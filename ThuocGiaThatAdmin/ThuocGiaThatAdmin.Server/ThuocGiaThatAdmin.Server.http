@@ -1,0 +1,6 @@
+@ThuocGiaThatAdmin.Server_HostAddress = http://localhost:5014
+
+GET {{ThuocGiaThatAdmin.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

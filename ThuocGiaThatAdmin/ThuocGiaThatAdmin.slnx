@@ -1,0 +1,10 @@
+<Solution>
+  <Project Path="ThuocGiaThat.Infrastucture/ThuocGiaThat.Infrastucture.csproj" />
+  <Project Path="thuocgiathatadmin.client/thuocgiathatadmin.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="ThuocGiaThatAdmin.Domain/ThuocGiaThatAdmin.Domain.csproj" />
+  <Project Path="ThuocGiaThatAdmin.Server/ThuocGiaThatAdmin.Server.csproj" />
+  <Project Path="ThuocGiaThatAdmin.Service/ThuocGiaThatAdmin.Service.csproj" />
+</Solution>
