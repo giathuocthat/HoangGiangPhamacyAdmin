@@ -1,66 +1,51 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ThuocGiaThatAdmin.Domain.Entities
 {
     /// <summary>
-    /// Category entity - Danh mục sản phẩm (hỗ trợ cấu trúc cha-con)
+    /// ProductType entity - Lo?i s?n ph?m (Thu?c, Vitamin, Ch?t b? sung, v.v.)
     /// </summary>
-    public class Category
+    public class ProductType
     {
         public int Id { get; set; }
         
         /// <summary>
-        /// Tên danh mục
+        /// T�n lo?i s?n ph?m (Thu?c, Vitamin, Ch?t b? sung)
         /// </summary>
         public string Name { get; set; } = string.Empty;
         
         /// <summary>
-        /// Mô tả danh mục
+        /// M� t? lo?i s?n ph?m
         /// </summary>
         public string? Description { get; set; }
         
         /// <summary>
-        /// ID danh mục cha (null nếu là danh mục gốc)
-        /// </summary>
-        public int? ParentCategoryId { get; set; }
-        
-        /// <summary>
-        /// Đường dẫn SEO URL slug
+        /// ???ng d?n SEO URL slug
         /// </summary>
         public string Slug { get; set; } = string.Empty;
         
         /// <summary>
-        /// Hình ảnh đại diện danh mục
-        /// </summary>
-        public string? ImageUrl { get; set; }
-        
-        /// <summary>
-        /// Thứ tự hiển thị
+        /// Th? t? hi?n th?
         /// </summary>
         public int DisplayOrder { get; set; } = 0;
         
         /// <summary>
-        /// Trạng thái hoạt động
+        /// Tr?ng th�i ho?t ??ng
         /// </summary>
         public bool IsActive { get; set; } = true;
         
         /// <summary>
-        /// Ngày tạo
+        /// Ng�y t?o
         /// </summary>
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         
         /// <summary>
-        /// Ngày cập nhật
+        /// Ng�y c?p nh?t
         /// </summary>
         public DateTime? UpdatedDate { get; set; }
 
         // Navigation properties
-        public virtual Category? ParentCategory { get; set; }
-        public virtual ICollection<Category> ChildCategories { get; set; } = new List<Category>();
         public virtual ICollection<Product> Products { get; set; } = new List<Product>();
     }
 }

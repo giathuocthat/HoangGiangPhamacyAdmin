@@ -1,10 +1,22 @@
 <Solution>
-  <Project Path="ThuocGiaThat.Infrastucture/ThuocGiaThat.Infrastucture.csproj" />
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Dev" />
+    <BuildType Name="Release" />
+  </Configurations>
+  <Project Path="ThuocGiaThat.Infrastucture/ThuocGiaThat.Infrastucture.csproj">
+    <BuildType Solution="Dev|*" Project="Release" />
+  </Project>
   <Project Path="thuocgiathatadmin.client/thuocgiathatadmin.client.esproj">
+    <BuildType Solution="Dev|*" Project="Release" />
     <Build />
     <Deploy />
   </Project>
-  <Project Path="ThuocGiaThatAdmin.Domain/ThuocGiaThatAdmin.Domain.csproj" />
+  <Project Path="ThuocGiaThatAdmin.Domain/ThuocGiaThatAdmin.Domain.csproj">
+    <BuildType Solution="Dev|*" Project="Release" />
+  </Project>
   <Project Path="ThuocGiaThatAdmin.Server/ThuocGiaThatAdmin.Server.csproj" />
-  <Project Path="ThuocGiaThatAdmin.Service/ThuocGiaThatAdmin.Service.csproj" />
+  <Project Path="ThuocGiaThatAdmin.Service/ThuocGiaThatAdmin.Service.csproj">
+    <BuildType Solution="Dev|*" Project="Release" />
+  </Project>
 </Solution>
