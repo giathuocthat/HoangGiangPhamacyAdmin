@@ -7,6 +7,9 @@
   <Project Path="ThuocGiaThat.Infrastucture/ThuocGiaThat.Infrastucture.csproj">
     <BuildType Solution="Dev|*" Project="Release" />
   </Project>
+  <Project Path="ThuocGiaThatAdmin.Contracts/ThuocGiaThatAdmin.Contract.csproj" Id="5ea62172-cecc-4b2a-8052-d17ef812f016">
+    <BuildType Solution="Dev|*" Project="Release" />
+  </Project>
   <Project Path="ThuocGiaThatAdmin.Domain/ThuocGiaThatAdmin.Domain.csproj">
     <BuildType Solution="Dev|*" Project="Release" />
   </Project>

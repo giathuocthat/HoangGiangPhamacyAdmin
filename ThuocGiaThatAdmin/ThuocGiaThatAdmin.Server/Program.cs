@@ -1,6 +1,12 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System;
 using ThuocGiaThat.Infrastucture;
+using ThuocGiaThat.Infrastucture.Data;
 using ThuocGiaThat.Infrastucture.Repositories;
+using ThuocGiaThatAdmin.Domain.Entities;
+using ThuocGiaThatAdmin.Service;
+using ThuocGiaThatAdmin.Service.Interfaces;
 using ThuocGiaThatAdmin.Service.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,16 +19,22 @@ builder.Services.AddSwaggerGen();
 
 // Configure DbContext
 // Update the connection string as needed
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? "Server=(localdb)\\mssqllocaldb;Database=ThuocGiaThatDb;Trusted_Connection=true;";
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<ThuocGiaThat.Infrastucture.AppContext>(options =>
     options.UseSqlServer(connectionString));
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<ThuocGiaThat.Infrastucture.AppContext>()
+    .AddDefaultTokenProviders();
 
 // Register repositories and services
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 // Add CORS to allow frontend to call this API
 builder.Services.AddCors(options =>
@@ -43,6 +55,8 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ThuocGiaThat.Infrastucture.AppContext>();
     db.Database.Migrate();
+    // seed admin user and roles (reads AdminUser:* from configuration)
+    SeedData.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
 }
 
 app.UseCors("AllowLocalhost");
