@@ -5,6 +5,8 @@ using ThuocGiaThat.Infrastucture;
 using ThuocGiaThat.Infrastucture.Data;
 using ThuocGiaThat.Infrastucture.Repositories;
 using ThuocGiaThatAdmin.Domain.Entities;
+using ThuocGiaThatAdmin.Service;
+using ThuocGiaThatAdmin.Service.Interfaces;
 using ThuocGiaThatAdmin.Service.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +32,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 // Add CORS to allow frontend to call this API
 builder.Services.AddCors(options =>
