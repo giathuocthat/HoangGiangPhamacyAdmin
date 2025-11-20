@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System;
 using ThuocGiaThatAdmin.Domain.Entities;
 
 namespace ThuocGiaThat.Infrastucture
 {
-    public class AppContext : DbContext
+    public class AppContext : IdentityDbContext<ApplicationUser>
     {
         public AppContext(DbContextOptions<AppContext> options) : base(options)
         {
@@ -223,6 +225,25 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasIndex(e => e.ProductId);
                 entity.HasIndex(e => e.EffectiveDate);
             });
+
+            modelBuilder.Entity<ApplicationUser>(entity =>
+            {
+                entity.ToTable(name: "Users");
+                entity.Property(u => u.FullName).HasMaxLength(200);
+            });
+
+            modelBuilder.Entity<ApplicationUser>(entity =>
+            {
+                entity.ToTable(name: "Users");
+                entity.Property(u => u.FullName).HasMaxLength(200);
+            });
+
+            modelBuilder.Entity<IdentityRole>().ToTable("Roles");
+            modelBuilder.Entity<IdentityUserRole<string>>().ToTable("UserRoles");
+            modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("UserClaims");
+            modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("UserLogins");
+            modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaims");
+            modelBuilder.Entity<IdentityUserToken<string>>().ToTable("UserTokens");
         }
     }
 }

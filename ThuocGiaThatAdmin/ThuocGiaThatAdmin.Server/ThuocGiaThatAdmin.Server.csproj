@@ -26,9 +26,6 @@
     <ProjectReference Include="..\ThuocGiaThatAdmin.Service\ThuocGiaThatAdmin.Service.csproj" />
     <ProjectReference Include="..\ThuocGiaThat.Infrastucture\ThuocGiaThat.Infrastucture.csproj" />
     <ProjectReference Include="..\ThuocGiaThatAdmin.Domain\ThuocGiaThatAdmin.Domain.csproj" />
-    <ProjectReference Include="..\thuocgiathatadmin.client\thuocgiathatadmin.client.esproj">
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
   </ItemGroup>
 
 </Project>
