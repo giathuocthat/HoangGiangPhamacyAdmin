@@ -7,11 +7,6 @@
   <Project Path="ThuocGiaThat.Infrastucture/ThuocGiaThat.Infrastucture.csproj">
     <BuildType Solution="Dev|*" Project="Release" />
   </Project>
-  <Project Path="thuocgiathatadmin.client/thuocgiathatadmin.client.esproj">
-    <BuildType Solution="Dev|*" Project="Release" />
-    <Build />
-    <Deploy />
-  </Project>
   <Project Path="ThuocGiaThatAdmin.Domain/ThuocGiaThatAdmin.Domain.csproj">
     <BuildType Solution="Dev|*" Project="Release" />
   </Project>
