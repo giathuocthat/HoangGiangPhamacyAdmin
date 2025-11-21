@@ -1,0 +1,251 @@
+-- =============================================
+-- Database Design for Pharmacy E-commerce System
+-- Context: Supports Product Variants (e.g., Pack sizes, Dosages)
+-- Domain: Pharmaceuticals & Functional Foods
+-- =============================================
+
+/*
+OVERVIEW OF TABLES:
+
+1. CATALOG & CLASSIFICATION
+   - Categories: Hierarchical category tree
+   - Brands: Manufacturers/Brands
+
+2. PRODUCT MANAGEMENT (CORE)
+   - Products: Base product information (Name, Description, Pharma specs)
+   - ProductOptions: Definitions of variant types (e.g., "Quy cách", "Màu sắc")
+   - ProductOptionValues: Values for options (e.g., "Hộp 30 viên", "Chai 100ml")
+   - ProductVariants: Specific sellable SKUs (Combinations of options)
+   - VariantOptionValues: Linking Variants to specific Option Values
+
+3. PRICING & INVENTORY
+   - Inventory: Stock levels per Variant (potentially per Warehouse)
+   - PriceHistory: Tracking price changes
+
+4. SALES & CUSTOMERS
+   - Customers: User accounts
+   - Addresses: Shipping addresses
+   - Orders: Order headers
+   - OrderItems: Order details linking to ProductVariants
+*/
+
+-- 1. CATALOG & CLASSIFICATION
+-- =============================================
+
+CREATE TABLE Categories (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    ParentId INT NULL, -- Self-referencing for hierarchy
+    Name NVARCHAR(255) NOT NULL,
+    Slug NVARCHAR(255) NOT NULL,
+    Description NVARCHAR(MAX) NULL,
+    IsActive BIT DEFAULT 1,
+    DisplayOrder INT DEFAULT 0,
+    CreatedAt DATETIME2 DEFAULT GETDATE(),
+    CONSTRAINT FK_Categories_Parent FOREIGN KEY (ParentId) REFERENCES Categories(Id)
+);
+
+CREATE TABLE Brands (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Name NVARCHAR(255) NOT NULL,
+    Slug NVARCHAR(255) NOT NULL,
+    CountryOfOrigin NVARCHAR(100) NULL,
+    Website NVARCHAR(500) NULL,
+    LogoUrl NVARCHAR(500) NULL,
+    IsActive BIT DEFAULT 1
+);
+
+-- 2. PRODUCT MANAGEMENT
+-- =============================================
+
+CREATE TABLE Products (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    CategoryId INT NOT NULL,
+    BrandId INT NULL,
+    
+    -- Basic Info
+    Name NVARCHAR(255) NOT NULL,
+    ShortDescription NVARCHAR(500) NULL,
+    FullDescription NVARCHAR(MAX) NULL,
+    Slug NVARCHAR(255) NOT NULL,
+    ThumbnailUrl NVARCHAR(500) NULL,
+    
+    -- Pharma Specifics
+    Ingredients NVARCHAR(MAX) NULL, -- Thành phần
+    UsageInstructions NVARCHAR(MAX) NULL, -- Hướng dẫn sử dụng
+    Contraindications NVARCHAR(MAX) NULL, -- Chống chỉ định
+    StorageInstructions NVARCHAR(MAX) NULL, -- Hướng dẫn bảo quản
+    RegistrationNumber NVARCHAR(100) NULL, -- Số đăng ký (Visa)
+    IsPrescriptionDrug BIT DEFAULT 0, -- Thuốc kê đơn?
+    
+    -- Metadata
+    IsActive BIT DEFAULT 1,
+    IsFeatured BIT DEFAULT 0,
+    CreatedAt DATETIME2 DEFAULT GETDATE(),
+    UpdatedAt DATETIME2 NULL,
+    
+    CONSTRAINT FK_Products_Categories FOREIGN KEY (CategoryId) REFERENCES Categories(Id),
+    CONSTRAINT FK_Products_Brands FOREIGN KEY (BrandId) REFERENCES Brands(Id)
+);
+
+-- Defines what options a product has (e.g., Product "Panadol" has Option "Quy cách đóng gói")
+CREATE TABLE ProductOptions (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    ProductId INT NOT NULL,
+    Name NVARCHAR(100) NOT NULL, -- e.g., "Color", "Size", "Pack Size"
+    DisplayOrder INT DEFAULT 0,
+    CONSTRAINT FK_ProductOptions_Products FOREIGN KEY (ProductId) REFERENCES Products(Id)
+);
+
+-- Defines the values for those options (e.g., "Hộp 10 vỉ", "Hộp 5 vỉ")
+CREATE TABLE ProductOptionValues (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    ProductOptionId INT NOT NULL,
+    Value NVARCHAR(255) NOT NULL, -- e.g., "Red", "XL", "Box of 30"
+    DisplayOrder INT DEFAULT 0,
+    CONSTRAINT FK_ProductOptionValues_Options FOREIGN KEY (ProductOptionId) REFERENCES ProductOptions(Id)
+);
+
+-- The actual sellable SKU (Variant)
+-- Example: Panadol - Hộp 10 vỉ
+CREATE TABLE ProductVariants (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    ProductId INT NOT NULL,
+    
+    SKU NVARCHAR(100) NOT NULL, -- Unique Stock Keeping Unit
+    Barcode NVARCHAR(50) NULL,
+    
+    -- Price & Stock
+    Price DECIMAL(18, 2) NOT NULL,
+    OriginalPrice DECIMAL(18, 2) NULL, -- For strike-through pricing
+    StockQuantity INT DEFAULT 0,
+    
+    -- Variant specific attributes
+    Weight DECIMAL(10, 2) NULL, -- For shipping
+    Dimensions NVARCHAR(100) NULL,
+    ImageUrl NVARCHAR(500) NULL, -- Variant specific image
+    
+    IsActive BIT DEFAULT 1,
+    
+    CONSTRAINT FK_ProductVariants_Products FOREIGN KEY (ProductId) REFERENCES Products(Id),
+    CONSTRAINT UQ_ProductVariants_SKU UNIQUE (SKU)
+);
+
+-- Link Variant to specific Option Values to define what it is
+-- Variant "SKU-001" is "Blue" (OptionValueId for Blue) AND "XL" (OptionValueId for XL)
+CREATE TABLE VariantOptionValues (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    ProductVariantId INT NOT NULL,
+    ProductOptionValueId INT NOT NULL,
+    
+    CONSTRAINT FK_VariantValues_Variant FOREIGN KEY (ProductVariantId) REFERENCES ProductVariants(Id),
+    CONSTRAINT FK_VariantValues_Value FOREIGN KEY (ProductOptionValueId) REFERENCES ProductOptionValues(Id),
+    CONSTRAINT UQ_Variant_Option UNIQUE (ProductVariantId, ProductOptionValueId)
+);
+
+-- 3. PRICING & INVENTORY
+-- =============================================
+
+CREATE TABLE Inventory (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    ProductVariantId INT NOT NULL,
+    WarehouseId INT NULL, -- Optional: if managing multiple warehouses
+    Quantity INT NOT NULL DEFAULT 0,
+    LastUpdated DATETIME2 DEFAULT GETDATE(),
+    
+    CONSTRAINT FK_Inventory_Variants FOREIGN KEY (ProductVariantId) REFERENCES ProductVariants(Id)
+);
+
+CREATE TABLE PriceHistory (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    ProductVariantId INT NOT NULL,
+    Price DECIMAL(18, 2) NOT NULL,
+    StartDate DATETIME2 DEFAULT GETDATE(),
+    EndDate DATETIME2 NULL, -- NULL means current active price
+    Reason NVARCHAR(255) NULL, -- e.g. "Seasonal Promotion", "Cost Increase"
+    
+    CONSTRAINT FK_PriceHistory_Variants FOREIGN KEY (ProductVariantId) REFERENCES ProductVariants(Id)
+);
+
+-- 4. CUSTOMERS & SALES
+-- =============================================
+
+CREATE TABLE Customers (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    FullName NVARCHAR(255) NOT NULL,
+    Email NVARCHAR(255) NOT NULL,
+    PhoneNumber NVARCHAR(20) NULL,
+    PasswordHash NVARCHAR(MAX) NOT NULL,
+    CreatedAt DATETIME2 DEFAULT GETDATE(),
+    CONSTRAINT UQ_Customers_Email UNIQUE (Email)
+);
+
+CREATE TABLE Addresses (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    CustomerId INT NOT NULL,
+    RecipientName NVARCHAR(255) NOT NULL,
+    PhoneNumber NVARCHAR(20) NOT NULL,
+    AddressLine1 NVARCHAR(255) NOT NULL,
+    Ward NVARCHAR(100) NULL,
+    District NVARCHAR(100) NULL,
+    City NVARCHAR(100) NULL,
+    IsDefault BIT DEFAULT 0,
+    CONSTRAINT FK_Addresses_Customers FOREIGN KEY (CustomerId) REFERENCES Customers(Id)
+);
+
+CREATE TABLE Orders (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    OrderNumber NVARCHAR(50) NOT NULL, -- User facing ID
+    CustomerId INT NULL, -- Nullable for guest checkout
+    
+    OrderDate DATETIME2 DEFAULT GETDATE(),
+    OrderStatus NVARCHAR(50) NOT NULL, -- Pending, Confirmed, Shipping, Completed, Cancelled
+    PaymentStatus NVARCHAR(50) NOT NULL, -- Pending, Paid, Failed
+    PaymentMethod NVARCHAR(50) NOT NULL,
+    
+    -- Pricing snapshots
+    SubTotal DECIMAL(18, 2) NOT NULL,
+    ShippingFee DECIMAL(18, 2) DEFAULT 0,
+    DiscountAmount DECIMAL(18, 2) DEFAULT 0,
+    TotalAmount DECIMAL(18, 2) NOT NULL,
+    
+    -- Shipping Info Snapshot (in case address changes later)
+    ShippingName NVARCHAR(255) NOT NULL,
+    ShippingAddress NVARCHAR(MAX) NOT NULL,
+    ShippingPhone NVARCHAR(20) NOT NULL,
+    
+    Note NVARCHAR(MAX) NULL,
+    
+    CONSTRAINT FK_Orders_Customers FOREIGN KEY (CustomerId) REFERENCES Customers(Id),
+    CONSTRAINT UQ_Orders_OrderNumber UNIQUE (OrderNumber)
+);
+
+CREATE TABLE OrderItems (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    OrderId INT NOT NULL,
+    ProductVariantId INT NOT NULL,
+    ProductId INT NOT NULL, -- Denormalized for easier reporting
+    
+    ProductName NVARCHAR(255) NOT NULL, -- Snapshot name
+    VariantDescription NVARCHAR(500) NULL, -- Snapshot of variant options (e.g. "Blue, XL")
+    
+    Quantity INT NOT NULL,
+    UnitPrice DECIMAL(18, 2) NOT NULL, -- Price at time of purchase
+    TotalLineAmount DECIMAL(18, 2) NOT NULL,
+    
+    CONSTRAINT FK_OrderItems_Orders FOREIGN KEY (OrderId) REFERENCES Orders(Id),
+    CONSTRAINT FK_OrderItems_Variants FOREIGN KEY (ProductVariantId) REFERENCES ProductVariants(Id)
+);
+
+-- 4. REVIEWS (Optional)
+-- =============================================
+CREATE TABLE ProductReviews (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    ProductId INT NOT NULL,
+    CustomerId INT NOT NULL,
+    Rating INT NOT NULL CHECK (Rating >= 1 AND Rating <= 5),
+    Comment NVARCHAR(MAX) NULL,
+    CreatedAt DATETIME2 DEFAULT GETDATE(),
+    IsApproved BIT DEFAULT 0,
+    CONSTRAINT FK_Reviews_Products FOREIGN KEY (ProductId) REFERENCES Products(Id),
+    CONSTRAINT FK_Reviews_Customers FOREIGN KEY (CustomerId) REFERENCES Customers(Id)
+);

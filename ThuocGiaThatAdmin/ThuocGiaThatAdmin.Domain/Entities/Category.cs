@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ThuocGiaThatAdmin.Domain.Entities
 {
     /// <summary>
     /// Category entity - Danh mục sản phẩm (hỗ trợ cấu trúc cha-con)
     /// </summary>
-    public class Category
+    public class Category : AuditableEntity
     {
-        public int Id { get; set; }
+        // Id inherited from BaseEntity
         
         /// <summary>
         /// Tên danh mục
@@ -26,7 +23,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         /// <summary>
         /// ID danh mục cha (null nếu là danh mục gốc)
         /// </summary>
-        public int? ParentCategoryId { get; set; }
+        public int? ParentId { get; set; }
         
         /// <summary>
         /// Đường dẫn SEO URL slug
@@ -48,15 +45,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         /// </summary>
         public bool IsActive { get; set; } = true;
         
-        /// <summary>
-        /// Ngày tạo
-        /// </summary>
-        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-        
-        /// <summary>
-        /// Ngày cập nhật
-        /// </summary>
-        public DateTime? UpdatedDate { get; set; }
+        // Dates inherited
 
         // Navigation properties
         public virtual Category? ParentCategory { get; set; }

@@ -13,10 +13,20 @@ namespace ThuocGiaThat.Infrastucture
         }
 
         public DbSet<Category> Categories { get; set; }
-        public DbSet<ProductType> ProductTypes { get; set; }
+        public DbSet<Brand> Brands { get; set; }
+        // ProductType removed
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
-        public DbSet<ProductPrice> ProductPrices { get; set; }
+        public DbSet<ProductOption> ProductOptions { get; set; }
+        public DbSet<ProductOptionValue> ProductOptionValues { get; set; }
+        public DbSet<ProductVariant> ProductVariants { get; set; }
+        public DbSet<VariantOptionValue> VariantOptionValues { get; set; }
+        public DbSet<Inventory> Inventories { get; set; }
+        public DbSet<PriceHistory> PriceHistories { get; set; }
+        public DbSet<Customer> Customers { get; set; }
+        public DbSet<Address> Addresses { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -26,204 +36,145 @@ namespace ThuocGiaThat.Infrastucture
             modelBuilder.Entity<Category>(entity =>
             {
                 entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.Description).HasMaxLength(1000);
+                entity.Property(e => e.Slug).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.ImageUrl).HasMaxLength(500);
                 
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(255);
-                
-                entity.Property(e => e.Description)
-                    .HasMaxLength(1000);
-                
-                entity.Property(e => e.Slug)
-                    .IsRequired()
-                    .HasMaxLength(255);
-                
-                entity.Property(e => e.ImageUrl)
-                    .HasMaxLength(500);
-                
-                entity.Property(e => e.CreatedDate)
-                    .HasDefaultValueSql("GETUTCDATE()");
-                
-                // Parent-Child relationship
+                entity.Property(e => e.CreatedDate).HasColumnName("CreatedAt").HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate).HasColumnName("UpdatedAt");
+
                 entity.HasOne(e => e.ParentCategory)
                     .WithMany(e => e.ChildCategories)
-                    .HasForeignKey(e => e.ParentCategoryId)
+                    .HasForeignKey(e => e.ParentId)
                     .OnDelete(DeleteBehavior.Restrict);
                 
-                // Index for performance
                 entity.HasIndex(e => e.Slug).IsUnique();
                 entity.HasIndex(e => e.IsActive);
                 entity.HasIndex(e => e.DisplayOrder);
             });
 
-            // ============ ProductType Configuration ============
-            modelBuilder.Entity<ProductType>(entity =>
+            // ============ Brand Configuration ============
+            modelBuilder.Entity<Brand>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(255);
-                
-                entity.Property(e => e.Description)
-                    .HasMaxLength(1000);
-                
-                entity.Property(e => e.Slug)
-                    .IsRequired()
-                    .HasMaxLength(255);
-                
-                entity.Property(e => e.CreatedDate)
-                    .HasDefaultValueSql("GETUTCDATE()");
-                
-                // Index for performance
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.Slug).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.CreatedDate).HasColumnName("CreatedAt").HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate).HasColumnName("UpdatedAt");
                 entity.HasIndex(e => e.Slug).IsUnique();
-                entity.HasIndex(e => e.IsActive);
             });
 
             // ============ Product Configuration ============
             modelBuilder.Entity<Product>(entity =>
             {
                 entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.Slug).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.CreatedDate).HasColumnName("CreatedAt").HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate).HasColumnName("UpdatedAt");
                 
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(255);
+                entity.HasOne(e => e.Category).WithMany(e => e.Products).HasForeignKey(e => e.CategoryId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(e => e.Brand).WithMany(e => e.Products).HasForeignKey(e => e.BrandId).OnDelete(DeleteBehavior.SetNull);
                 
-                entity.Property(e => e.ShortName)
-                    .HasMaxLength(100);
-                
-                entity.Property(e => e.Description)
-                    .HasMaxLength(5000);
-                
-                entity.Property(e => e.Ingredients)
-                    .HasMaxLength(2000);
-                
-                entity.Property(e => e.UsageInstructions)
-                    .HasMaxLength(2000);
-                
-                entity.Property(e => e.Warnings)
-                    .HasMaxLength(1000);
-                
-                entity.Property(e => e.SKU)
-                    .IsRequired()
-                    .HasMaxLength(100);
-                
-                entity.Property(e => e.Barcode)
-                    .HasMaxLength(50);
-                
-                entity.Property(e => e.Manufacturer)
-                    .HasMaxLength(255);
-                
-                entity.Property(e => e.ManufacturingCountry)
-                    .HasMaxLength(100);
-                
-                entity.Property(e => e.Strength)
-                    .HasMaxLength(100);
-                
-                entity.Property(e => e.Unit)
-                    .IsRequired()
-                    .HasMaxLength(50);
-                
-                entity.Property(e => e.Slug)
-                    .IsRequired()
-                    .HasMaxLength(255);
-                
-                entity.Property(e => e.ThumbnailImage)
-                    .HasMaxLength(500);
-                
-                entity.Property(e => e.CostPrice)
-                    .HasColumnType("decimal(18,2)")
-                    .HasDefaultValue(0);
-                
-                entity.Property(e => e.SalePrice)
-                    .HasColumnType("decimal(18,2)")
-                    .HasDefaultValue(0);
-                
-                entity.Property(e => e.DiscountPrice)
-                    .HasColumnType("decimal(18,2)");
-                
-                entity.Property(e => e.Rating)
-                    .HasColumnType("decimal(3,2)")
-                    .HasDefaultValue(0);
-                
-                entity.Property(e => e.CreatedDate)
-                    .HasDefaultValueSql("GETUTCDATE()");
-                
-                // Foreign Keys
-                entity.HasOne(e => e.Category)
-                    .WithMany(e => e.Products)
-                    .HasForeignKey(e => e.CategoryId)
-                    .OnDelete(DeleteBehavior.Restrict);
-                
-                entity.HasOne(e => e.ProductType)
-                    .WithMany(e => e.Products)
-                    .HasForeignKey(e => e.ProductTypeId)
-                    .OnDelete(DeleteBehavior.Restrict);
-                
-                // Indexes
-                entity.HasIndex(e => e.SKU).IsUnique();
                 entity.HasIndex(e => e.Slug).IsUnique();
-                entity.HasIndex(e => e.CategoryId);
-                entity.HasIndex(e => e.ProductTypeId);
-                entity.HasIndex(e => e.IsActive);
-                entity.HasIndex(e => e.IsFeatured);
-                entity.HasIndex(e => new { e.IsActive, e.IsFeatured });
             });
 
-            // ============ ProductImage Configuration ============
-            modelBuilder.Entity<ProductImage>(entity =>
+            // ============ ProductOption Configuration ============
+            modelBuilder.Entity<ProductOption>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                
-                entity.Property(e => e.ImageUrl)
-                    .IsRequired()
-                    .HasMaxLength(500);
-                
-                entity.Property(e => e.AltText)
-                    .HasMaxLength(255);
-                
-                entity.Property(e => e.CreatedDate)
-                    .HasDefaultValueSql("GETUTCDATE()");
-                
-                // Foreign Key
-                entity.HasOne(e => e.Product)
-                    .WithMany(e => e.Images)
-                    .HasForeignKey(e => e.ProductId)
-                    .OnDelete(DeleteBehavior.Cascade);
-                
-                // Index
-                entity.HasIndex(e => e.ProductId);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+                entity.HasOne(e => e.Product).WithMany(e => e.ProductOptions).HasForeignKey(e => e.ProductId).OnDelete(DeleteBehavior.Cascade);
             });
 
-            // ============ ProductPrice Configuration ============
-            modelBuilder.Entity<ProductPrice>(entity =>
+            // ============ ProductOptionValue Configuration ============
+            modelBuilder.Entity<ProductOptionValue>(entity =>
             {
                 entity.HasKey(e => e.Id);
+                entity.Property(e => e.Value).IsRequired().HasMaxLength(255);
+                entity.HasOne(e => e.ProductOption).WithMany(e => e.ProductOptionValues).HasForeignKey(e => e.ProductOptionId).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // ============ ProductVariant Configuration ============
+            modelBuilder.Entity<ProductVariant>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.SKU).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.OriginalPrice).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.CreatedDate).HasColumnName("CreatedAt").HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate).HasColumnName("UpdatedAt");
                 
-                entity.Property(e => e.Reason)
-                    .HasMaxLength(500);
-                
-                entity.Property(e => e.CostPrice)
-                    .HasColumnType("decimal(18,2)");
-                
-                entity.Property(e => e.SalePrice)
-                    .HasColumnType("decimal(18,2)");
-                
-                entity.Property(e => e.DiscountPrice)
-                    .HasColumnType("decimal(18,2)");
-                
-                entity.Property(e => e.CreatedDate)
-                    .HasDefaultValueSql("GETUTCDATE()");
-                
-                // Foreign Key
-                entity.HasOne(e => e.Product)
-                    .WithMany(e => e.PriceHistory)
-                    .HasForeignKey(e => e.ProductId)
-                    .OnDelete(DeleteBehavior.Cascade);
-                
-                // Index
-                entity.HasIndex(e => e.ProductId);
-                entity.HasIndex(e => e.EffectiveDate);
+                entity.HasOne(e => e.Product).WithMany(e => e.ProductVariants).HasForeignKey(e => e.ProductId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasIndex(e => e.SKU).IsUnique();
+            });
+
+            // ============ VariantOptionValue Configuration ============
+            modelBuilder.Entity<VariantOptionValue>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasOne(e => e.ProductVariant).WithMany(e => e.VariantOptionValues).HasForeignKey(e => e.ProductVariantId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.ProductOptionValue).WithMany(e => e.VariantOptionValues).HasForeignKey(e => e.ProductOptionValueId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasIndex(e => new { e.ProductVariantId, e.ProductOptionValueId }).IsUnique();
+            });
+
+            // ============ Inventory Configuration ============
+            modelBuilder.Entity<Inventory>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.UpdatedDate).HasColumnName("UpdatedAt").HasDefaultValueSql("GETUTCDATE()");
+                entity.HasOne(e => e.ProductVariant).WithMany(e => e.Inventories).HasForeignKey(e => e.ProductVariantId).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // ============ PriceHistory Configuration ============
+            modelBuilder.Entity<PriceHistory>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.CreatedDate).HasColumnName("CreatedAt").HasDefaultValueSql("GETUTCDATE()");
+                entity.HasOne(e => e.ProductVariant).WithMany(e => e.PriceHistories).HasForeignKey(e => e.ProductVariantId).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // ============ Customer Configuration ============
+            modelBuilder.Entity<Customer>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.CreatedDate).HasColumnName("CreatedAt").HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate).HasColumnName("UpdatedAt");
+                entity.HasIndex(e => e.Email).IsUnique();
+            });
+
+            // ============ Address Configuration ============
+            modelBuilder.Entity<Address>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.CreatedDate).HasColumnName("CreatedAt").HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate).HasColumnName("UpdatedAt");
+                entity.HasOne(e => e.Customer).WithMany(e => e.Addresses).HasForeignKey(e => e.CustomerId).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // ============ Order Configuration ============
+            modelBuilder.Entity<Order>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.OrderNumber).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.TotalAmount).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.CreatedDate).HasColumnName("CreatedAt").HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate).HasColumnName("UpdatedAt");
+                entity.HasOne(e => e.Customer).WithMany(e => e.Orders).HasForeignKey(e => e.CustomerId).OnDelete(DeleteBehavior.SetNull);
+                entity.HasIndex(e => e.OrderNumber).IsUnique();
+            });
+
+            // ============ OrderItem Configuration ============
+            modelBuilder.Entity<OrderItem>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.TotalLineAmount).HasColumnType("decimal(18,2)");
+                entity.HasOne(e => e.Order).WithMany(e => e.OrderItems).HasForeignKey(e => e.OrderId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.ProductVariant).WithMany().HasForeignKey(e => e.ProductVariantId).OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<ApplicationUser>(entity =>
