@@ -10,5 +10,6 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public int DisplayOrder { get; set; } = 0;
 
         public virtual Product Product { get; set; } = null!;
+        public virtual List<ProductOptionValue> ProductOptionValues { get; set; }
     }
 }

@@ -10,5 +10,6 @@ namespace ThuocGiaThatAdmin.Domain.Entities
 
         public virtual ProductVariant ProductVariant { get; set; } = null!;
         public virtual ProductOptionValue ProductOptionValue { get; set; } = null!;
+
     }
 }

@@ -10,5 +10,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public int DisplayOrder { get; set; } = 0;
 
         public virtual ProductOption ProductOption { get; set; } = null!;
+
+        public virtual List<VariantOptionValue> VariantOptionValues { get; set; } = new List<VariantOptionValue>();
     }
 }
