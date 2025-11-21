@@ -39,10 +39,9 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.Description).HasMaxLength(1000);
                 entity.Property(e => e.Slug).IsRequired().HasMaxLength(255);
-                entity.Property(e => e.ImageUrl).HasMaxLength(500);
                 
-                entity.Property(e => e.CreatedDate).HasColumnName("CreatedAt").HasDefaultValueSql("GETUTCDATE()");
-                entity.Property(e => e.UpdatedDate).HasColumnName("UpdatedAt");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
 
                 entity.HasOne(e => e.ParentCategory)
                     .WithMany(e => e.ChildCategories)
@@ -60,8 +59,8 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.Slug).IsRequired().HasMaxLength(255);
-                entity.Property(e => e.CreatedDate).HasColumnName("CreatedAt").HasDefaultValueSql("GETUTCDATE()");
-                entity.Property(e => e.UpdatedDate).HasColumnName("UpdatedAt");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
                 entity.HasIndex(e => e.Slug).IsUnique();
             });
 
@@ -71,8 +70,8 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.Slug).IsRequired().HasMaxLength(255);
-                entity.Property(e => e.CreatedDate).HasColumnName("CreatedAt").HasDefaultValueSql("GETUTCDATE()");
-                entity.Property(e => e.UpdatedDate).HasColumnName("UpdatedAt");
+                entity.Property(e => e.CreatedDate).HasColumnName("CreatedDate").HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate).HasColumnName("UpdatedDate");
                 
                 entity.HasOne(e => e.Category).WithMany(e => e.Products).HasForeignKey(e => e.CategoryId).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(e => e.Brand).WithMany(e => e.Products).HasForeignKey(e => e.BrandId).OnDelete(DeleteBehavior.SetNull);
@@ -103,8 +102,8 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.SKU).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.OriginalPrice).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.CreatedDate).HasColumnName("CreatedAt").HasDefaultValueSql("GETUTCDATE()");
-                entity.Property(e => e.UpdatedDate).HasColumnName("UpdatedAt");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
                 
                 entity.HasOne(e => e.Product).WithMany(e => e.ProductVariants).HasForeignKey(e => e.ProductId).OnDelete(DeleteBehavior.Cascade);
                 entity.HasIndex(e => e.SKU).IsUnique();
@@ -132,7 +131,7 @@ namespace ThuocGiaThat.Infrastucture
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.CreatedDate).HasColumnName("CreatedAt").HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
                 entity.HasOne(e => e.ProductVariant).WithMany(e => e.PriceHistories).HasForeignKey(e => e.ProductVariantId).OnDelete(DeleteBehavior.Cascade);
             });
 
@@ -141,8 +140,8 @@ namespace ThuocGiaThat.Infrastucture
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
-                entity.Property(e => e.CreatedDate).HasColumnName("CreatedAt").HasDefaultValueSql("GETUTCDATE()");
-                entity.Property(e => e.UpdatedDate).HasColumnName("UpdatedAt");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
                 entity.HasIndex(e => e.Email).IsUnique();
             });
 
@@ -150,8 +149,8 @@ namespace ThuocGiaThat.Infrastucture
             modelBuilder.Entity<Address>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.CreatedDate).HasColumnName("CreatedAt").HasDefaultValueSql("GETUTCDATE()");
-                entity.Property(e => e.UpdatedDate).HasColumnName("UpdatedAt");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
                 entity.HasOne(e => e.Customer).WithMany(e => e.Addresses).HasForeignKey(e => e.CustomerId).OnDelete(DeleteBehavior.Cascade);
             });
 
@@ -161,8 +160,8 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.OrderNumber).IsRequired().HasMaxLength(50);
                 entity.Property(e => e.TotalAmount).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.CreatedDate).HasColumnName("CreatedAt").HasDefaultValueSql("GETUTCDATE()");
-                entity.Property(e => e.UpdatedDate).HasColumnName("UpdatedAt");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
                 entity.HasOne(e => e.Customer).WithMany(e => e.Orders).HasForeignKey(e => e.CustomerId).OnDelete(DeleteBehavior.SetNull);
                 entity.HasIndex(e => e.OrderNumber).IsUnique();
             });

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 using ThuocGiaThatAdmin.Service.Services;
 
 namespace ThuocGiaThatAdmin.Server.Controllers
@@ -49,7 +50,109 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 if (product == null)
                     return NotFound(new { message = $"Product with ID {id} not found" });
 
-                return Ok(product);
+                // Shape data specifically for product detail page
+                var response = new
+                {
+                    // Basic info
+                    product.Id,
+                    product.Name,
+                    product.Slug,
+                    product.ShortDescription,
+                    product.FullDescription,
+                    product.ThumbnailUrl,
+
+                    // Pharma specifics
+                    product.Ingredients,
+                    product.UsageInstructions,
+                    product.Contraindications,
+                    product.StorageInstructions,
+                    product.RegistrationNumber,
+                    product.IsPrescriptionDrug,
+
+                    // Metadata
+                    product.IsActive,
+                    product.IsFeatured,
+                    product.CreatedDate,
+                    product.UpdatedDate,
+
+                    // Category
+                    Category = product.Category == null
+                        ? null
+                        : new
+                        {
+                            product.Category.Id,
+                            product.Category.Name,
+                            product.Category.Slug,
+                            product.Category.ParentId
+                        },
+
+                    // Brand
+                    Brand = product.Brand == null
+                        ? null
+                        : new
+                        {
+                            product.Brand.Id,
+                            product.Brand.Name,
+                            product.Brand.Slug,
+                            product.Brand.CountryOfOrigin,
+                            product.Brand.LogoUrl
+                        },
+
+                    // Images
+                    Images = product.Images
+                        .OrderBy(i => i.DisplayOrder)
+                        .Select(i => new
+                        {
+                            i.Id,
+                            i.ImageUrl,
+                            i.DisplayOrder,
+                            i.AltText
+                        }),
+
+                    // Product options & values
+                    ProductOptions = product.ProductOptions
+                        .OrderBy(o => o.DisplayOrder)
+                        .Select(o => new
+                        {
+                            o.Id,
+                            o.Name,
+                            o.DisplayOrder,
+                            Values = o.ProductOptionValues
+                                .OrderBy(v => v.DisplayOrder)
+                                .Select(v => new
+                                {
+                                    v.Id,
+                                    v.Value,
+                                    v.DisplayOrder
+                                })
+                        }),
+
+                    // Variants & their option values
+                    ProductVariants = product.ProductVariants
+                        .Where(v => v.IsActive)
+                        .Select(v => new
+                        {
+                            v.Id,
+                            v.SKU,
+                            v.Barcode,
+                            v.Price,
+                            v.OriginalPrice,
+                            v.StockQuantity,
+                            v.Weight,
+                            v.Dimensions,
+                            v.ImageUrl,
+                            v.IsActive,
+                            OptionValues = v.VariantOptionValues.Select(vov => new
+                            {
+                                OptionValueId = vov.ProductOptionValueId,
+                                OptionValue = vov.ProductOptionValue.Value,
+                                OptionId = vov.ProductOptionValue.ProductOption.Id,
+                                OptionName = vov.ProductOptionValue.ProductOption.Name
+                            })
+                        })
+                };
+
+                return Ok(response);
             }
             catch (ArgumentException ex)
             {

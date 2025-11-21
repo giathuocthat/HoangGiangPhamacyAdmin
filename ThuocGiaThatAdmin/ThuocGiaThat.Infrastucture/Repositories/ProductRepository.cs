@@ -56,7 +56,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         }
 
         /// <summary>
-        /// Get product with related category information
+        /// Get product with full detail information for product detail page
         /// </summary>
         public async Task<Product?> GetProductWithCategoryAsync(int id)
         {
@@ -65,6 +65,14 @@ namespace ThuocGiaThat.Infrastucture.Repositories
 
             return await _dbSet
                 .Include(p => p.Category)
+                .Include(p => p.Brand)
+                .Include(p => p.Images)
+                .Include(p => p.ProductOptions)
+                    .ThenInclude(o => o.ProductOptionValues)
+                .Include(p => p.ProductVariants)
+                    .ThenInclude(v => v.VariantOptionValues)
+                        .ThenInclude(vov => vov.ProductOptionValue)
+                            .ThenInclude(pov => pov.ProductOption)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
     }

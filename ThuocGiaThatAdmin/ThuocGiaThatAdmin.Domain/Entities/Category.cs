@@ -31,11 +31,6 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public string Slug { get; set; } = string.Empty;
         
         /// <summary>
-        /// Hình ảnh đại diện danh mục
-        /// </summary>
-        public string? ImageUrl { get; set; }
-        
-        /// <summary>
         /// Thứ tự hiển thị
         /// </summary>
         public int DisplayOrder { get; set; } = 0;
