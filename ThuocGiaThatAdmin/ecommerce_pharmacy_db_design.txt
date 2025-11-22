@@ -80,11 +80,23 @@ CREATE TABLE Products (
     -- Metadata
     IsActive BIT DEFAULT 1,
     IsFeatured BIT DEFAULT 0,
-    CreatedAt DATETIME2 DEFAULT GETDATE(),
-    UpdatedAt DATETIME2 NULL,
+    CreatedDate DATETIME2 DEFAULT GETDATE(),
+    CreatedDate DATETIME2 NULL,
     
     CONSTRAINT FK_Products_Categories FOREIGN KEY (CategoryId) REFERENCES Categories(Id),
     CONSTRAINT FK_Products_Brands FOREIGN KEY (BrandId) REFERENCES Brands(Id)
+);
+
+-- Additional product images (gallery)
+CREATE TABLE ProductImages (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    ProductId INT NOT NULL,
+    ImageUrl NVARCHAR(500) NOT NULL,
+    AltText NVARCHAR(255) NULL,
+    DisplayOrder INT DEFAULT 0,
+    CreatedAt DATETIME2 DEFAULT GETDATE(),
+
+    CONSTRAINT FK_ProductImages_Products FOREIGN KEY (ProductId) REFERENCES Products(Id)
 );
 
 -- Defines what options a product has (e.g., Product "Panadol" has Option "Quy cách đóng gói")

@@ -27,7 +27,37 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             try
             {
                 var products = await _productService.GetAllProductsAsync();
-                return Ok(products);
+
+                var response = products.Select(product => new
+                {
+                    product.Id,
+                    product.CategoryId,
+                    product.BrandId,
+                    product.Name,
+                    product.ShortDescription,
+                    product.FullDescription,
+                    product.Slug,
+                    product.ThumbnailUrl,
+                    product.Ingredients,
+                    product.UsageInstructions,
+                    product.Contraindications,
+                    product.StorageInstructions,
+                    product.RegistrationNumber,
+                    product.IsPrescriptionDrug,
+                    product.IsActive,
+                    product.IsFeatured,
+                    product.CreatedDate,
+                    product.UpdatedDate,
+                    product.Category,
+                    product.Brand,
+                    product.ProductOptions,
+                    product.ProductVariants,
+                    product.Images,
+                    BrandName = product.Brand?.Name,
+                    CategoryName = product.Category?.Name
+                });
+
+                return Ok(response);
             }
             catch (Exception ex)
             {

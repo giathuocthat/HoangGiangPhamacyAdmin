@@ -30,5 +30,10 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         /// Get product with category information
         /// </summary>
         Task<Product?> GetProductWithCategoryAsync(int id);
+
+        /// <summary>
+        /// Get all products including brand and category
+        /// </summary>
+        Task<IEnumerable<Product>> GetAllWithBrandAndCategoryAsync();
     }
 }

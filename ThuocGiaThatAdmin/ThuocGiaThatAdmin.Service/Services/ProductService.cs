@@ -27,7 +27,7 @@ namespace ThuocGiaThatAdmin.Service.Services
         /// </summary>
         public async Task<IEnumerable<Product>> GetAllProductsAsync()
         {
-            return await _productRepository.GetAllAsync();
+            return await _productRepository.GetAllWithBrandAndCategoryAsync();
         }
 
         /// <summary>

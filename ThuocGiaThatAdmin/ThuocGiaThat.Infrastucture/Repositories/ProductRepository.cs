@@ -75,5 +75,16 @@ namespace ThuocGiaThat.Infrastucture.Repositories
                             .ThenInclude(pov => pov.ProductOption)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
+
+        /// <summary>
+        /// Get all products with brand and category loaded
+        /// </summary>
+        public async Task<IEnumerable<Product>> GetAllWithBrandAndCategoryAsync()
+        {
+            return await _dbSet
+                .Include(p => p.Brand)
+                .Include(p => p.Category)
+                .ToListAsync();
+        }
     }
 }
