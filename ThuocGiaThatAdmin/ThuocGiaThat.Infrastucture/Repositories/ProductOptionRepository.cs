@@ -12,7 +12,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
     /// </summary>
     public class ProductOptionRepository : Repository<ProductOption>, IProductOptionRepository
     {
-        public ProductOptionRepository(AppContext context) : base(context)
+        public ProductOptionRepository(TrueMecContext context) : base(context)
         {
         }
 

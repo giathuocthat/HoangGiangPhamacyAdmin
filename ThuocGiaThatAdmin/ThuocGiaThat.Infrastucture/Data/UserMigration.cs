@@ -9,7 +9,7 @@ using ThuocGiaThatAdmin.Domain.Entities;
 
 namespace ThuocGiaThat.Infrastucture.Data
 {
-    public static class SeedData
+    public static class UserMigration
     {
         /// <summary>
         /// Ensures roles and an admin user exist.
@@ -22,7 +22,7 @@ namespace ThuocGiaThat.Infrastucture.Data
             using var scope = serviceProvider.CreateScope();
             var services = scope.ServiceProvider;
 
-            var logger = services.GetRequiredService<ILoggerFactory>().CreateLogger("SeedData");
+            var logger = services.GetRequiredService<ILoggerFactory>().CreateLogger("UserMigration");
 
             var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();

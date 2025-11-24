@@ -13,10 +13,10 @@ namespace ThuocGiaThat.Infrastucture.Repositories
     /// <typeparam name="T">Entity type</typeparam>
     public class Repository<T> : IRepository<T> where T : class
     {
-        protected readonly AppContext _context;
+        protected readonly TrueMecContext _context;
         protected readonly DbSet<T> _dbSet;
 
-        public Repository(AppContext context)
+        public Repository(TrueMecContext context)
         {
             _context = context;
             _dbSet = context.Set<T>();
