@@ -65,6 +65,10 @@ using (var scope = app.Services.CreateScope())
 
 app.UseCors("AllowLocalhost");
 
+// Add global exception handler middleware
+app.UseMiddleware<ThuocGiaThatAdmin.Server.Middleware.GlobalExceptionHandlerMiddleware>();
+
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "Local")
 {

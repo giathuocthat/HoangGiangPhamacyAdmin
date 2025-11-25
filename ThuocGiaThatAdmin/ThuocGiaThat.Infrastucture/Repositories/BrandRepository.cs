@@ -21,7 +21,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         /// </summary>
         public async Task<(IEnumerable<Brand> Brands, int TotalCount)> GetBrandsWithPagingAsync(int pageNumber, int pageSize)
         {
-            var query = _context.Set<Brand>().AsQueryable();
+            var query = _context.Set<Brand>().AsQueryable().AsNoTracking();
 
             var totalCount = await query.CountAsync();
 
