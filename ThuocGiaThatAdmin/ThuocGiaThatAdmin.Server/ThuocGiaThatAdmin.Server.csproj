@@ -28,4 +28,8 @@
     <ProjectReference Include="..\ThuocGiaThatAdmin.Domain\ThuocGiaThatAdmin.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Properties\PublishProfiles\" />
+  </ItemGroup>
+
 </Project>

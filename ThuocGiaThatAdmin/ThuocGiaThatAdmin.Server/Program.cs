@@ -50,14 +50,16 @@ builder.Services.AddScoped<IUserService, UserService>();
 // Add CORS to allow frontend to call this API
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowLocalhost", builder =>
-    {
-        builder.WithOrigins("http://localhost:5173", "https://localhost:5173", "http://localhost:3000", "https://localhost:3000")
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
-    });
+    options.AddPolicy("AllowAllOrigins",
+        policy =>
+        {
+            policy.AllowAnyOrigin() // Allows requests from any origin
+                  .AllowAnyMethod() // Allows any HTTP method (GET, POST, PUT, DELETE, etc.)
+                  .AllowAnyHeader(); // Allows any header in the request
+        });
 });
+
+//builder.WebHost.UseUrls("https://0.0.0.0:5000");
 
 var app = builder.Build();
 
@@ -73,7 +75,7 @@ using (var scope = app.Services.CreateScope())
     WardMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
 }
 
-app.UseCors("AllowLocalhost");
+app.UseCors("AllowAllOrigins");
 
 // Add global exception handler middleware
 app.UseMiddleware<ThuocGiaThatAdmin.Server.Middleware.GlobalExceptionHandlerMiddleware>();

@@ -165,13 +165,12 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     product.IsFeatured,
                     product.CreatedDate,
                     product.UpdatedDate,
-                    product.Category,
-                    product.Brand,
-                    product.ProductOptions,
-                    product.ProductVariants,
-                    product.Images,
-                    BrandName = product.Brand?.Name,
-                    CategoryName = product.Category?.Name
+                    Category = new {
+                        product.Category.Id,
+                        product.Category.Name,
+                        product.Category.Slug,
+                        product.Category.ParentId
+                    },
                 });
 
                 return Ok(response);
