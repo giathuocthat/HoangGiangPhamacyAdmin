@@ -8,6 +8,7 @@ using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Service;
 using ThuocGiaThatAdmin.Service.Interfaces;
 using ThuocGiaThatAdmin.Service.Services;
+using ThuocGiaThatAdmin.Contracts.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,14 +29,20 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ThuocGiaThat.Infrastucture.TrueMecContext>()
     .AddDefaultTokenProviders();
 
+// Configure FileUploadSettings
+builder.Services.Configure<FileUploadSettings>(
+    builder.Configuration.GetSection("FileUploadSettings"));
+
 // Register repositories and services
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 builder.Services.AddScoped<IProductOptionRepository, ProductOptionRepository>();
+builder.Services.AddScoped<IUploadedFileRepository, UploadedFileRepository>();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<BrandService>();
 builder.Services.AddScoped<ProductOptionService>();
+builder.Services.AddScoped<FileUploadService>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -80,6 +87,9 @@ if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "Local
 }
 
 app.UseHttpsRedirection();
+
+// Serve static files from wwwroot/uploads
+app.UseStaticFiles();
 
 app.UseAuthorization();
 

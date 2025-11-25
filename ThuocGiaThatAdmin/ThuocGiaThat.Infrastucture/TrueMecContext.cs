@@ -30,6 +30,7 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<Country> Countries { get; set; }
         public DbSet<Province> Provinces { get; set; }
         public DbSet<Ward>  Wards { get; set; }
+        public DbSet<UploadedFile> UploadedFiles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
