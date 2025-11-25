@@ -21,11 +21,11 @@ builder.Services.AddSwaggerGen();
 // Update the connection string as needed
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddDbContext<ThuocGiaThat.Infrastucture.AppContext>(options =>
+builder.Services.AddDbContext<ThuocGiaThat.Infrastucture.TrueMecContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<ThuocGiaThat.Infrastucture.AppContext>()
+    .AddEntityFrameworkStores<ThuocGiaThat.Infrastucture.TrueMecContext>()
     .AddDefaultTokenProviders();
 
 // Register repositories and services
@@ -57,10 +57,13 @@ var app = builder.Build();
 // Apply migrations automatically on startup
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<ThuocGiaThat.Infrastucture.AppContext>();
+    var db = scope.ServiceProvider.GetRequiredService<ThuocGiaThat.Infrastucture.TrueMecContext>();
     db.Database.Migrate();
     // seed admin user and roles (reads AdminUser:* from configuration)
-    SeedData.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
+    UserMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
+    CountryMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
+    ProvinceMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
+    WardMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
 }
 
 app.UseCors("AllowLocalhost");

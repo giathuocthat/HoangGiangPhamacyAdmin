@@ -12,7 +12,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
     /// </summary>
     public class BrandRepository : Repository<Brand>, IBrandRepository
     {
-        public BrandRepository(AppContext context) : base(context)
+        public BrandRepository(TrueMecContext context) : base(context)
         {
         }
 

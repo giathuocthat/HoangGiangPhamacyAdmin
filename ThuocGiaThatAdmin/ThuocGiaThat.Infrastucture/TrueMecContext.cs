@@ -6,9 +6,9 @@ using ThuocGiaThatAdmin.Domain.Entities;
 
 namespace ThuocGiaThat.Infrastucture
 {
-    public class AppContext : IdentityDbContext<ApplicationUser>
+    public class TrueMecContext : IdentityDbContext<ApplicationUser>
     {
-        public AppContext(DbContextOptions<AppContext> options) : base(options)
+        public TrueMecContext(DbContextOptions<TrueMecContext> options) : base(options)
         {
         }
 
@@ -27,6 +27,9 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<Country> Countries { get; set; }
+        public DbSet<Province> Provinces { get; set; }
+        public DbSet<Ward>  Wards { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -194,6 +197,10 @@ namespace ThuocGiaThat.Infrastucture
             modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("UserLogins");
             modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaims");
             modelBuilder.Entity<IdentityUserToken<string>>().ToTable("UserTokens");
+
+            modelBuilder.Entity<Country>().ToTable("Countries");
+            modelBuilder.Entity<Province>().ToTable("Provinces");
+            modelBuilder.Entity<Ward>().ToTable("Wards");
         }
     }
 }

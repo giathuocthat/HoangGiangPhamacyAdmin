@@ -10,8 +10,8 @@ using ThuocGiaThat.Infrastucture;
 
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
-    [DbContext(typeof(AppContext))]
-    partial class AppContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(TrueMecContext))]
+    partial class TrueMecContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -371,6 +371,71 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsUnique();
 
                     b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Country", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Capital")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CommonName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CountryCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CountryCode3")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CountryNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CountrySubType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CountryType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CurrencyCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CurrencyName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Flags")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FormalName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("InternetCountryCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("IsPublished")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Sovereignty")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TelephoneCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Countries", (string)null);
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Customer", b =>
@@ -812,6 +877,46 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.ToTable("ProductVariants");
                 });
 
+            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Province", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CountryId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("IsStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ZipCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CountryId");
+
+                    b.ToTable("Provinces", (string)null);
+                });
+
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.VariantOptionValue", b =>
                 {
                     b.Property<int>("Id")
@@ -834,6 +939,45 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsUnique();
 
                     b.ToTable("VariantOptionValues");
+                });
+
+            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Ward", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("IsStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ProvinceId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ZipCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProvinceId");
+
+                    b.ToTable("Wards", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -1021,6 +1165,17 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Province", b =>
+                {
+                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Country", "Country")
+                        .WithMany("Provinces")
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Country");
+                });
+
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.VariantOptionValue", b =>
                 {
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ProductOptionValue", "ProductOptionValue")
@@ -1040,6 +1195,15 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("ProductVariant");
                 });
 
+            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Ward", b =>
+                {
+                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Province", "Province")
+                        .WithMany("Wards")
+                        .HasForeignKey("ProvinceId");
+
+                    b.Navigation("Province");
+                });
+
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Brand", b =>
                 {
                     b.Navigation("Products");
@@ -1050,6 +1214,11 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("ChildCategories");
 
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Country", b =>
+                {
+                    b.Navigation("Provinces");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Customer", b =>
@@ -1090,6 +1259,11 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("PriceHistories");
 
                     b.Navigation("VariantOptionValues");
+                });
+
+            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Province", b =>
+                {
+                    b.Navigation("Wards");
                 });
 #pragma warning restore 612, 618
         }

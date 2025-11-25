@@ -12,7 +12,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
     /// </summary>
     public class CategoryRepository : Repository<Category>, ICategoryRepository
     {
-        public CategoryRepository(AppContext context) : base(context)
+        public CategoryRepository(TrueMecContext context) : base(context)
         {
         }
 

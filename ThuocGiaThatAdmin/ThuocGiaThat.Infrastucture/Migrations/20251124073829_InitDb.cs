@@ -58,6 +58,35 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Countries",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CountryCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CommonName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FormalName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CountryType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CountrySubType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Sovereignty = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Capital = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CurrencyCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CurrencyName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TelephoneCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CountryCode3 = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CountryNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    InternetCountryCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SortOrder = table.Column<int>(type: "int", nullable: true),
+                    IsPublished = table.Column<bool>(type: "bit", nullable: true),
+                    Flags = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Countries", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Customers",
                 columns: table => new
                 {
@@ -154,6 +183,32 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         principalTable: "Categories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Provinces",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CountryId = table.Column<int>(type: "int", nullable: false),
+                    SortOrder = table.Column<int>(type: "int", nullable: false),
+                    ZipCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsStatus = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Provinces", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Provinces_Countries_CountryId",
+                        column: x => x.CountryId,
+                        principalTable: "Countries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -399,6 +454,31 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Wards",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Code = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ProvinceId = table.Column<int>(type: "int", nullable: true),
+                    SortOrder = table.Column<int>(type: "int", nullable: false),
+                    ZipCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsStatus = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Wards", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Wards_Provinces_ProvinceId",
+                        column: x => x.ProvinceId,
+                        principalTable: "Provinces",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ProductOptionValues",
                 columns: table => new
                 {
@@ -634,6 +714,11 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Provinces_CountryId",
+                table: "Provinces",
+                column: "CountryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RoleClaims_RoleId",
                 table: "RoleClaims",
                 column: "RoleId");
@@ -682,6 +767,11 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                 table: "VariantOptionValues",
                 columns: new[] { "ProductVariantId", "ProductOptionValueId" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Wards_ProvinceId",
+                table: "Wards",
+                column: "ProvinceId");
         }
 
         /// <inheritdoc />
@@ -721,6 +811,9 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                 name: "VariantOptionValues");
 
             migrationBuilder.DropTable(
+                name: "Wards");
+
+            migrationBuilder.DropTable(
                 name: "Orders");
 
             migrationBuilder.DropTable(
@@ -736,10 +829,16 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                 name: "ProductVariants");
 
             migrationBuilder.DropTable(
+                name: "Provinces");
+
+            migrationBuilder.DropTable(
                 name: "Customers");
 
             migrationBuilder.DropTable(
                 name: "ProductOptions");
+
+            migrationBuilder.DropTable(
+                name: "Countries");
 
             migrationBuilder.DropTable(
                 name: "Products");
