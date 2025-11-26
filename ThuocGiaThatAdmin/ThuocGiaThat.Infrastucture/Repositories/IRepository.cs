@@ -14,6 +14,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         // Add operations
         Task AddAsync(T entity);
         Task AddRangeAsync(IEnumerable<T> entities);
+        void AddRange(IEnumerable<T> entities);
 
         // Update operations
         void Update(T entity);

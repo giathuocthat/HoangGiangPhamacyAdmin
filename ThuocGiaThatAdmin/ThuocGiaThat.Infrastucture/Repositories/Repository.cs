@@ -46,6 +46,14 @@ namespace ThuocGiaThat.Infrastucture.Repositories
             await _dbSet.AddRangeAsync(entities);
         }
 
+        public  void AddRange(IEnumerable<T> entities)
+        {
+            if (entities == null)
+                throw new ArgumentNullException(nameof(entities));
+
+             _dbSet.AddRange(entities);
+        }
+
         #endregion
 
         #region Update Operations

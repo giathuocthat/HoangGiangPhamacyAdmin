@@ -20,7 +20,7 @@ namespace ThuocGiaThat.Infrastucture.Data
             using var scope = serviceProvider.CreateScope();
             var services = scope.ServiceProvider;
             var logger = services.GetRequiredService<ILoggerFactory>().CreateLogger("BusinessTypeMigration");
-            var businessTypeRepository= services.GetRequiredService<IBusinessTypeRepository>();
+            var businessTypeRepository = services.GetRequiredService<IBusinessTypeRepository>();
 
             try
             {
@@ -33,15 +33,15 @@ namespace ThuocGiaThat.Infrastucture.Data
 
                 var businessTypes = new List<BusinessType>()
                 {
-                    new() { Id = 1, Name = "Quầy thuốc" },
-                    new() { Id = 2, Name = "Nhà thuốc" },
-                    new() { Id = 3, Name = "Phòng khám" },
-                    new() { Id = 4, Name = "Bệnh viện" },
-                    new() { Id = 5, Name = "Công ty dược phẩm" },
-                    new() { Id = 6, Name = "Nha khoa" },
-                    new() { Id = 7, Name = "Thẩm mỹ viện" },
-                    new() { Id = 8, Name = "Trung tâm y tế" },
-                    new() { Id = 9, Name = "Dược sĩ" },
+                    new() { Name = "Quầy thuốc" },
+                    new() { Name = "Nhà thuốc" },
+                    new() { Name = "Phòng khám" },
+                    new() { Name = "Bệnh viện" },
+                    new() { Name = "Công ty dược phẩm" },
+                    new() { Name = "Nha khoa" },
+                    new() { Name = "Thẩm mỹ viện" },
+                    new() { Name = "Trung tâm y tế" },
+                    new() { Name = "Dược sĩ" },
                 };
 
                 await businessTypeRepository.AddRangeAsync(businessTypes);

@@ -43,6 +43,8 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<Province> Provinces { get; set; }
         public DbSet<Ward>  Wards { get; set; }
         public DbSet<UploadedFile> UploadedFiles { get; set; }
+        
+        public DbSet<BusinessType>  BusinessTypes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -51,6 +53,7 @@ namespace ThuocGiaThat.Infrastucture
             // ============ Category Configuration ============
             modelBuilder.Entity<Category>(entity =>
             {
+                entity.Property(p => p.Id).UseIdentityColumn(seed: 1, increment: 1);
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.Description).HasMaxLength(1000);

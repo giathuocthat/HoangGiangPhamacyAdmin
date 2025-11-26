@@ -9,6 +9,7 @@ using ThuocGiaThatAdmin.Service;
 using ThuocGiaThatAdmin.Service.Interfaces;
 using ThuocGiaThatAdmin.Service.Services;
 using ThuocGiaThatAdmin.Contracts.Models;
+using ThuocGiaThat.Infrastucture.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +46,7 @@ builder.Services.AddScoped<IWarehouseRepository, WarehouseRepository>();
 builder.Services.AddScoped<IInventoryBatchRepository, InventoryBatchRepository>();
 builder.Services.AddScoped<IInventoryTransactionRepository, InventoryTransactionRepository>();
 builder.Services.AddScoped<IStockAlertRepository, StockAlertRepository>();
+builder.Services.AddScoped<IBusinessTypeRepository, BusinessTypeRepository>();
 
 // Services
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -62,6 +64,7 @@ builder.Services.AddScoped<StockAlertService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<BusinessTypeService>();
 
 // Add CORS to allow frontend to call this API
 builder.Services.AddCors(options =>
@@ -89,6 +92,8 @@ using (var scope = app.Services.CreateScope())
     CountryMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     ProvinceMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     WardMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
+    BusinessTypeMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
+    CategoryMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
 }
 
 app.UseCors("AllowAllOrigins");
