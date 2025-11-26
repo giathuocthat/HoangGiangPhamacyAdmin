@@ -43,8 +43,8 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         // Dates inherited
 
         // Navigation properties
-        public virtual Category? ParentCategory { get; set; }
-        public virtual ICollection<Category> ChildCategories { get; set; } = new List<Category>();
-        public virtual ICollection<Product> Products { get; set; } = new List<Product>();
+        public Category? ParentCategory { get; set; }
+        public ICollection<Category> ChildCategories { get; set; } = new List<Category>();
+        public ICollection<Product> Products { get; set; } = new List<Product>();
     }
 }

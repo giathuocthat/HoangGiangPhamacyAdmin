@@ -8,8 +8,8 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public int ProductVariantId { get; set; }
         public int ProductOptionValueId { get; set; }
 
-        public virtual ProductVariant ProductVariant { get; set; } = null!;
-        public virtual ProductOptionValue ProductOptionValue { get; set; } = null!;
+        public ProductVariant ProductVariant { get; set; } = null!;
+        public ProductOptionValue ProductOptionValue { get; set; } = null!;
 
     }
 }

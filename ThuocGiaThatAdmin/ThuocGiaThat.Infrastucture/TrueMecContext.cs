@@ -28,6 +28,13 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<VariantOptionValue> VariantOptionValues { get; set; }
         public DbSet<Inventory> Inventories { get; set; }
         public DbSet<PriceHistory> PriceHistories { get; set; }
+        
+        // Inventory Management
+        public DbSet<Warehouse> Warehouses { get; set; }
+        public DbSet<InventoryBatch> InventoryBatches { get; set; }
+        public DbSet<InventoryTransaction> InventoryTransactions { get; set; }
+        public DbSet<StockAlert> StockAlerts { get; set; }
+        
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Order> Orders { get; set; }
@@ -131,8 +138,117 @@ namespace ThuocGiaThat.Infrastucture
             modelBuilder.Entity<Inventory>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.UpdatedDate).HasColumnName("UpdatedAt").HasDefaultValueSql("GETUTCDATE()");
-                entity.HasOne(e => e.ProductVariant).WithMany(e => e.Inventories).HasForeignKey(e => e.ProductVariantId).OnDelete(DeleteBehavior.Cascade);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+                
+                entity.HasOne(e => e.ProductVariant)
+                    .WithMany(e => e.Inventories)
+                    .HasForeignKey(e => e.ProductVariantId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                entity.HasOne(e => e.Warehouse)
+                    .WithMany(e => e.Inventories)
+                    .HasForeignKey(e => e.WarehouseId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                
+                // Unique constraint: one inventory record per product variant per warehouse
+                entity.HasIndex(e => new { e.ProductVariantId, e.WarehouseId }).IsUnique();
+                entity.HasIndex(e => e.WarehouseId);
+                entity.HasIndex(e => e.QuantityOnHand);
+            });
+            
+            // ============ Warehouse Configuration ============
+            modelBuilder.Entity<Warehouse>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Code).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.Address).HasMaxLength(500);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+                
+                entity.HasIndex(e => e.Code).IsUnique();
+                entity.HasIndex(e => e.IsActive);
+            });
+            
+            // ============ InventoryBatch Configuration ============
+            modelBuilder.Entity<InventoryBatch>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.BatchNumber).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.CostPrice).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+                
+                entity.HasOne(e => e.Inventory)
+                    .WithMany(e => e.Batches)
+                    .HasForeignKey(e => e.InventoryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                
+                entity.HasIndex(e => e.BatchNumber);
+                entity.HasIndex(e => e.ExpiryDate);
+                entity.HasIndex(e => e.Status);
+            });
+            
+            // ============ InventoryTransaction Configuration ============
+            modelBuilder.Entity<InventoryTransaction>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.TotalValue).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.ReferenceNumber).HasMaxLength(100);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+                
+                entity.HasOne(e => e.ProductVariant)
+                    .WithMany(e => e.InventoryTransactions)
+                    .HasForeignKey(e => e.ProductVariantId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                entity.HasOne(e => e.Warehouse)
+                    .WithMany(e => e.Transactions)
+                    .HasForeignKey(e => e.WarehouseId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                entity.HasOne(e => e.Batch)
+                    .WithMany()
+                    .HasForeignKey(e => e.BatchId)
+                    .OnDelete(DeleteBehavior.SetNull);
+                
+                entity.HasIndex(e => e.ProductVariantId);
+                entity.HasIndex(e => e.WarehouseId);
+                entity.HasIndex(e => e.Type);
+                entity.HasIndex(e => e.CreatedDate);
+                entity.HasIndex(e => e.ReferenceNumber);
+            });
+            
+            // ============ StockAlert Configuration ============
+            modelBuilder.Entity<StockAlert>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Message).IsRequired().HasMaxLength(500);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+                
+                entity.HasOne(e => e.ProductVariant)
+                    .WithMany()
+                    .HasForeignKey(e => e.ProductVariantId)
+                    .OnDelete(DeleteBehavior.NoAction);  // Changed from Cascade to NoAction to prevent cycle
+                    
+                entity.HasOne(e => e.Warehouse)
+                    .WithMany()
+                    .HasForeignKey(e => e.WarehouseId)
+                    .OnDelete(DeleteBehavior.NoAction);  // Changed from Restrict to NoAction
+                    
+                entity.HasOne(e => e.Batch)
+                    .WithMany()
+                    .HasForeignKey(e => e.BatchId)
+                    .OnDelete(DeleteBehavior.SetNull);
+                
+                entity.HasIndex(e => e.Type);
+                entity.HasIndex(e => e.Priority);
+                entity.HasIndex(e => e.IsResolved);
+                entity.HasIndex(e => e.CreatedDate);
             });
 
             // ============ PriceHistory Configuration ============

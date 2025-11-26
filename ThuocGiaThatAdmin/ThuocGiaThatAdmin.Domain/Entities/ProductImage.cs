@@ -11,6 +11,6 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public int DisplayOrder { get; set; } = 0;
         // CreatedDate inherited
 
-        public virtual Product Product { get; set; } = null!;
+        public Product Product { get; set; } = null!;
     }
 }

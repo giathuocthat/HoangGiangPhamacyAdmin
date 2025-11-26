@@ -50,6 +50,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
-        public virtual Product Product { get; set; } = null!;
+        public Product Product { get; set; } = null!;
     }
 }
+

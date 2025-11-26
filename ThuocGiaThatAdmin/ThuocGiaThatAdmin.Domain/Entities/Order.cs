@@ -28,7 +28,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public string? Note { get; set; }
         // UpdatedDate inherited
 
-        public virtual Customer? Customer { get; set; }
-        public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+        public Customer? Customer { get; set; }
+        public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 }

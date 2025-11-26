@@ -24,9 +24,10 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public bool IsActive { get; set; } = true;
         // Dates inherited
 
-        public virtual Product Product { get; set; } = null!;
-        public virtual ICollection<VariantOptionValue> VariantOptionValues { get; set; } = new List<VariantOptionValue>();
-        public virtual ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
-        public virtual ICollection<PriceHistory> PriceHistories { get; set; } = new List<PriceHistory>();
+        public Product Product { get; set; } = null!;
+        public ICollection<VariantOptionValue> VariantOptionValues { get; set; } = new List<VariantOptionValue>();
+        public ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
+        public ICollection<PriceHistory> PriceHistories { get; set; } = new List<PriceHistory>();
+        public ICollection<InventoryTransaction> InventoryTransactions { get; set; } = new List<InventoryTransaction>();
     }
 }
