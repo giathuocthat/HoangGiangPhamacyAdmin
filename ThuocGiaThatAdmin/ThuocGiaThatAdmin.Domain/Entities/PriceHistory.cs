@@ -11,6 +11,6 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public DateTime? EndDate { get; set; }
         public string? Reason { get; set; }
 
-        public virtual ProductVariant ProductVariant { get; set; } = null!;
+        public ProductVariant ProductVariant { get; set; } = null!;
     }
 }

@@ -46,6 +46,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public DateTime? UpdatedDate { get; set; }
 
         // Navigation properties
-        public virtual ICollection<Product> Products { get; set; } = new List<Product>();
+        public ICollection<Product> Products { get; set; } = new List<Product>();
     }
 }
+

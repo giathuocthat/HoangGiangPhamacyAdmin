@@ -13,7 +13,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public decimal UnitPrice { get; set; }
         public decimal TotalLineAmount { get; set; }
 
-        public virtual Order Order { get; set; } = null!;
-        public virtual ProductVariant ProductVariant { get; set; } = null!;
+        public Order Order { get; set; } = null!;
+        public ProductVariant ProductVariant { get; set; } = null!;
     }
 }

@@ -15,6 +15,6 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public bool IsDefault { get; set; } = false;
         // Dates inherited
 
-        public virtual Customer Customer { get; set; } = null!;
+        public Customer Customer { get; set; } = null!;
     }
 }

@@ -12,7 +12,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public string PasswordHash { get; set; } = string.Empty;
         // Dates inherited
 
-        public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
-        public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+        public ICollection<Address> Addresses { get; set; } = new List<Address>();
+        public ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 }

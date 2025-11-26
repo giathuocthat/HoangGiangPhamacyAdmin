@@ -9,8 +9,8 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public string Value { get; set; } = string.Empty; // e.g., "Red", "XL"
         public int DisplayOrder { get; set; } = 0;
 
-        public virtual ProductOption ProductOption { get; set; } = null!;
+        public ProductOption ProductOption { get; set; } = null!;
 
-        public virtual List<VariantOptionValue> VariantOptionValues { get; set; } = new List<VariantOptionValue>();
+        public List<VariantOptionValue> VariantOptionValues { get; set; } = new List<VariantOptionValue>();
     }
 }

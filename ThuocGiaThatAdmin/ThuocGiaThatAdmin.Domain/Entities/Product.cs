@@ -33,10 +33,10 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         // Dates inherited
 
         // Navigation properties
-        public virtual Category Category { get; set; } = null!;
-        public virtual Brand? Brand { get; set; }
-        public virtual ICollection<ProductOption> ProductOptions { get; set; } = new List<ProductOption>();
-        public virtual ICollection<ProductVariant> ProductVariants { get; set; } = new List<ProductVariant>();
-        public virtual ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
+        public Category Category { get; set; } = null!;
+        public Brand? Brand { get; set; }
+        public ICollection<ProductOption> ProductOptions { get; set; } = new List<ProductOption>();
+        public ICollection<ProductVariant> ProductVariants { get; set; } = new List<ProductVariant>();
+        public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
     }
 }

@@ -14,6 +14,6 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public bool IsActive { get; set; } = true;
         // Dates inherited
 
-        public virtual ICollection<Product> Products { get; set; } = new List<Product>();
+        public ICollection<Product> Products { get; set; } = new List<Product>();
     }
 }
