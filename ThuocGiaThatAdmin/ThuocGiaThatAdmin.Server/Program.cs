@@ -44,7 +44,7 @@ builder.Services.AddScoped<BrandService>();
 builder.Services.AddScoped<ProductOptionService>();
 builder.Services.AddScoped<FileUploadService>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 // Add CORS to allow frontend to call this API
