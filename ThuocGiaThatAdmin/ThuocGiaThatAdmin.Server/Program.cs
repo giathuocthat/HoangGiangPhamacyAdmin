@@ -51,6 +51,7 @@ builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<BrandService>();
 builder.Services.AddScoped<ProductOptionService>();
 builder.Services.AddScoped<FileUploadService>();
+builder.Services.AddScoped<OrderService>();
 
 // Inventory Management Services
 builder.Services.AddScoped<WarehouseService>();
