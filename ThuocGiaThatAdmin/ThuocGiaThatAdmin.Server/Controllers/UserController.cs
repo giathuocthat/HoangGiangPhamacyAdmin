@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -74,6 +75,39 @@ namespace HoangGiangPhamacyAuthentication.Controllers
                 return BadRequest(new { error = "id_required" });
 
             var user = await _userService.GetByIdAsync(id);
+            if (user == null)
+                return NotFound(new { error = "user_not_found" });
+
+            var roles = await _userService.GetRolesAsync(user);
+
+            var dto = new UserDto
+            {
+                Id = user.Id,
+                Username = user.UserName,
+                Email = user.Email,
+                FullName = user.FullName,
+                Roles = roles?.ToArray() ?? Array.Empty<string>()
+            };
+
+            return Ok(dto);
+        }
+
+        /// <summary>
+        /// GET: api/user/profile/me
+        /// Returns the current authenticated user's profile information.
+        /// Requires a valid Bearer token in the Authorization header.
+        /// </summary>
+        [Authorize]
+        [HttpGet("profile/me")]
+        public async Task<IActionResult> GetCurrentUserProfile()
+        {
+            // Get the user ID from the JWT token (Subject claim)
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrWhiteSpace(userId))
+                return Unauthorized(new { error = "User ID not found in token" });
+
+            var user = await _userService.GetByIdAsync(userId);
             if (user == null)
                 return NotFound(new { error = "user_not_found" });
 

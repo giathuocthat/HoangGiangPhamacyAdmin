@@ -8,6 +8,7 @@ using ThuocGiaThatAdmin.Contract.DTOs;
 using ThuocGiaThatAdmin.Contract.Responses;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Service;
+using ThuocGiaThatAdmin.Service.Interfaces;
 
 namespace HoangGiangPhamacyAuthentication.Controllers
 {
@@ -15,10 +16,10 @@ namespace HoangGiangPhamacyAuthentication.Controllers
     [Route("api/[controller]")]
     public class TokenController : ControllerBase
     {
-        private readonly TokenService _tokenService;
+        private readonly ITokenService _tokenService;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public TokenController(TokenService tokenService, UserManager<ApplicationUser> userManager)
+        public TokenController(ITokenService tokenService, UserManager<ApplicationUser> userManager)
         {
             _tokenService = tokenService;
             _userManager = userManager;
