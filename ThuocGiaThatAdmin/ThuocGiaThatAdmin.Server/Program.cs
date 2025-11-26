@@ -47,6 +47,8 @@ builder.Services.AddScoped<IInventoryTransactionRepository, InventoryTransaction
 builder.Services.AddScoped<IStockAlertRepository, StockAlertRepository>();
 
 // Services
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<BrandService>();
 builder.Services.AddScoped<ProductOptionService>();
@@ -58,8 +60,8 @@ builder.Services.AddScoped<WarehouseService>();
 builder.Services.AddScoped<InventoryService>();
 builder.Services.AddScoped<StockAlertService>();
 
-builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 // Add CORS to allow frontend to call this API

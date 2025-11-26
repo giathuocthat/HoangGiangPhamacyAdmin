@@ -4,10 +4,10 @@ namespace ThuocGiaThatAdmin.Contracts.Models
     {
         public int MaxFileSizeInMB { get; set; }
         public string UploadPath { get; set; } = string.Empty;
-        public List<string> AllowedImageExtensions { get; set; } = new();
-        public List<string> AllowedDocumentExtensions { get; set; } = new();
-        public List<string> AllowedVideoExtensions { get; set; } = new();
-        public List<string> AllowedAudioExtensions { get; set; } = new();
+        public List<string> AllowedImageExtensions { get; set; } = [];
+        public List<string> AllowedDocumentExtensions { get; set; } = [];
+        public List<string> AllowedVideoExtensions { get; set; } = [];
+        public List<string> AllowedAudioExtensions { get; set; } = [];
         public string BaseUrl { get; set; } = string.Empty;
         
         public List<string> GetAllAllowedExtensions()
