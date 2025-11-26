@@ -15,8 +15,6 @@ namespace ThuocGiaThat.Infrastucture
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
-            // Tắt lazy loading
-            optionsBuilder.UseLazyLoadingProxies(false);
         }
 
         public DbSet<Category> Categories { get; set; }
