@@ -45,6 +45,7 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<UploadedFile> UploadedFiles { get; set; }
         
         public DbSet<BusinessType>  BusinessTypes { get; set; }
+        public DbSet<CustomerPaymentAccount> CustomerPaymentAccounts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -270,7 +271,50 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
                 entity.Property(e => e.UpdatedDate);
+                
+                // Business Type relationship (nullable)
+                entity.HasOne(e => e.BusinessType)
+                      .WithMany()
+                      .HasForeignKey(e => e.BusinessTypeId)
+                      .OnDelete(DeleteBehavior.SetNull);
+                
+                // Enterprise Information fields
+                entity.Property(e => e.CompanyName).HasMaxLength(200);
+                entity.Property(e => e.TaxCode).HasMaxLength(20);
+                entity.Property(e => e.BusinessRegistrationNumber).HasMaxLength(50);
+                entity.Property(e => e.LegalRepresentative).HasMaxLength(100);
+                entity.Property(e => e.BusinessLicenseUrl).HasMaxLength(500);
+                entity.Property(e => e.BusinessAddress).HasMaxLength(500);
+                entity.Property(e => e.BusinessPhone).HasMaxLength(20);
+                entity.Property(e => e.BusinessEmail).HasMaxLength(100);
+                
                 entity.HasIndex(e => e.Email).IsUnique();
+                entity.HasIndex(e => e.TaxCode);
+                entity.HasIndex(e => e.BusinessTypeId);
+            });
+            
+            // ============ CustomerPaymentAccount Configuration ============
+            modelBuilder.Entity<CustomerPaymentAccount>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                
+                entity.HasOne(e => e.Customer)
+                      .WithMany(e => e.PaymentAccounts)
+                      .HasForeignKey(e => e.CustomerId)
+                      .OnDelete(DeleteBehavior.Cascade);
+                
+                entity.Property(e => e.BankName).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.AccountNumber).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.AccountHolder).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.BankBranch).HasMaxLength(200);
+                entity.Property(e => e.SwiftCode).HasMaxLength(20);
+                entity.Property(e => e.Notes).HasMaxLength(500);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+                
+                // Indexes for faster queries
+                entity.HasIndex(e => e.CustomerId);
+                entity.HasIndex(e => new { e.CustomerId, e.IsDefault });
             });
 
             // ============ Address Configuration ============
