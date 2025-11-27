@@ -24,6 +24,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\GiaThuocThat.Application.Quries\ThuocGiaThatAdmin.Queries.csproj" />
+    <ProjectReference Include="..\GiathuocthatAdmin.Application.Command\ThuocGiaThatAdmin.Commands.csproj" />
+    <ProjectReference Include="..\ThuocGiaThat.Common\ThuocGiaThatAdmin.Common.csproj" />
     <ProjectReference Include="..\ThuocGiaThatAdmin.Service\ThuocGiaThatAdmin.Service.csproj" />
     <ProjectReference Include="..\ThuocGiaThat.Infrastucture\ThuocGiaThat.Infrastucture.csproj" />
     <ProjectReference Include="..\ThuocGiaThatAdmin.Domain\ThuocGiaThatAdmin.Domain.csproj" />

@@ -4,6 +4,15 @@
     <BuildType Name="Dev" />
     <BuildType Name="Release" />
   </Configurations>
+  <Project Path="GiaThuocThat.Application.Quries/ThuocGiaThatAdmin.Queries.csproj" Id="6009d098-d1a8-4e6e-bc6f-e180b5b79ae5">
+    <BuildType Solution="Dev|*" Project="Release" />
+  </Project>
+  <Project Path="GiathuocthatAdmin.Application.Command/ThuocGiaThatAdmin.Commands.csproj" Id="2f6bc1e4-fb27-4942-b012-0373f192533f">
+    <BuildType Solution="Dev|*" Project="Release" />
+  </Project>
+  <Project Path="ThuocGiaThat.Common/ThuocGiaThatAdmin.Common.csproj" Id="62d1963f-f385-49ee-9bb0-66c46546512f">
+    <BuildType Solution="Dev|*" Project="Release" />
+  </Project>
   <Project Path="ThuocGiaThat.Infrastucture/ThuocGiaThat.Infrastucture.csproj">
     <BuildType Solution="Dev|*" Project="Release" />
   </Project>

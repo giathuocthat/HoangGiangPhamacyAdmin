@@ -2,9 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System;
 using System.Text;
-using ThuocGiaThat.Infrastucture;
 using ThuocGiaThat.Infrastucture.Data;
 using ThuocGiaThat.Infrastucture.Repositories;
 using ThuocGiaThatAdmin.Contracts.Models;
@@ -12,8 +10,12 @@ using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Service;
 using ThuocGiaThatAdmin.Service.Interfaces;
 using ThuocGiaThatAdmin.Service.Services;
-using ThuocGiaThatAdmin.Contracts.Models;
 using ThuocGiaThat.Infrastucture.Interfaces;
+using ThuocGiaThatAdmin.Server.Extensions;
+
+using ThuocGiaThatAdmin.Common.Interfaces;
+using ThuocGiaThatAdmin.Queries;
+using ThuocGiaThatAdmin.Commands;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,7 +70,9 @@ builder.Services.AddAuthentication(options =>
 builder.Services.Configure<FileUploadSettings>(
     builder.Configuration.GetSection("FileUploadSettings"));
 
-// Register repositories and services
+// ============================================================
+// Register Repositories
+// ============================================================
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IBrandRepository, BrandRepository>();
@@ -82,9 +86,12 @@ builder.Services.AddScoped<IInventoryTransactionRepository, InventoryTransaction
 builder.Services.AddScoped<IStockAlertRepository, StockAlertRepository>();
 builder.Services.AddScoped<IBusinessTypeRepository, BusinessTypeRepository>();
 
-// Services
+// Generic Repository
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
+// ============================================================
+// Register Services (Legacy - for backward compatibility)
+// ============================================================
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<BrandService>();
 builder.Services.AddScoped<ProductOptionService>();
@@ -101,7 +108,21 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<BusinessTypeService>();
 
-// Add CORS to allow frontend to call this API
+// ============================================================
+// Register CQRS - Dispatchers
+// ============================================================
+builder.Services.AddScoped<ICommandDispatcher, CommandDispatcher>();
+builder.Services.AddScoped<IQueryDispatcher, QueryDispatcher>();
+
+// ============================================================
+// Register CQRS - Auto-discover Handlers
+// ============================================================
+builder.RegisterQueryHandlers();
+builder.RegisterCommandHandlers();
+
+// ============================================================
+// Add CORS
+// ============================================================
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",
@@ -117,7 +138,9 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Apply migrations automatically on startup
+// ============================================================
+// Apply Migrations & Seeding
+// ============================================================
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ThuocGiaThat.Infrastucture.TrueMecContext>();
@@ -131,6 +154,9 @@ using (var scope = app.Services.CreateScope())
     CategoryMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
 }
 
+// ============================================================
+// Middleware Pipeline
+// ============================================================
 app.UseCors("AllowAllOrigins");
 
 // Add global exception handler middleware
@@ -149,6 +175,7 @@ app.UseHttpsRedirection();
 // Serve static files from wwwroot/uploads
 app.UseStaticFiles();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

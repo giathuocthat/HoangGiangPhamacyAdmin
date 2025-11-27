@@ -3,10 +3,13 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using ThuocGiaThatAdmin.Commands.Categories;
+using ThuocGiaThatAdmin.Common.Interfaces;
+using ThuocGiaThatAdmin.Contracts.Responses;
 using ThuocGiaThatAdmin.Domain.Entities;
+using ThuocGiaThatAdmin.Queries.IQueries;
 using ThuocGiaThatAdmin.Service;
 using ThuocGiaThatAdmin.Service.Interfaces;
-using ThuocGiaThatAdmin.Contracts.Responses;
 
 namespace ThuocGiaThatAdmin.Server.Controllers
 {
@@ -16,11 +19,15 @@ namespace ThuocGiaThatAdmin.Server.Controllers
     {
         private readonly ICategoryService _service;
         private readonly ILogger<CategoryController> _logger;
+        private readonly IQueryDispatcher _queryDispatcher;
+        private readonly ICommandDispatcher _commandDispatcher;
 
-        public CategoryController(ICategoryService service, ILogger<CategoryController> logger)
+        public CategoryController(ICategoryService service, ILogger<CategoryController> logger, ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher)
         {
             _service = service ?? throw new ArgumentNullException(nameof(service));
             _logger = logger;
+            _commandDispatcher = commandDispatcher ?? throw new ArgumentNullException(nameof(commandDispatcher));
+            _queryDispatcher = queryDispatcher ?? throw new ArgumentNullException(nameof(queryDispatcher));
         }
 
         /// <summary>
@@ -149,7 +156,9 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             try
             {
-                var items = await _service.GetCategoryHierarchyAsync();
+                var query = new GetCategoryHierarchyQuery();
+                var items = await _queryDispatcher.DispatchAsync(query);
+               // var items = await _service.GetCategoryHierarchyAsync();
                 return Ok(new { Data = items });
             }
             catch (Exception ex)
@@ -234,13 +243,18 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// Update an existing category
         /// </summary>
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Category dto)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateCategoryCommand command)
         {
             try
             {
-                if (id != dto.Id) return BadRequest(new { message = "Id mismatch" });
-                var updated = await _service.UpdateAsync(dto);
-                return Ok(new { message = "Updated", affected = updated });
+                if (command == null)
+                    return BadRequest(new { message = "Command cannot be null" });
+
+                if (id != command.Id)
+                    return BadRequest(new { message = "Id mismatch" });
+
+                var result = await _commandDispatcher.DispatchAsync(command);
+                return Ok(result);
             }
             catch (ArgumentException ex)
             {
@@ -248,7 +262,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { message = ex.Message });
+                return Conflict(new { message = ex.Message });
             }
             catch (Exception ex)
             {
