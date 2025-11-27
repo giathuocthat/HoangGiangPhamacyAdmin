@@ -23,7 +23,43 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Thuoc Gia That API",
+        Version = "v1",
+        Description = "API for Pharmacy Management System with Admin and Customer authentication"
+    });
+
+    // Add JWT Authentication to Swagger
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n" +
+                      "Enter your token in the text input below.\r\n\r\n" +
+                      "Example: '12345abcdef'"
+    });
+
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
 
 // Configure DbContext
 // Update the connection string as needed
@@ -123,6 +159,10 @@ builder.RegisterCommandHandlers();
 // ============================================================
 // Add CORS
 // ============================================================
+// Customer Authentication Service
+builder.Services.AddScoped<ICustomerAuthService, CustomerAuthService>();
+
+// Add CORS to allow frontend to call this API
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",
