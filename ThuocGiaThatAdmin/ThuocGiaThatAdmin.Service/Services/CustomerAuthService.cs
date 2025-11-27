@@ -1,0 +1,170 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
+using ThuocGiaThat.Infrastucture;
+using ThuocGiaThatAdmin.Contract.DTOs;
+using ThuocGiaThatAdmin.Domain.Entities;
+using ThuocGiaThatAdmin.Service.Interfaces;
+
+namespace ThuocGiaThatAdmin.Service.Services
+{
+    public class CustomerAuthService : ICustomerAuthService
+    {
+        private readonly TrueMecContext _context;
+        private readonly IConfiguration _configuration;
+
+        public CustomerAuthService(TrueMecContext context, IConfiguration configuration)
+        {
+            _context = context;
+            _configuration = configuration;
+        }
+
+        public async Task<(bool Success, string Message, Customer? Customer)> RegisterAsync(CustomerRegisterDto dto)
+        {
+            // Check if email already exists
+            var existingCustomer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.Email == dto.Email);
+
+            if (existingCustomer != null)
+            {
+                return (false, "Email already registered", null);
+            }
+
+            // Create new customer
+            var customer = new Customer
+            {
+                FullName = dto.FullName,
+                Email = dto.Email,
+                PhoneNumber = dto.PhoneNumber,
+                PasswordHash = HashPassword(dto.Password),
+                CreatedDate = DateTime.UtcNow
+            };
+
+            _context.Customers.Add(customer);
+            await _context.SaveChangesAsync();
+
+            return (true, "Registration successful", customer);
+        }
+
+        public async Task<(bool Success, string Message, string? Token, Customer? Customer)> LoginAsync(CustomerLoginDto dto)
+        {
+            var customer = await _context.Customers
+                .Include(c => c.BusinessType)
+                .FirstOrDefaultAsync(c => c.Email == dto.Email);
+
+            if (customer == null)
+            {
+                return (false, "Invalid email or password", null, null);
+            }
+
+            if (!VerifyPassword(dto.Password, customer.PasswordHash))
+            {
+                return (false, "Invalid email or password", null, null);
+            }
+
+            var token = GenerateJwtToken(customer);
+            return (true, "Login successful", token, customer);
+        }
+
+        public async Task<Customer?> GetCustomerByIdAsync(int customerId)
+        {
+            return await _context.Customers
+                .Include(c => c.BusinessType)
+                .Include(c => c.PaymentAccounts)
+                .FirstOrDefaultAsync(c => c.Id == customerId);
+        }
+
+        public async Task<Customer?> GetCustomerByEmailAsync(string email)
+        {
+            return await _context.Customers
+                .FirstOrDefaultAsync(c => c.Email == email);
+        }
+
+        public async Task<bool> UpdateProfileAsync(int customerId, UpdateCustomerProfileDto dto)
+        {
+            var customer = await _context.Customers.FindAsync(customerId);
+            if (customer == null) return false;
+
+            customer.FullName = dto.FullName;
+            customer.PhoneNumber = dto.PhoneNumber;
+            customer.UpdatedDate = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> UpdateBusinessInfoAsync(int customerId, UpdateBusinessInfoDto dto)
+        {
+            var customer = await _context.Customers.FindAsync(customerId);
+            if (customer == null) return false;
+
+            // Verify BusinessType exists
+            var businessTypeExists = await _context.BusinessTypes
+                .AnyAsync(bt => bt.Id == dto.BusinessTypeId);
+            if (!businessTypeExists) return false;
+
+            customer.BusinessTypeId = dto.BusinessTypeId;
+            customer.CompanyName = dto.CompanyName;
+            customer.TaxCode = dto.TaxCode;
+            customer.BusinessRegistrationNumber = dto.BusinessRegistrationNumber;
+            customer.BusinessRegistrationDate = dto.BusinessRegistrationDate;
+            customer.LegalRepresentative = dto.LegalRepresentative;
+            customer.BusinessLicenseUrl = dto.BusinessLicenseUrl;
+            customer.BusinessAddress = dto.BusinessAddress;
+            customer.BusinessPhone = dto.BusinessPhone;
+            customer.BusinessEmail = dto.BusinessEmail;
+            customer.UpdatedDate = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public string GenerateJwtToken(Customer customer)
+        {
+            var jwtSettings = _configuration.GetSection("Jwt");
+            var secretKey = jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key not configured");
+            var issuer = jwtSettings["Issuer"] ?? "ThuocGiaThatAPI";
+            var audience = jwtSettings["Audience"] ?? "ThuocGiaThatCustomers";
+            var expiryMinutes = int.Parse(jwtSettings["ExpiresMinutes"] ?? "60");
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, customer.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, customer.Email),
+                new Claim(JwtRegisteredClaimNames.Name, customer.FullName),
+                new Claim("customer_id", customer.Id.ToString()),
+                new Claim(ClaimTypes.Role, "Customer"),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            var token = new JwtSecurityToken(
+                issuer: issuer,
+                audience: audience,
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
+                signingCredentials: credentials
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public string HashPassword(string password)
+        {
+            return BCrypt.Net.BCrypt.HashPassword(password);
+        }
+
+        public bool VerifyPassword(string password, string passwordHash)
+        {
+            return BCrypt.Net.BCrypt.Verify(password, passwordHash);
+        }
+    }
+}
