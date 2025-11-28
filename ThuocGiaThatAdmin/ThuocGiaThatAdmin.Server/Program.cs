@@ -122,6 +122,10 @@ builder.Services.AddScoped<IInventoryTransactionRepository, InventoryTransaction
 builder.Services.AddScoped<IStockAlertRepository, StockAlertRepository>();
 builder.Services.AddScoped<IBusinessTypeRepository, BusinessTypeRepository>();
 
+// Shopping Cart Repositories
+builder.Services.AddScoped<IShoppingCartRepository, ShoppingCartRepository>();
+builder.Services.AddScoped<IShoppingCartItemRepository, ShoppingCartItemRepository>();
+
 // Generic Repository
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
@@ -143,6 +147,9 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<BusinessTypeService>();
+
+// Shopping Cart Service
+builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 
 // ============================================================
 // Register CQRS - Dispatchers

@@ -46,6 +46,10 @@ namespace ThuocGiaThat.Infrastucture
         
         public DbSet<BusinessType>  BusinessTypes { get; set; }
         public DbSet<CustomerPaymentAccount> CustomerPaymentAccounts { get; set; }
+        
+        // Shopping Cart
+        public DbSet<ShoppingCart> ShoppingCarts { get; set; }
+        public DbSet<ShoppingCartItem> ShoppingCartItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -352,6 +356,62 @@ namespace ThuocGiaThat.Infrastucture
             {
                 entity.ToTable(name: "Users");
                 entity.Property(u => u.FullName).HasMaxLength(200);
+            });
+            
+            // ============ ShoppingCart Configuration ============
+            modelBuilder.Entity<ShoppingCart>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.SubTotal).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.TotalAmount).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.Note).HasMaxLength(500);
+                entity.Property(e => e.SessionId).HasMaxLength(100);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+                
+                entity.HasOne(e => e.Customer)
+                      .WithMany()
+                      .HasForeignKey(e => e.CustomerId)
+                      .OnDelete(DeleteBehavior.SetNull);
+                
+                // Indexes
+                entity.HasIndex(e => e.CustomerId);
+                entity.HasIndex(e => e.SessionId);
+                entity.HasIndex(e => e.CreatedDate);
+            });
+            
+            // ============ ShoppingCartItem Configuration ============
+            modelBuilder.Entity<ShoppingCartItem>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.OriginalPrice).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.TotalLineAmount).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.ProductName).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.VariantSKU).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.ImageUrl).HasMaxLength(500);
+                entity.Property(e => e.VariantAttributes).HasMaxLength(500);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+                
+                entity.HasOne(e => e.ShoppingCart)
+                      .WithMany(e => e.CartItems)
+                      .HasForeignKey(e => e.ShoppingCartId)
+                      .OnDelete(DeleteBehavior.Cascade);
+                      
+                entity.HasOne(e => e.Product)
+                      .WithMany()
+                      .HasForeignKey(e => e.ProductId)
+                      .OnDelete(DeleteBehavior.Restrict);
+                      
+                entity.HasOne(e => e.ProductVariant)
+                      .WithMany()
+                      .HasForeignKey(e => e.ProductVariantId)
+                      .OnDelete(DeleteBehavior.Restrict);
+                
+                // Indexes
+                entity.HasIndex(e => e.ShoppingCartId);
+                entity.HasIndex(e => e.ProductVariantId);
             });
 
             modelBuilder.Entity<ApplicationUser>(entity =>
