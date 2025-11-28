@@ -8,6 +8,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using ThuocGiaThat.Infrastucture;
+using ThuocGiaThat.Infrastucture.Repositories;
 using ThuocGiaThatAdmin.Contract.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Service.Interfaces;
