@@ -10,7 +10,7 @@ namespace ThuocGiaThatAdmin.Service.Services
     /// <summary>
     /// Service for Brand business logic
     /// </summary>
-    public class BrandService : IBrandService
+    public class BrandService
     {
         private readonly IBrandRepository _brandRepository;
 
