@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using ThuocGiaThat.Infrastucture.Repositories;
 using ThuocGiaThatAdmin.Domain.Entities;
-
+using ThuocGiaThatAdmin.Service.Interfaces;
+    
 namespace ThuocGiaThatAdmin.Service.Services
 {
     /// <summary>
     /// Service for Brand business logic
     /// </summary>
-    public class BrandService
+    public class BrandService : IBrandService
     {
         private readonly IBrandRepository _brandRepository;
 

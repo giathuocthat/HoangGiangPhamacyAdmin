@@ -35,7 +35,7 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<InventoryTransaction> InventoryTransactions { get; set; }
         public DbSet<StockAlert> StockAlerts { get; set; }
         
-        public DbSet<Customer> Customers { get; set; }
+        public virtual DbSet<Customer> Customers { get; set; }
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
