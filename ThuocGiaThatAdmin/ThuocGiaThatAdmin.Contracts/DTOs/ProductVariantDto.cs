@@ -34,5 +34,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public string? ImageUrl { get; set; }
 
         public bool IsActive { get; set; } = true;
+
+        public List<int> VariantOptionValueIds { get; set; } = new();
     }
 }

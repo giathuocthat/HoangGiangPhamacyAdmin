@@ -70,7 +70,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 {
                     foreach (var variantDto in dto.ProductVariants)
                     {
-                        product.ProductVariants.Add(new ProductVariant
+                        var variant = new ProductVariant
                         {
                             SKU = variantDto.SKU,
                             Barcode = variantDto.Barcode,
@@ -81,7 +81,21 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                             Dimensions = variantDto.Dimensions,
                             ImageUrl = variantDto.ImageUrl,
                             IsActive = variantDto.IsActive
-                        });
+                        };
+
+                        // Map Variant Option Values
+                        if (variantDto.VariantOptionValueIds != null && variantDto.VariantOptionValueIds.Any())
+                        {
+                            foreach (var optionValueId in variantDto.VariantOptionValueIds)
+                            {
+                                variant.VariantOptionValues.Add(new VariantOptionValue
+                                {
+                                    ProductOptionValueId = optionValueId
+                                });
+                            }
+                        }
+
+                        product.ProductVariants.Add(variant);
                     }
                 }
 
@@ -131,7 +145,14 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                         v.Weight,
                         v.Dimensions,
                         v.ImageUrl,
-                        v.IsActive
+                        v.IsActive,
+                        OptionValues = v.VariantOptionValues.Select(vov => new
+                        {
+                            OptionValueId = vov.ProductOptionValueId,
+                            OptionValue = vov.ProductOptionValue.Value,
+                            OptionId = vov.ProductOptionValue.ProductOption.Id,
+                            OptionName = vov.ProductOptionValue.ProductOption.Name
+                        })
                     })
                 };
 
