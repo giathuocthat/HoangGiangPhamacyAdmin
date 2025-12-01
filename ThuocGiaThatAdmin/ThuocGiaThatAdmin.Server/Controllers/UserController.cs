@@ -30,7 +30,7 @@ namespace HoangGiangPhamacyAuthentication.Controllers
             {
                 UserName = dto.Username,
                 Email = dto.Email,
-                FullName = dto.FullName
+                FullName = dto.FullName,                
             };
 
             var result = await _userService.CreateAsync(user, dto.Password);

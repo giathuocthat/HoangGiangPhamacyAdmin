@@ -26,7 +26,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             _configuration = configuration;
         }
 
-        public async Task<(bool Success, string Message, Customer? Customer)> RegisterAsync(CustomerRegisterDto dto)
+        public async Task<(bool Success, string Message, CustomerProfileTokenDto Customer)> RegisterAsync(CustomerRegisterDto dto)
         {
             // Check if email already exists
             var existingCustomer = await _context.Customers
@@ -44,33 +44,51 @@ namespace ThuocGiaThatAdmin.Service.Services
                 Email = dto.Email,
                 PhoneNumber = dto.PhoneNumber,
                 PasswordHash = HashPassword(dto.Password),
+                BusinessTypeId = dto.BusinessTypeId,
                 CreatedDate = DateTime.UtcNow
             };
 
             _context.Customers.Add(customer);
             await _context.SaveChangesAsync();
 
-            return (true, "Registration successful", customer);
+            var (token, expiresAt) = GenerateJwtTokenAndExpires(customer);
+
+            customer.BusinessType = await _context.BusinessTypes
+                .FirstOrDefaultAsync(bt => bt.Id == customer.BusinessTypeId);
+
+            var result = new CustomerProfileTokenDto
+            { 
+                FullName = dto.FullName,
+                BusinessTypeId = dto.BusinessTypeId,
+                BusinessTypeName = customer.BusinessType?.Name,
+                PhoneNumber = dto.PhoneNumber,
+                Email = dto.Email,
+                ExpiresAt = expiresAt,
+                Token = token
+            };
+
+
+            return (true, "Registration successful", result);
         }
 
-        public async Task<(bool Success, string Message, string? Token, Customer? Customer)> LoginAsync(CustomerLoginDto dto)
+        public async Task<(bool Success, string Message, string? Token, string? expiresAt, Customer? Customer)> LoginAsync(CustomerLoginDto dto)
         {
             var customer = await _context.Customers
                 .Include(c => c.BusinessType)
-                .FirstOrDefaultAsync(c => c.Email == dto.Email);
+                .FirstOrDefaultAsync(c => c.PhoneNumber == dto.PhoneNumber);
 
             if (customer == null)
             {
-                return (false, "Invalid email or password", null, null);
+                return (false, "Invalid phone number or password", null, null, null);
             }
 
             if (!VerifyPassword(dto.Password, customer.PasswordHash))
             {
-                return (false, "Invalid email or password", null, null);
+                return (false, "Invalid email or password", null, null, null);
             }
 
-            var token = GenerateJwtToken(customer);
-            return (true, "Login successful", token, customer);
+            var (token, expiresAt) = GenerateJwtTokenAndExpires(customer);
+            return (true, "Login successful", token, expiresAt, customer);
         }
 
         public async Task<Customer?> GetCustomerByIdAsync(int customerId)
@@ -128,6 +146,13 @@ namespace ThuocGiaThatAdmin.Service.Services
 
         public string GenerateJwtToken(Customer customer)
         {
+            JwtSecurityToken token = BuildJwtToken(customer);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private JwtSecurityToken BuildJwtToken(Customer customer)
+        {
             var jwtSettings = _configuration.GetSection("Jwt");
             var secretKey = jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key not configured");
             var issuer = jwtSettings["Issuer"] ?? "ThuocGiaThatAPI";
@@ -154,8 +179,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
                 signingCredentials: credentials
             );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return token;
         }
 
         public string HashPassword(string password)
@@ -166,6 +190,13 @@ namespace ThuocGiaThatAdmin.Service.Services
         public bool VerifyPassword(string password, string passwordHash)
         {
             return BCrypt.Net.BCrypt.Verify(password, passwordHash);
+        }
+
+        public (string token, string expiresAt) GenerateJwtTokenAndExpires(Customer customer)
+        {
+            JwtSecurityToken token = BuildJwtToken(customer);
+
+            return (new JwtSecurityTokenHandler().WriteToken(token), token.ValidTo.ToString("o"));
         }
     }
 }
