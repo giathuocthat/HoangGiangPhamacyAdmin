@@ -149,6 +149,33 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         }
 
         /// <summary>
+        /// Get child categories by parent ID
+        /// </summary>
+        [HttpGet("allchildren")]
+        public async Task<IActionResult> GetAllChildrenCategories()
+        {
+            try
+            {
+                var items = await _service.GetAllChildrenAsync();
+                var response = items.Select(c => new
+                {
+                    c.Id,
+                    c.Name,
+                    c.Slug,
+                    c.Description,
+                    c.DisplayOrder,
+                    c.IsActive
+                });
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all children categories");
+                return StatusCode(500, new { message = "An error occurred while retrieving children categories", error = ex.Message });
+            }
+        }
+
+        /// <summary>
         /// Get categories in hierarchical tree structure (nested parent-child)
         /// </summary>
         [HttpGet("hierarchy")]

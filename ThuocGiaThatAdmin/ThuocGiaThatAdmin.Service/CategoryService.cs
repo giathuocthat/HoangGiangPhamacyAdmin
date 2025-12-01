@@ -54,6 +54,12 @@ namespace ThuocGiaThatAdmin.Service
             return all.Where(c => c.ParentId == null && c.IsActive).OrderBy(c => c.DisplayOrder);
         }
 
+        public async Task<IEnumerable<Category>> GetAllChildrenAsync()
+        {
+            var all = await _repo.GetAllAsync();
+            return all.Where(c => c.ParentId != null && c.IsActive).OrderBy(c => c.DisplayOrder);
+        }
+
         public async Task<IEnumerable<Category>> GetChildCategoriesAsync(int parentId)
         {
             if (parentId <= 0) return Enumerable.Empty<Category>();

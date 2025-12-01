@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThuocGiaThat.Infrastucture.Repositories;
+using ThuocGiaThatAdmin.Contract.DTOs;
+using ThuocGiaThatAdmin.Contract.Requests;
 using ThuocGiaThatAdmin.Domain.Entities;
 
 namespace ThuocGiaThatAdmin.Service.Services
@@ -61,6 +63,23 @@ namespace ThuocGiaThatAdmin.Service.Services
                 throw new ArgumentException("Product name cannot be null or empty", nameof(name));
 
             return await _productRepository.GetByNameAsync(name);
+        }
+
+        /// <summary>
+        /// Get products with pagination
+        /// </summary>
+        /// <param name="pageNumber">Page number (1-based)</param>
+        /// <param name="pageSize">Number of items per page</param>
+        /// <returns>Tuple containing list of products and total count</returns>
+        public async Task<(IEnumerable<Product> products, int TotalCount)> GetPagedProductsAsync(int pageNumber = 1, int pageSize = 10)
+        {
+            if (pageNumber <= 0)
+                throw new ArgumentException("Page number must be greater than 0", nameof(pageNumber));
+
+            if (pageSize <= 0 || pageSize > 100)
+                throw new ArgumentException("Page size must be between 1 and 100", nameof(pageSize));
+
+            return await _productRepository.GetPagedProductsAsync(pageNumber, pageSize);
         }
 
         #endregion
@@ -182,5 +201,7 @@ namespace ThuocGiaThatAdmin.Service.Services
         }
 
         #endregion
+
+        
     }
 }

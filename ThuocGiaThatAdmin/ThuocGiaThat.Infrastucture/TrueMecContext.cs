@@ -275,6 +275,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
                 entity.Property(e => e.UpdatedDate);
+                entity.Property(e => e.PhoneNumber).IsRequired(true);
                 
                 // Business Type relationship (nullable)
                 entity.HasOne(e => e.BusinessType)

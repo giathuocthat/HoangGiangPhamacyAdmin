@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using ThuocGiaThatAdmin.Domain.Entities;
+using ThuocGiaThatAdmin.Contract.DTOs;
 
 namespace ThuocGiaThat.Infrastucture.Repositories
 {
@@ -85,6 +86,28 @@ namespace ThuocGiaThat.Infrastucture.Repositories
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
                 .ToListAsync();
+        }
+
+        /// <summary>
+        /// Get brands with pagination
+        /// </summary>
+        public async Task<(IList<Product> products, int TotalCount)> GetPagedProductsAsync(int pageNumber, int pageSize)
+        {
+            var query = _context.Set<Product>()
+                .Where(x => x.IsActive)
+                .AsQueryable()
+                .AsNoTracking();
+
+            var totalCount = await query.CountAsync();
+
+            var products = await query
+                .Include(p => p.ProductVariants.OrderBy(v => v.CreatedDate).Take(1))
+                .OrderByDescending(b => b.CreatedDate)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (products, totalCount);
         }
     }
 }

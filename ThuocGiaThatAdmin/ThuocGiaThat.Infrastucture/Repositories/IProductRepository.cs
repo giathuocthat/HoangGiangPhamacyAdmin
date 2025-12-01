@@ -35,5 +35,13 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         /// Get all products including brand and category
         /// </summary>
         Task<IEnumerable<Product>> GetAllWithBrandAndCategoryAsync();
+
+        /// <summary>
+        /// Get Products with Paging
+        /// </summary>
+        /// <param name="pageNumber"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        Task<(IList<Product> products, int TotalCount)> GetPagedProductsAsync(int pageNumber, int pageSize);
     }
 }

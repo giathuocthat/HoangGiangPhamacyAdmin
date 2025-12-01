@@ -13,9 +13,10 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
         [StringLength(255)]
         public string Email { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Phone number is required")]
         [Phone(ErrorMessage = "Invalid phone number format")]
         [StringLength(20)]
-        public string? PhoneNumber { get; set; }
+        public string PhoneNumber { get; set; }
 
         [Required(ErrorMessage = "Password is required")]
         [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be between 6 and 100 characters")]
@@ -24,5 +25,8 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
         [Required(ErrorMessage = "Password confirmation is required")]
         [Compare("Password", ErrorMessage = "Password and confirmation do not match")]
         public string ConfirmPassword { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Customer type is required")]
+        public int? BusinessTypeId { get; set; } // Nullable - only for business customers
     }
 }

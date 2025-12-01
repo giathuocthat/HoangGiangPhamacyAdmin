@@ -40,10 +40,17 @@ namespace ThuocGiaThatAdmin.Server.Controllers
 
                 var response = new
                 {
-                    id = customer!.Id,
-                    fullName = customer.FullName,
-                    email = customer.Email,
-                    phoneNumber = customer.PhoneNumber
+                    accessToken = customer.Token,
+                    tokenType = "Bearer",
+                    expiresAt = customer.ExpiresAt,
+                    customer = new
+                    {
+                        id = customer!.Id,
+                        fullName = customer.FullName,
+                        email = customer.Email,
+                        businessTypeId = customer.BusinessTypeId,
+                        businessTypeName = customer.BusinessTypeName
+                    }
                 };
 
                 return Created($"/api/customer/auth/profile", response);
@@ -59,7 +66,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             return await ExecuteActionAsync(async () =>
             {
-                var (success, message, token, customer) = await _customerAuthService.LoginAsync(dto);
+                var (success, message, token, expiresAt, customer) = await _customerAuthService.LoginAsync(dto);
 
                 if (!success)
                 {
@@ -70,13 +77,15 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 {
                     accessToken = token,
                     tokenType = "Bearer",
-                    expiresIn = 3600, // 1 hour
+                    expiresAt = expiresAt,
                     customer = new
                     {
                         id = customer!.Id,
                         fullName = customer.FullName,
                         email = customer.Email,
-                        hasBusinessInfo = customer.BusinessTypeId.HasValue
+                        hasBusinessInfo = customer.BusinessTypeId.HasValue,
+                        businessTypeId = customer.BusinessTypeId,
+                        businessTypeName = customer.BusinessType?.Name
                     }
                 };
 
