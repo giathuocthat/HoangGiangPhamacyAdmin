@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../ThuocGiaThatAdmin.Domain/ThuocGiaThatAdmin.Domain.csproj" />
+    <ProjectReference Include="..\ThuocGiaThatAdmin.Contracts\ThuocGiaThatAdmin.Contract.csproj" />
   </ItemGroup>
 
   <ItemGroup>

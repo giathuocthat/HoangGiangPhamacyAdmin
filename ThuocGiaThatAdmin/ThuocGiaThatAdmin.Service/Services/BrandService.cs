@@ -84,6 +84,18 @@ namespace ThuocGiaThatAdmin.Service.Services
             return await _brandRepository.SaveChangesAsync();
         }
 
+        public async Task<int> CreateAsync(Brand brand)
+        {
+            if (brand == null)
+                throw new ArgumentNullException(nameof(brand));
+
+            if (string.IsNullOrWhiteSpace(brand.Name))
+                throw new ArgumentException("Brand name cannot be null or empty", nameof(brand.Name));
+
+            await _brandRepository.AddAsync(brand);
+            return await _brandRepository.SaveChangesAsync();
+        }
+
         #endregion
 
         #region Delete Operation

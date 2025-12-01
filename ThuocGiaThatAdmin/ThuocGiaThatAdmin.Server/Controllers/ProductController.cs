@@ -3,17 +3,22 @@ using System.Linq;
 using ThuocGiaThatAdmin.Service.Services;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
+using ThuocGiaThatAdmin.Server.Models;
+using ThuocGiaThatAdmin.Contract.Requests;
+using ThuocGiaThatAdmin.Service.Interfaces;
 
 namespace ThuocGiaThatAdmin.Server.Controllers
 {
     public class ProductController : BaseApiController
     {
         private readonly ProductService _productService;
+        private readonly ICartService _cartService;
 
-        public ProductController(ProductService productService, ILogger<ProductController> logger)
+        public ProductController(ProductService productService, ILogger<ProductController> logger, ICartService cartService)
             : base(logger)
         {
             _productService = productService ?? throw new ArgumentNullException(nameof(productService));
+            _cartService = cartService ?? throw new ArgumentNullException(nameof(cartService));
         }
 
         /// <summary>
@@ -204,9 +209,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     product.Name,
                     product.Slug,
                     product.ShortDescription,
-                    product.FullDescription,
+                    fullDescription = product.FullDescription?.Replace("\\n",""),
                     product.ThumbnailUrl,
-
                     // Pharma specifics
                     product.Ingredients,
                     product.UsageInstructions,
@@ -357,6 +361,75 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 Logger.LogError(ex, "Error searching products");
                 return StatusCode(500, new { message = "An error occurred while searching products", error = ex.Message });
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pageNumber"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        [HttpGet("getPagedProducts")]
+        public async Task<ActionResult<dynamic>> GetPagedProducts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var (products, totalCount) = await _productService.GetPagedProductsAsync(pageNumber, pageSize);
+                var response = new
+                {
+                    Data = products.Select(product => new
+                    {
+                        product.Id,
+                        product.CategoryId,
+                        product.BrandId,
+                        product.Name,
+                        product.ShortDescription,
+                        product.FullDescription,
+                        product.Slug,
+                        product.ThumbnailUrl,
+                        product.Ingredients,
+                        product.UsageInstructions,
+                        product.Contraindications,
+                        product.StorageInstructions,
+                        product.RegistrationNumber,
+                        product.IsPrescriptionDrug,
+                        product.IsActive,
+                        product.IsFeatured,
+                        product.CreatedDate,
+                        product.UpdatedDate,
+                        BrandName = product.Brand?.Name,
+                        CategoryName = product.Category?.Name,
+                        price = product.ProductVariants.FirstOrDefault()?.Price,
+                        originalPrice = product.ProductVariants.FirstOrDefault()?.OriginalPrice,
+                        productVariantId = product.ProductVariants.FirstOrDefault()?.Id
+                    }),
+                    Pagination = new
+                    {
+                        PageNumber = pageNumber,
+                        PageSize = pageSize,
+                        TotalCount = totalCount,
+                        TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+                    }
+                };
+                return Ok(response);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error getting paged products");
+                return StatusCode(500, new { message = "An error occurred while retrieving paged products", error = ex.Message });
+            }
+        }
+
+        [HttpPost("cart")]
+        public async Task<ActionResult<dynamic>> CartInfo(IList<CartItem> cartItems)
+        {
+            var cartProductDtos = await _cartService.GetCartProductsAsync(cartItems);
+            
+            return Ok(cartProductDtos);
         }
     }
 }

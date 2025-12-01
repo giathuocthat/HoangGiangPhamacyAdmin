@@ -18,5 +18,6 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
         Task<Category> CreateAsync(Category entity);
         Task<int> UpdateAsync(Category entity);
         Task<int> DeleteAsync(int id);
+        Task<IEnumerable<Category>> GetAllChildrenAsync();
     }
 }

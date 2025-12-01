@@ -114,6 +114,7 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 builder.Services.AddScoped<IProductOptionRepository, ProductOptionRepository>();
 builder.Services.AddScoped<IUploadedFileRepository, UploadedFileRepository>();
+builder.Services.AddScoped<IProductVariantRepository, ProductVariantRepository>();
 
 // Inventory Management Repositories
 builder.Services.AddScoped<IWarehouseRepository, WarehouseRepository>();
@@ -137,6 +138,7 @@ builder.Services.AddScoped<BrandService>();
 builder.Services.AddScoped<ProductOptionService>();
 builder.Services.AddScoped<FileUploadService>();
 builder.Services.AddScoped<OrderService>();
+builder.Services.AddScoped<CategoryService>();
 
 // Inventory Management Services
 builder.Services.AddScoped<WarehouseService>();
@@ -147,6 +149,7 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<BusinessTypeService>();
+builder.Services.AddScoped<ICartService, CartService>();
 
 // Shopping Cart Service
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
