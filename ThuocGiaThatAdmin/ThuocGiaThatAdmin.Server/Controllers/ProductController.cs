@@ -273,6 +273,10 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     product.CreatedDate,
                     product.UpdatedDate,
 
+                    // IDs for editing
+                    product.CategoryId,
+                    product.BrandId,
+
                     // Category
                     Category = product.Category == null
                         ? null
@@ -472,11 +476,155 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             }
         }
 
+        /// <summary>
+        /// Update an existing product
+        /// </summary>
+        /// <param name="id">Product ID</param>
+        /// <param name="dto">Product update data</param>
+        /// <returns>Updated product</returns>
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProduct(int id, [FromBody] CreateProductDto dto)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                // Get existing product
+                var existingProduct = await _productService.GetProductByIdAsync(id);
+                if (existingProduct == null)
+                    return NotFound(new { message = $"Product with ID {id} not found" });
+
+                // Update basic properties
+                existingProduct.CategoryId = dto.CategoryId;
+                existingProduct.BrandId = dto.BrandId;
+                existingProduct.Name = dto.Name;
+                existingProduct.ShortDescription = dto.ShortDescription;
+                existingProduct.FullDescription = dto.FullDescription;
+                existingProduct.Slug = dto.Slug;
+                existingProduct.ThumbnailUrl = dto.ThumbnailUrl;
+                existingProduct.Ingredients = dto.Ingredients;
+                existingProduct.UsageInstructions = dto.UsageInstructions;
+                existingProduct.Contraindications = dto.Contraindications;
+                existingProduct.StorageInstructions = dto.StorageInstructions;
+                existingProduct.RegistrationNumber = dto.RegistrationNumber;
+                existingProduct.IsPrescriptionDrug = dto.IsPrescriptionDrug;
+                existingProduct.IsActive = dto.IsActive;
+                existingProduct.IsFeatured = dto.IsFeatured;
+
+                // Update Images (clear and re-add)
+                existingProduct.Images.Clear();
+                if (dto.Images != null && dto.Images.Any())
+                {
+                    foreach (var imageDto in dto.Images)
+                    {
+                        existingProduct.Images.Add(new ProductImage
+                        {
+                            ImageUrl = imageDto.ImageUrl,
+                            AltText = imageDto.AltText,
+                            DisplayOrder = imageDto.DisplayOrder
+                        });
+                    }
+                }
+
+                // Update Product Variants
+                existingProduct.ProductVariants.Clear();
+                if (dto.ProductVariants != null && dto.ProductVariants.Any())
+                {
+                    foreach (var variantDto in dto.ProductVariants)
+                    {
+                        var variant = new ProductVariant
+                        {
+                            SKU = variantDto.SKU,
+                            Barcode = variantDto.Barcode,
+                            Price = variantDto.Price,
+                            OriginalPrice = variantDto.OriginalPrice,
+                            StockQuantity = variantDto.StockQuantity,
+                            Weight = variantDto.Weight,
+                            Dimensions = variantDto.Dimensions,
+                            ImageUrl = variantDto.ImageUrl,
+                            IsActive = variantDto.IsActive
+                        };
+
+                        // Map Variant Option Values
+                        if (variantDto.VariantOptionValueIds != null && variantDto.VariantOptionValueIds.Any())
+                        {
+                            foreach (var optionValueId in variantDto.VariantOptionValueIds)
+                            {
+                                variant.VariantOptionValues.Add(new VariantOptionValue
+                                {
+                                    ProductOptionValueId = optionValueId
+                                });
+                            }
+                        }
+
+                        existingProduct.ProductVariants.Add(variant);
+                    }
+                }
+
+                // Update product using service
+                await _productService.UpdateProductAsync(existingProduct);
+
+                // Return updated product with details
+                var updatedProduct = await _productService.GetProductByIdAsync(id);
+
+                var response = new
+                {
+                    updatedProduct.Id,
+                    updatedProduct.CategoryId,
+                    updatedProduct.BrandId,
+                    updatedProduct.Name,
+                    updatedProduct.ShortDescription,
+                    updatedProduct.FullDescription,
+                    updatedProduct.Slug,
+                    updatedProduct.ThumbnailUrl,
+                    updatedProduct.Ingredients,
+                    updatedProduct.UsageInstructions,
+                    updatedProduct.Contraindications,
+                    updatedProduct.StorageInstructions,
+                    updatedProduct.RegistrationNumber,
+                    updatedProduct.IsPrescriptionDrug,
+                    updatedProduct.IsActive,
+                    updatedProduct.IsFeatured,
+                    updatedProduct.CreatedDate,
+                    updatedProduct.UpdatedDate,
+                    BrandName = updatedProduct.Brand?.Name,
+                    CategoryName = updatedProduct.Category?.Name,
+                    Images = updatedProduct.Images.Select(i => new
+                    {
+                        i.Id,
+                        i.ImageUrl,
+                        i.AltText,
+                        i.DisplayOrder
+                    }),
+                    ProductVariants = updatedProduct.ProductVariants.Select(v => new
+                    {
+                        v.Id,
+                        v.SKU,
+                        v.Barcode,
+                        v.Price,
+                        v.OriginalPrice,
+                        v.StockQuantity,
+                        v.Weight,
+                        v.Dimensions,
+                        v.ImageUrl,
+                        v.IsActive,
+                        OptionValues = v.VariantOptionValues.Select(vov => new
+                        {
+                            OptionValueId = vov.ProductOptionValueId,
+                            OptionValue = vov.ProductOptionValue.Value,
+                            OptionId = vov.ProductOptionValue.ProductOption.Id,
+                            OptionName = vov.ProductOptionValue.ProductOption.Name
+                        })
+                    })
+                };
+
+                return Ok(response);
+            }, "Update Product");
+        }
+
         [HttpPost("cart")]
         public async Task<ActionResult<dynamic>> CartInfo(IList<CartItem> cartItems)
         {
             var cartProductDtos = await _cartService.GetCartProductsAsync(cartItems);
-            
+
             return Ok(cartProductDtos);
         }
     }

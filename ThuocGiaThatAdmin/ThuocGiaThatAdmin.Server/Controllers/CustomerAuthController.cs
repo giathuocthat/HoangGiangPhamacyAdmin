@@ -94,6 +94,21 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         }
 
         /// <summary>
+        /// POST: api/customer/auth/logout
+        /// Customer logout
+        /// </summary>
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            return ExecuteAction(() =>
+            {
+                // Since we are using stateless JWT, we just return success.
+                // The client should discard the token.
+                return Success("Logout successful");
+            });
+        }
+
+        /// <summary>
         /// GET: api/customer/auth/profile
         /// Get current customer profile (requires authentication)
         /// </summary>
