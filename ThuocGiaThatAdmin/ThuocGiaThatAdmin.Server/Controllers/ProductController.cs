@@ -170,12 +170,39 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     product.IsFeatured,
                     product.CreatedDate,
                     product.UpdatedDate,
+                    Brand = new {
+                        product.Brand?.Id,
+                        product.Brand?.Name,
+                        product.Brand?.Slug,
+                        product.Brand?.CountryOfOrigin,
+                        product.Brand?.LogoUrl
+                    },
                     Category = new {
                         product.Category.Id,
                         product.Category.Name,
                         product.Category.Slug,
                         product.Category.ParentId
                     },
+                    ProductVariants = product.ProductVariants.Select(v => new
+                    {
+                        v.Id,
+                        v.SKU,
+                        v.Barcode,
+                        v.Price,
+                        v.OriginalPrice,
+                        v.StockQuantity,
+                        v.Weight,
+                        v.Dimensions,
+                        v.ImageUrl,
+                        v.IsActive
+                    }),
+                    Images = product.Images.Select(i => new
+                    {
+                        i.Id,
+                        i.ImageUrl,
+                        i.AltText,
+                        i.DisplayOrder
+                    })
                 });
 
                 return Ok(response);

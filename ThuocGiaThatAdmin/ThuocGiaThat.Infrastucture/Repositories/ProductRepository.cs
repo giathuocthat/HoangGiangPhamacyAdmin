@@ -85,6 +85,8 @@ namespace ThuocGiaThat.Infrastucture.Repositories
             return await _dbSet
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
+                .Include(p => p.Images)
+                .Include(p => p.ProductVariants)
                 .ToListAsync();
         }
 
