@@ -54,6 +54,15 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             return Ok(detail);
         }
 
+        // GET: api/ward
+        [HttpGet("GetByProvinceId/{provinceId:int}")]
+        public async Task<IActionResult> GetByProvinceId(int provinceId)
+        {
+            var wards = await _wardRepo.FindAsync(x => x.ProvinceId == provinceId);
+            var result = wards.Select(w => new WardListDto(w.Id, w.Name, w.Code, w.ProvinceId)).ToList();
+            return Ok(result);
+        }
+
         // DTOs
         private sealed record WardListDto(int Id, string? Name, string? Code, int? ProvinceId);
         private sealed record ProvinceBriefDto(int Id, string Name, string? Code);

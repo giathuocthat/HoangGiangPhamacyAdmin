@@ -8,13 +8,11 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public int CustomerId { get; set; }
         public string RecipientName { get; set; } = string.Empty;
         public string PhoneNumber { get; set; } = string.Empty;
-        public string AddressLine1 { get; set; } = string.Empty;
-        public string? Ward { get; set; }
-        public string? District { get; set; }
-        public string? City { get; set; }
+        public string AddressLine { get; set; } = string.Empty;
+        public int? WardId { get; set; }
+        public int? ProvinceId { get; set; }
         public bool IsDefault { get; set; } = false;
-        // Dates inherited
-
+        public int? AddressType { get; set; } // 0: Home, 1: Office, null: Others
         public Customer Customer { get; set; } = null!;
     }
 }

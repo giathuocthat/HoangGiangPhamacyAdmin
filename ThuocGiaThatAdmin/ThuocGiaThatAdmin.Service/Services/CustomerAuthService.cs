@@ -30,22 +30,38 @@ namespace ThuocGiaThatAdmin.Service.Services
         {
             // Check if email already exists
             var existingCustomer = await _context.Customers
-                .FirstOrDefaultAsync(c => c.Email == dto.Email);
+                .FirstOrDefaultAsync(c => c.PhoneNumber == dto.PhoneNumber);
 
             if (existingCustomer != null)
             {
-                return (false, "Email already registered", null);
+                return (false, "Phone Number has been already registered", null);
             }
+
+            var businessType = await _context.BusinessTypes
+                .FirstOrDefaultAsync(bt => bt.Id == dto.BusinessTypeId);
 
             // Create new customer
             var customer = new Customer
             {
-                FullName = dto.FullName,
-                Email = dto.Email,
+                FullName = businessType?.Name,
                 PhoneNumber = dto.PhoneNumber,
                 PasswordHash = HashPassword(dto.Password),
                 BusinessTypeId = dto.BusinessTypeId,
                 CreatedDate = DateTime.UtcNow
+            };
+
+            customer.Addresses = new System.Collections.Generic.List<Address>
+            {
+                new Address
+                {
+                    AddressLine = dto.Address,
+                    IsDefault = true,
+                    CreatedDate = DateTime.UtcNow,
+                    ProvinceId = dto.ProvinceId,
+                    WardId = dto.WardId,
+                    RecipientName = dto.FullName,
+                    PhoneNumber = dto.PhoneNumber
+                }
             };
 
             _context.Customers.Add(customer);
@@ -53,16 +69,13 @@ namespace ThuocGiaThatAdmin.Service.Services
 
             var (token, expiresAt) = GenerateJwtTokenAndExpires(customer);
 
-            customer.BusinessType = await _context.BusinessTypes
-                .FirstOrDefaultAsync(bt => bt.Id == customer.BusinessTypeId);
-
             var result = new CustomerProfileTokenDto
             { 
-                FullName = dto.FullName,
-                BusinessTypeId = dto.BusinessTypeId,
-                BusinessTypeName = customer.BusinessType?.Name,
-                PhoneNumber = dto.PhoneNumber,
-                Email = dto.Email,
+                FullName = customer.FullName,
+                BusinessTypeId = customer.BusinessTypeId,
+                BusinessTypeName = businessType?.Name,
+                PhoneNumber = customer.PhoneNumber,
+                Email = customer.Email,
                 ExpiresAt = expiresAt,
                 Token = token
             };
@@ -164,8 +177,7 @@ namespace ThuocGiaThatAdmin.Service.Services
 
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, customer.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, customer.Email),
+                new Claim(JwtRegisteredClaimNames.Sub, customer.Id.ToString()),                
                 new Claim(JwtRegisteredClaimNames.Name, customer.FullName),
                 new Claim("customer_id", customer.Id.ToString()),
                 new Claim(ClaimTypes.Role, "Customer"),

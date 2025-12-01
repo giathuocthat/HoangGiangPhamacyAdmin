@@ -272,7 +272,7 @@ namespace ThuocGiaThat.Infrastucture
             modelBuilder.Entity<Customer>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.Email).HasMaxLength(255);
                 entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
                 entity.Property(e => e.UpdatedDate);
                 entity.Property(e => e.PhoneNumber).IsRequired(true);
