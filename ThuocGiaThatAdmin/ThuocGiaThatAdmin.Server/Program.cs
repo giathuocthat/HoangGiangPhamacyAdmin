@@ -127,6 +127,9 @@ builder.Services.AddScoped<IBusinessTypeRepository, BusinessTypeRepository>();
 builder.Services.AddScoped<IShoppingCartRepository, ShoppingCartRepository>();
 builder.Services.AddScoped<IShoppingCartItemRepository, ShoppingCartItemRepository>();
 
+// Customer Management Repository
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+
 // Generic Repository
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
@@ -171,6 +174,9 @@ builder.RegisterCommandHandlers();
 // ============================================================
 // Customer Authentication Service
 builder.Services.AddScoped<ICustomerAuthService, CustomerAuthService>();
+
+// Customer Management Service
+builder.Services.AddScoped<ICustomerService, CustomerService>();
 
 // Add CORS to allow frontend to call this API
 builder.Services.AddCors(options =>

@@ -13,6 +13,10 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public int? ProvinceId { get; set; }
         public bool IsDefault { get; set; } = false;
         public int? AddressType { get; set; } // 0: Home, 1: Office, null: Others
+        
+        // Navigation Properties
         public Customer Customer { get; set; } = null!;
+        public Province? Province { get; set; }
+        public Ward? Ward { get; set; }
     }
 }
