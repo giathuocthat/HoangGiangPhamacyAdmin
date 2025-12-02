@@ -137,7 +137,7 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 // Register Services (Legacy - for backward compatibility)
 // ============================================================
 builder.Services.AddScoped<ProductService>();
-builder.Services.AddScoped<BrandService>();
+builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<ProductOptionService>();
 builder.Services.AddScoped<FileUploadService>();
 builder.Services.AddScoped<OrderService>();

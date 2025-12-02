@@ -32,6 +32,19 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
 
         #endregion
 
+        #region Create Operation
+        
+        /// <summary>
+        /// Create a new brand
+        /// </summary>
+        /// <param name="brand">Brand entity to create</param>
+        /// <returns>Number of entities affected in the database</returns>
+        /// <exception cref="ArgumentNullException">Thrown when brand is null</exception>
+        /// <exception cref="ArgumentException">Thrown when brand name is null or empty</exception>
+        Task<int> CreateAsync(Brand brand);
+
+        #endregion
+
         #region Update Operation
 
         /// <summary>

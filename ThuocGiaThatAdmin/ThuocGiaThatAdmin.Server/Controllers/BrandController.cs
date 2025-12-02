@@ -4,21 +4,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using ThuocGiaThatAdmin.Domain.Entities;
-using ThuocGiaThatAdmin.Service.Services;
+using ThuocGiaThatAdmin.Service.Interfaces;
+using ThuocGiaThatAdmin.Contracts.DTOs;
 
 namespace ThuocGiaThatAdmin.Server.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class BrandController : ControllerBase
+    public class BrandController : BaseApiController
     {
-        private readonly BrandService _brandService;
-        private readonly ILogger<BrandController> _logger;
+        private readonly IBrandService _brandService;
 
-        public BrandController(BrandService brandService, ILogger<BrandController> logger)
+        public BrandController(IBrandService brandService, ILogger<BrandController> logger) : base(logger)
         {
             _brandService = brandService ?? throw new ArgumentNullException(nameof(brandService));
-            _logger = logger;
         }
 
         /// <summary>
@@ -28,82 +27,147 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// <param name="pageSize">Page size (default: 10, max: 100)</param>
         /// <returns>Paginated list of brands</returns>
         [HttpGet]
-        public async Task<ActionResult<dynamic>> GetBrands([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetBrands([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            try
+            return await ExecuteActionAsync(async () =>
             {
                 var (brands, totalCount) = await _brandService.GetBrandsAsync(pageNumber, pageSize);
 
-                var response = new
+                var brandDtos = brands.Select(brand => new BrandResponseDto
                 {
-                    Data = brands.Select(brand => new
-                    {
-                        brand.Id,
-                        brand.Name,
-                        brand.Slug,
-                        brand.CountryOfOrigin,
-                        brand.Website,
-                        brand.LogoUrl,
-                        brand.IsActive,
-                        brand.CreatedDate,
-                        brand.UpdatedDate
-                    }),
-                    Pagination = new
-                    {
-                        PageNumber = pageNumber,
-                        PageSize = pageSize,
-                        TotalCount = totalCount,
-                        TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
-                    }
+                    Id = brand.Id,
+                    Name = brand.Name,
+                    Slug = brand.Slug,
+                    CountryOfOrigin = brand.CountryOfOrigin,
+                    Website = brand.Website,
+                    LogoUrl = brand.LogoUrl,
+                    IsActive = brand.IsActive,
+                    CreatedDate = brand.CreatedDate,
+                    UpdatedDate = brand.UpdatedDate
+                });
+
+                return SuccessPaginated(brandDtos, pageNumber, pageSize, totalCount);
+            }, "Get Brands");
+        }
+
+        /// <summary>
+        /// Get brand by ID
+        /// </summary>
+        /// <param name="id">Brand ID</param>
+        /// <returns>Brand details</returns>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetBrandById(int id)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var brand = await _brandService.GetBrandByIdAsync(id);
+
+                if (brand == null)
+                {
+                    return NotFoundResponse($"Brand with ID {id} not found");
+                }
+
+                var brandDto = new BrandResponseDto
+                {
+                    Id = brand.Id,
+                    Name = brand.Name,
+                    Slug = brand.Slug,
+                    CountryOfOrigin = brand.CountryOfOrigin,
+                    Website = brand.Website,
+                    LogoUrl = brand.LogoUrl,
+                    IsActive = brand.IsActive,
+                    CreatedDate = brand.CreatedDate,
+                    UpdatedDate = brand.UpdatedDate
                 };
 
-                return Ok(response);
-            }
-            catch (ArgumentException ex)
+                return Success(brandDto);
+            }, "Get Brand By Id");
+        }
+
+        /// <summary>
+        /// Create a new brand
+        /// </summary>
+        /// <param name="dto">Brand creation data</param>
+        /// <returns>Created brand</returns>
+        [HttpPost]
+        public async Task<IActionResult> CreateBrand([FromBody] CreateBrandDto dto)
+        {
+            return await ExecuteActionAsync(async () =>
             {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting brands");
-                return StatusCode(500, new { message = "An error occurred while retrieving brands", error = ex.Message });
-            }
+                var brand = new Brand
+                {
+                    Name = dto.Name,
+                    Slug = dto.Slug,
+                    CountryOfOrigin = dto.CountryOfOrigin,
+                    Website = dto.Website,
+                    LogoUrl = dto.LogoUrl,
+                    IsActive = dto.IsActive
+                };
+
+                await _brandService.CreateAsync(brand);
+
+                var brandDto = new BrandResponseDto
+                {
+                    Id = brand.Id,
+                    Name = brand.Name,
+                    Slug = brand.Slug,
+                    CountryOfOrigin = brand.CountryOfOrigin,
+                    Website = brand.Website,
+                    LogoUrl = brand.LogoUrl,
+                    IsActive = brand.IsActive,
+                    CreatedDate = brand.CreatedDate,
+                    UpdatedDate = brand.UpdatedDate
+                };
+
+                return Created(brandDto, "Brand created successfully");
+            }, "Create Brand");
         }
 
         /// <summary>
         /// Update an existing brand
         /// </summary>
         /// <param name="id">Brand ID</param>
-        /// <param name="brand">Brand data to update</param>
+        /// <param name="dto">Brand update data</param>
         /// <returns>Updated brand confirmation</returns>
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateBrand(int id, [FromBody] Brand brand)
+        public async Task<IActionResult> UpdateBrand(int id, [FromBody] UpdateBrandDto dto)
         {
-            try
+            return await ExecuteActionAsync(async () =>
             {
-                if (id != brand.Id)
-                    return BadRequest(new { message = "ID in URL does not match ID in request body" });
+                var brand = new Brand
+                {
+                    Id = id,
+                    Name = dto.Name,
+                    Slug = dto.Slug,
+                    CountryOfOrigin = dto.CountryOfOrigin,
+                    Website = dto.Website,
+                    LogoUrl = dto.LogoUrl,
+                    IsActive = dto.IsActive
+                };
 
                 var result = await _brandService.UpdateBrandAsync(brand);
 
                 if (result > 0)
-                    return Ok(new { message = "Brand updated successfully", brandId = id });
+                {
+                    // Fetch updated brand to return
+                    var updatedBrand = await _brandService.GetBrandByIdAsync(id);
+                    var brandDto = new BrandResponseDto
+                    {
+                        Id = updatedBrand!.Id,
+                        Name = updatedBrand.Name,
+                        Slug = updatedBrand.Slug,
+                        CountryOfOrigin = updatedBrand.CountryOfOrigin,
+                        Website = updatedBrand.Website,
+                        LogoUrl = updatedBrand.LogoUrl,
+                        IsActive = updatedBrand.IsActive,
+                        CreatedDate = updatedBrand.CreatedDate,
+                        UpdatedDate = updatedBrand.UpdatedDate
+                    };
+                    return Success(brandDto, "Brand updated successfully");
+                }
 
-                return StatusCode(500, new { message = "Failed to update brand" });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating brand");
-                return StatusCode(500, new { message = "An error occurred while updating the brand", error = ex.Message });
-            }
+                return InternalServerErrorResponse("Failed to update brand");
+            }, "Update Brand");
         }
 
         /// <summary>
@@ -112,30 +176,17 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// <param name="id">Brand ID</param>
         /// <returns>Deletion confirmation</returns>
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteBrand(int id)
+        public async Task<IActionResult> DeleteBrand(int id)
         {
-            try
+            return await ExecuteActionAsync(async () =>
             {
                 var result = await _brandService.DeleteBrandAsync(id);
 
                 if (result > 0)
-                    return Ok(new { message = "Brand deleted successfully", brandId = id });
+                    return Success(new { brandId = id }, "Brand deleted successfully");
 
-                return StatusCode(500, new { message = "Failed to delete brand" });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting brand");
-                return StatusCode(500, new { message = "An error occurred while deleting the brand", error = ex.Message });
-            }
+                return InternalServerErrorResponse("Failed to delete brand");
+            }, "Delete Brand");
         }
     }
 }
