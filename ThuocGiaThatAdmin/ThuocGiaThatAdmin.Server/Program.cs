@@ -129,6 +129,8 @@ builder.Services.AddScoped<IShoppingCartItemRepository, ShoppingCartItemReposito
 
 // Customer Management Repository
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<IProductCollectionRepository, ProductCollectionRepository>();
+builder.Services.AddScoped<IProductMaxOrderConfigRepository, ProductMaxOrderConfigRepository>();
 
 // Generic Repository
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -177,6 +179,7 @@ builder.Services.AddScoped<ICustomerAuthService, CustomerAuthService>();
 
 // Customer Management Service
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IProductCollectionService, ProductCollectionService>();
 
 // Add CORS to allow frontend to call this API
 builder.Services.AddCors(options =>

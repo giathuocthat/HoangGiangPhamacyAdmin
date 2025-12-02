@@ -7,6 +7,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
     /// </summary>
     public class ProductVariantDto
     {
+        public int Id { get; set; }
         [Required(ErrorMessage = "SKU is required")]
         [StringLength(100, ErrorMessage = "SKU cannot exceed 100 characters")]
         public string SKU { get; set; } = string.Empty;

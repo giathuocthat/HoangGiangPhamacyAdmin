@@ -30,6 +30,9 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         // Metadata
         public bool IsActive { get; set; } = true;
         public bool IsFeatured { get; set; } = false;
+        
+        public ProductSourceType SourceType { get; set; } = ProductSourceType.Regular;
+        public bool IsHGSGSelected { get; set; } = false;
         // Dates inherited
 
         // Navigation properties
@@ -38,5 +41,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public ICollection<ProductOption> ProductOptions { get; set; } = new List<ProductOption>();
         public ICollection<ProductVariant> ProductVariants { get; set; } = new List<ProductVariant>();
         public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
+        public ICollection<ProductCollectionItem> CollectionItems { get; set; } = new List<ProductCollectionItem>();
+        public ProductMaxOrderConfig? MaxOrderConfig { get; set; }
     }
 }

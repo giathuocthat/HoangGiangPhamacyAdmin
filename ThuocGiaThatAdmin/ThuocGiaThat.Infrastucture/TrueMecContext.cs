@@ -51,6 +51,11 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public DbSet<ShoppingCartItem> ShoppingCartItems { get; set; }
 
+        // Product Collection
+        public DbSet<ProductCollection> ProductCollections { get; set; }
+        public DbSet<ProductCollectionItem> ProductCollectionItems { get; set; }
+        public DbSet<ProductMaxOrderConfig> ProductMaxOrderConfigs { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -431,6 +436,55 @@ namespace ThuocGiaThat.Infrastucture
             modelBuilder.Entity<Country>().ToTable("Countries");
             modelBuilder.Entity<Province>().ToTable("Provinces");
             modelBuilder.Entity<Ward>().ToTable("Wards");
+
+
+            // ============ ProductCollection Configuration ============
+            modelBuilder.Entity<ProductCollection>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.Slug).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.Description).HasMaxLength(1000);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+                
+                entity.HasIndex(e => e.Slug).IsUnique();
+                entity.HasIndex(e => e.Type);
+                entity.HasIndex(e => e.IsActive);
+            });
+            
+            // ============ ProductCollectionItem Configuration ============
+            modelBuilder.Entity<ProductCollectionItem>(entity =>
+            {
+                entity.HasKey(e => new { e.ProductCollectionId, e.ProductId });
+                
+                entity.HasOne(e => e.ProductCollection)
+                    .WithMany(c => c.Items)
+                    .HasForeignKey(e => e.ProductCollectionId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                entity.HasOne(e => e.Product)
+                    .WithMany(p => p.CollectionItems)
+                    .HasForeignKey(e => e.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+            
+            // ============ ProductMaxOrderConfig Configuration ============
+            modelBuilder.Entity<ProductMaxOrderConfig>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Reason).HasMaxLength(500);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+                
+                entity.HasIndex(e => e.ProductId).IsUnique();
+                entity.HasIndex(e => e.IsActive);
+                
+                entity.HasOne(e => e.Product)
+                    .WithOne(p => p.MaxOrderConfig)
+                    .HasForeignKey<ProductMaxOrderConfig>(e => e.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
         }
     }
 }

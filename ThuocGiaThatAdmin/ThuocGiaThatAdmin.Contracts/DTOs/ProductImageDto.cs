@@ -7,6 +7,9 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
     /// </summary>
     public class ProductImageDto
     {
+        public int Id { get; set; }
+        public bool IsPrimary { get; set; } = false;
+
         [Required(ErrorMessage = "Image URL is required")]
         [Url(ErrorMessage = "Invalid URL format")]
         public string ImageUrl { get; set; } = string.Empty;
