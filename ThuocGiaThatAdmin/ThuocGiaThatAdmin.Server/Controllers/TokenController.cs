@@ -31,7 +31,7 @@ namespace HoangGiangPhamacyAuthentication.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var user = await _userManager.FindByNameAsync(model.Username);
+            var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null) return Unauthorized(new { error = "invalid_credentials" });
 
             var valid = await _userManager.CheckPasswordAsync(user, model.Password);
@@ -41,7 +41,7 @@ namespace HoangGiangPhamacyAuthentication.Controllers
 
             var response = new TokenResponse
             {
-                AccessToken = accessToken,
+                Token = accessToken,
                 RefreshToken = refreshToken,
                 ExpiresUtc = expiresUtc,
                 TokenType = "Bearer"
