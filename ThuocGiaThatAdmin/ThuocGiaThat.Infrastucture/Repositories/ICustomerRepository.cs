@@ -25,5 +25,10 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         /// Check if email exists (case-insensitive)
         /// </summary>
         Task<bool> IsEmailExistsAsync(string email, int? excludeCustomerId = null);
+
+        /// <summary>
+        /// Search customers by phone number (partial match)
+        /// </summary>
+        Task<IEnumerable<Customer>> SearchByPhoneAsync(string phoneNumber);
     }
 }

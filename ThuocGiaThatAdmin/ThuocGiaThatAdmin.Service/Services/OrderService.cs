@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using ThuocGiaThat.Infrastucture;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
+using ThuocGiaThatAdmin.Domain.Enums;
 
 namespace ThuocGiaThatAdmin.Service.Services
 {
@@ -292,6 +293,97 @@ namespace ThuocGiaThatAdmin.Service.Services
                 .ToListAsync();
 
             return orders.Select(o => MapToResponseDto(o, null, null, null)).ToList();
+        }
+
+        /// <summary>
+        /// Get orders with pagination and search
+        /// </summary>
+        public async Task<(List<OrderListDto> Orders, int TotalCount)> GetOrdersAsync(
+            int pageNumber,
+            int pageSize,
+            string? searchText)
+        {
+            if (pageNumber < 1)
+                throw new ArgumentException("Page number must be greater than 0", nameof(pageNumber));
+
+            if (pageSize < 1 || pageSize > 100)
+                throw new ArgumentException("Page size must be between 1 and 100", nameof(pageSize));
+
+            var query = _context.Orders
+                .Include(o => o.Customer)
+                .AsQueryable();
+
+            // Apply search filter
+            if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                searchText = searchText.Trim().ToLower();
+                query = query.Where(o =>
+                    o.OrderNumber.ToLower().Contains(searchText) ||
+                    (o.Customer != null && o.Customer.PhoneNumber.ToLower().Contains(searchText)) ||
+                    (o.Customer != null && o.Customer.Email != null && o.Customer.Email.ToLower().Contains(searchText))
+                );
+            }
+
+            // Get total count before pagination
+            var totalCount = await query.CountAsync();
+
+            // Apply pagination and ordering (newest first)
+            var orders = await query
+                .OrderByDescending(o => o.CreatedDate)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // Map to OrderListDto
+            var orderListDtos = orders.Select(o => new OrderListDto
+            {
+                Id = o.Id,
+                OrderNumber = o.OrderNumber,
+                CustomerName = o.Customer?.FullName ?? "Guest",
+                CustomerPhone = o.Customer?.PhoneNumber ?? o.ShippingPhone,
+                CustomerEmail = o.Customer?.Email,
+                CreatedDate = o.CreatedDate,
+                OrderStatus = o.OrderStatus,
+                PaymentStatus = o.PaymentStatus,
+                TotalAmount = o.TotalAmount
+            }).ToList();
+
+            return (orderListDtos, totalCount);
+        }
+
+        /// <summary>
+        /// Update order status
+        /// </summary>
+        public async Task<OrderResponseDto> UpdateOrderStatusAsync(int orderId, string newStatusString)
+        {
+            var order = await _context.Orders
+                .Include(o => o.Customer)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.ProductVariant)
+                    .ThenInclude(v => v.Product)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null)
+                throw new ArgumentException($"Order with ID {orderId} not found");
+
+            // Parse current and new status
+            var currentStatus = OrderStatusExtensions.ParseStatus(order.OrderStatus);
+            var newStatus = OrderStatusExtensions.ParseStatus(newStatusString);
+
+            // Validate status transition
+            if (!currentStatus.CanTransitionTo(newStatus))
+            {
+                var validStatuses = string.Join(", ", currentStatus.GetValidNextStatuses().Select(s => s.ToString()));
+                throw new InvalidOperationException(
+                    $"Cannot transition from {currentStatus} to {newStatus}. Valid transitions are: {validStatuses}");
+            }
+
+            // Update status
+            order.OrderStatus = newStatus.ToStatusString();
+            await _context.SaveChangesAsync();
+
+            // Return updated order
+            return MapToResponseDto(order, null, null, null);
         }
 
         /// <summary>

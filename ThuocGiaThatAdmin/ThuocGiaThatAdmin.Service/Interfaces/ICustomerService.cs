@@ -25,5 +25,10 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
         /// Get all customers with pagination
         /// </summary>
         Task<(IEnumerable<CustomerResponseDto> Customers, int TotalCount)> GetCustomersAsync(int pageNumber, int pageSize);
+
+        /// <summary>
+        /// Search customers by phone number
+        /// </summary>
+        Task<IEnumerable<CustomerResponseDto>> SearchByPhoneAsync(string phoneNumber);
     }
 }

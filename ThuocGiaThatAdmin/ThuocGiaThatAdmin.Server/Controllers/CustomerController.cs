@@ -117,5 +117,24 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 return Success(response);
             });
         }
+
+        /// <summary>
+        /// GET: api/customer/search
+        /// Search customers by phone number
+        /// </summary>
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchByPhone([FromQuery] string phoneNumber)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                if (string.IsNullOrWhiteSpace(phoneNumber))
+                {
+                    return BadRequestResponse("Phone number is required");
+                }
+
+                var customers = await _customerService.SearchByPhoneAsync(phoneNumber);
+                return Success(customers);
+            });
+        }
     }
 }
