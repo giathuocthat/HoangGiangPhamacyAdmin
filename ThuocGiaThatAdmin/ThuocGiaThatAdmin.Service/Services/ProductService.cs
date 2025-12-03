@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThuocGiaThat.Infrastucture;
 using ThuocGiaThat.Infrastucture.Repositories;
 using ThuocGiaThatAdmin.Contract.DTOs;
 using ThuocGiaThatAdmin.Contract.Requests;
 using ThuocGiaThatAdmin.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace ThuocGiaThatAdmin.Service.Services
 {
@@ -16,10 +18,12 @@ namespace ThuocGiaThatAdmin.Service.Services
     public class ProductService
     {
         private readonly IProductRepository _productRepository;
+        private readonly TrueMecContext _context;
 
-        public ProductService(IProductRepository productRepository)
+        public ProductService(IProductRepository productRepository, TrueMecContext context)
         {
             _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         #region Read Operations
@@ -198,6 +202,97 @@ namespace ThuocGiaThatAdmin.Service.Services
 
             _productRepository.DeleteRange(products);
             return await _productRepository.SaveChangesAsync();
+        }
+
+        #endregion
+
+        #region Store Product Operations
+
+        /// <summary>
+        /// Get products for store with detailed inventory and sales information
+        /// </summary>
+        /// <param name="pageNumber">Page number (1-based)</param>
+        /// <param name="pageSize">Number of items per page</param>
+        /// <returns>Tuple containing products with enhanced data and total count</returns>
+        public async Task<(IEnumerable<dynamic> products, int totalCount)> GetStoreProductsAsync(int pageNumber = 1, int pageSize = 10)
+        {
+            if (pageNumber <= 0)
+                throw new ArgumentException("Page number must be greater than 0", nameof(pageNumber));
+
+            if (pageSize <= 0 || pageSize > 100)
+                throw new ArgumentException("Page size must be between 1 and 100", nameof(pageSize));
+
+            // Get total count
+            var totalCount = await _context.Products.Where(p => p.IsActive).CountAsync();
+            
+            // Get products with all related data using efficient eager loading
+            var products = await _context.Products
+                .Where(p => p.IsActive)
+                .Include(p => p.Brand)
+                .Include(p => p.Category)
+                .Include(p => p.ProductVariants)
+                    .ThenInclude(v => v.Inventories)
+                .OrderByDescending(p => p.CreatedDate)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .AsNoTracking()
+                .ToListAsync();
+            
+            // Get all variant IDs for this page
+            var variantIds = products
+                .SelectMany(p => p.ProductVariants.Select(v => v.Id))
+                .ToList();
+            
+            // Get sold quantities for all variants in one query
+            var soldQuantities = await _context.OrderItems
+                .Where(oi => variantIds.Contains(oi.ProductVariantId))
+                .GroupBy(oi => oi.ProductVariantId)
+                .Select(g => new { VariantId = g.Key, SoldQuantity = g.Sum(oi => oi.Quantity) })
+                .ToDictionaryAsync(x => x.VariantId, x => x.SoldQuantity);
+            
+            // Map to dynamic result
+            var result = products.Select(product => new
+            {
+                product.Id,
+                product.CategoryId,
+                product.BrandId,
+                product.Name,
+                product.ShortDescription,
+                product.Slug,
+                product.ThumbnailUrl,
+                product.Ingredients,
+                product.UsageInstructions,
+                product.Contraindications,
+                product.StorageInstructions,
+                product.RegistrationNumber,
+                product.IsPrescriptionDrug,
+                product.IsActive,
+                product.IsFeatured,
+                product.CreatedDate,
+                product.UpdatedDate,
+                BrandName = product.Brand?.Name,
+                CategoryName = product.Category?.Name,
+                
+                // Enhanced variant information
+                ProductVariants = product.ProductVariants.Select(variant => new
+                {
+                    variant.Id,
+                    variant.SKU,
+                    variant.Barcode,
+                    variant.Price,
+                    variant.OriginalPrice,
+                    variant.StockQuantity,
+                    variant.MaxSalesQuantity,
+                    
+                    // Aggregate inventory stock from all warehouses
+                    InventoryStock = variant.Inventories.Sum(inv => inv.QuantityOnHand),
+                    
+                    // Get sold quantity from pre-loaded dictionary
+                    SoldQuantity = soldQuantities.ContainsKey(variant.Id) ? soldQuantities[variant.Id] : 0
+                }).ToList()
+            });
+
+            return (result, totalCount);
         }
 
         #endregion

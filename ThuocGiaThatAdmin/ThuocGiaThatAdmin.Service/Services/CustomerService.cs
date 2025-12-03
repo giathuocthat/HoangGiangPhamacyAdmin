@@ -180,6 +180,15 @@ namespace ThuocGiaThatAdmin.Service.Services
         }
 
         /// <summary>
+        /// Search customers by phone number
+        /// </summary>
+        public async Task<IEnumerable<CustomerResponseDto>> SearchByPhoneAsync(string phoneNumber)
+        {
+            var customers = await _customerRepository.SearchByPhoneAsync(phoneNumber);
+            return customers.Select(MapToResponseDto).ToList();
+        }
+
+        /// <summary>
         /// Map Customer entity to CustomerResponseDto
         /// </summary>
         private CustomerResponseDto MapToResponseDto(Customer customer)

@@ -79,5 +79,59 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 return Success(orders, "Orders retrieved successfully");
             }, "Get All Orders");
         }
+
+        /// <summary>
+        /// Get orders with pagination and search
+        /// </summary>
+        /// <param name="pageNumber">Page number (default: 1)</param>
+        /// <param name="pageSize">Page size (default: 10)</param>
+        /// <param name="searchText">Search by phone, email, or order number</param>
+        /// <returns>Paginated list of orders</returns>
+        [HttpGet("list")]
+        public async Task<IActionResult> GetOrders(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? searchText = null)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                if (pageSize > 100)
+                {
+                    return BadRequestResponse("Page size cannot exceed 100");
+                }
+
+                var (orders, totalCount) = await _orderService.GetOrdersAsync(pageNumber, pageSize, searchText);
+
+                var response = new
+                {
+                    Data = orders,
+                    Pagination = new
+                    {
+                        PageNumber = pageNumber,
+                        PageSize = pageSize,
+                        TotalCount = totalCount,
+                        TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+                    }
+                };
+
+                return Success(response, "Orders retrieved successfully");
+            }, "Get Orders List");
+        }
+
+        /// <summary>
+        /// Update order status
+        /// </summary>
+        /// <param name="id">Order ID</param>
+        /// <param name="dto">Update status DTO</param>
+        /// <returns>Updated order</returns>
+        [HttpPut("{id}/status")]
+        public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] UpdateOrderStatusDto dto)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var order = await _orderService.UpdateOrderStatusAsync(id, dto.NewStatus);
+                return Success(order, "Order status updated successfully");
+            }, "Update Order Status");
+        }
     }
 }

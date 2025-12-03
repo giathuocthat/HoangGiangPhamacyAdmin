@@ -91,5 +91,25 @@ namespace ThuocGiaThat.Infrastucture.Repositories
 
             return await query.AnyAsync();
         }
+
+        /// <summary>
+        /// Search customers by phone number (partial match)
+        /// </summary>
+        public async Task<IEnumerable<Customer>> SearchByPhoneAsync(string phoneNumber)
+        {
+            if (string.IsNullOrWhiteSpace(phoneNumber))
+                return new List<Customer>();
+
+            return await _dbSet
+                .Include(c => c.BusinessType)
+                .Include(c => c.Addresses)
+                    .ThenInclude(a => a.Province)
+                .Include(c => c.Addresses)
+                    .ThenInclude(a => a.Ward)
+                .Where(c => c.PhoneNumber.Contains(phoneNumber))
+                .OrderByDescending(c => c.CreatedDate)
+                .Take(10) // Limit results to 10
+                .ToListAsync();
+        }
     }
 }

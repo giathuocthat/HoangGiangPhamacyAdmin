@@ -156,4 +156,28 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public decimal UnitPrice { get; set; }
         public decimal TotalLineAmount { get; set; }
     }
+
+    /// <summary>
+    /// DTO for order list (simplified version for listing)
+    /// </summary>
+    public class OrderListDto
+    {
+        public int Id { get; set; }
+        public string OrderNumber { get; set; } = string.Empty;
+        public string CustomerName { get; set; } = string.Empty;
+        public string CustomerPhone { get; set; } = string.Empty;
+        public string? CustomerEmail { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public string OrderStatus { get; set; } = string.Empty;
+        public string PaymentStatus { get; set; } = string.Empty;
+        public decimal TotalAmount { get; set; }
+    }
+
+    /// <summary>
+    /// DTO for updating order status
+    /// </summary>
+    public class UpdateOrderStatusDto
+    {
+        public string NewStatus { get; set; } = string.Empty;
+    }
 }

@@ -477,6 +477,44 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         }
 
         /// <summary>
+        /// Get paged products with detailed inventory and sales information
+        /// </summary>
+        /// <param name="pageNumber">Page number (1-based)</param>
+        /// <param name="pageSize">Number of items per page</param>
+        /// <returns>Products with inventory stock, max sales quantity, and sold quantity</returns>
+        [HttpGet("getStoreProduct")]
+        public async Task<ActionResult<dynamic>> GetStoreProduct([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var (products, totalCount) = await _productService.GetStoreProductsAsync(pageNumber, pageSize);
+                
+                var response = new
+                {
+                    Data = products,
+                    Pagination = new
+                    {
+                        PageNumber = pageNumber,
+                        PageSize = pageSize,
+                        TotalCount = totalCount,
+                        TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+                    }
+                };
+                
+                return Ok(response);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error getting store products");
+                return StatusCode(500, new { message = "An error occurred while retrieving store products", error = ex.Message });
+            }
+        }
+
+        /// <summary>
         /// Update an existing product
         /// </summary>
         /// <param name="id">Product ID</param>

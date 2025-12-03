@@ -15,6 +15,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public decimal Price { get; set; }
         public decimal? OriginalPrice { get; set; }
         public int StockQuantity { get; set; } = 0;
+        public int? MaxSalesQuantity { get; set; }
         
         // Variant specific attributes
         public decimal? Weight { get; set; }
