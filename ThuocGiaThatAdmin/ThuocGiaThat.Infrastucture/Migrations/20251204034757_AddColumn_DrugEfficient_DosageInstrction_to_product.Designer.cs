@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ThuocGiaThat.Infrastucture;
 
@@ -11,9 +12,11 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    partial class TrueMecContextModelSnapshot : ModelSnapshot
+    [Migration("20251204034757_AddColumn_DrugEfficient_DosageInstrction_to_product")]
+    partial class AddColumn_DrugEfficient_DosageInstrction_to_product
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -828,16 +831,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("DeliveredDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DeliveryNotes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DeliveryStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<decimal>("DiscountAmount")
                         .HasColumnType("decimal(18,2)");
 
@@ -861,14 +854,8 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("ShippedDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("ShippingAddress")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ShippingCarrier")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("ShippingFee")
@@ -887,9 +874,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("TrackingNumber")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
@@ -1275,24 +1259,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("ProductOptionId");
 
                     b.ToTable("ProductOptionValues");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductStatusMap", b =>
-                {
-                    b.Property<int>("ProductVariantId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("StatusType")
-                        .HasColumnType("int");
-
-                    b.Property<string>("StatusName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("ProductVariantId", "StatusType");
-
-                    b.ToTable("ProductStatusMap", (string)null);
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductVariant", b =>
@@ -2076,17 +2042,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsRequired();
 
                     b.Navigation("ProductOption");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductStatusMap", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ProductVariant", "ProductVariant")
-                        .WithMany()
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ProductVariant");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductVariant", b =>
