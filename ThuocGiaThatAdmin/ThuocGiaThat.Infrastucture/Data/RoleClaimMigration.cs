@@ -84,8 +84,7 @@ namespace ThuocGiaThat.Infrastucture.Data
                     addedCount, skippedCount, adminPermissions.Count);
 
 
-                //// Get all permissions from the Permissions constants class
-                var salePermission = SalePermissions.GetAllPermissions();
+
 
                 var saleRole = "Sale";
 
@@ -98,14 +97,16 @@ namespace ThuocGiaThat.Infrastucture.Data
                     return;
                 }
 
-                // Get existing claims for the Admin role
-                var saleClaims = await roleManager.GetClaimsAsync(saleRoleDetail);
+                //// Get all permissions from the Permissions constants class
+                var salePermission = SalePermissions.GetAllPermissions();
 
-                var existingSlaePermissions = existingClaims
+                // Get existing claims for the Admin role
+                var saleExistingClaims = await roleManager.GetClaimsAsync(saleRoleDetail);
+
+                var existingSlaePermissions = saleExistingClaims
                     .Where(c => c.Type == SalePermissions.ClaimType)
                     .Select(c => c.Value)
                     .ToHashSet();
-
 
                 addedCount = 0;
                 skippedCount = 0;
@@ -115,14 +116,14 @@ namespace ThuocGiaThat.Infrastucture.Data
                 // Add each permission as a claim if it doesn't already exist
                 foreach (var permission in salePermissions)
                 {
-                    if (existingPermissions.Contains(permission))
+                    if (existingSlaePermissions.Contains(permission))
                     {
                         skippedCount++;
                         continue;
                     }
 
                     var claim = new Claim(SalePermissions.ClaimType, permission);
-                    var result = await roleManager.AddClaimAsync(role, claim);
+                    var result = await roleManager.AddClaimAsync(saleRoleDetail, claim);
 
                     if (result.Succeeded)
                     {

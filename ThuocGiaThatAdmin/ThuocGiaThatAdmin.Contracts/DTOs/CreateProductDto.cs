@@ -51,6 +51,8 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public bool IsActive { get; set; } = true;
 
         public bool IsFeatured { get; set; } = false;
+        public string? DrugEfficacy { get; set; }
+        public string? DosageInstructions { get; set; }
 
         // Related entities
         public List<ProductImageDto> Images { get; set; } = new List<ProductImageDto>();

@@ -10,6 +10,8 @@ namespace ThuocGiaThatAdmin.Domain.Entities
 {
     public class ApplicationUser : IdentityUser
     {
+        public DateTime CreatedDate { get; set; }
         public string? FullName { get; set; }
+        public bool IsActive { get; set; }
     }
 }
