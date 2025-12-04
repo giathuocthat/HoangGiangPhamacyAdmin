@@ -481,7 +481,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// </summary>
         /// <param name="pageNumber">Page number (1-based)</param>
         /// <param name="pageSize">Number of items per page</param>
-        /// <returns>Products with inventory stock, max sales quantity, and sold quantity</returns>
+        /// <returns>Products with inventory stock, max sales quantity, sold quantity, and ProductVariantStatuses</returns>
         [HttpGet("getStoreProduct")]
         public async Task<ActionResult<dynamic>> GetStoreProduct([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -656,6 +656,18 @@ namespace ThuocGiaThatAdmin.Server.Controllers
 
                 return Ok(response);
             }, "Update Product");
+        }
+
+        /// <summary>
+        /// Create a new ProductStatusMap
+        /// </summary>
+        /// <param name="dto">ProductStatusMap creation data</param>
+        /// <returns>Created ProductStatusMap</returns>
+        [HttpPost("status-map")]
+        public async Task<ActionResult<ProductStatusMapResponseDto>> CreateProductStatusMap([FromBody] CreateProductStatusMapDto dto)
+        {
+            var result = await _productService.CreateProductStatusMapAsync(dto);
+            return Ok(result);     
         }
 
         [HttpPost("cart")]

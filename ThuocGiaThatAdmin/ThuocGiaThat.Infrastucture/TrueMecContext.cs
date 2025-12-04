@@ -55,6 +55,10 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<ProductCollection> ProductCollections { get; set; }
         public DbSet<ProductCollectionItem> ProductCollectionItems { get; set; }
         public DbSet<ProductMaxOrderConfig> ProductMaxOrderConfigs { get; set; }
+        
+        // Product Status Mapping
+        public DbSet<ProductStatusMap> ProductStatusMaps { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -485,6 +489,29 @@ namespace ThuocGiaThat.Infrastucture
                     .HasForeignKey<ProductMaxOrderConfig>(e => e.ProductId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+
+            modelBuilder.Entity<ProductStatusMap>(entity =>
+            {
+                entity.ToTable("ProductStatusMap");
+
+                entity.HasKey(x => new { x.ProductVariantId, x.StatusType });
+
+                entity.Property(x => x.StatusType)
+                       .HasConversion<int>()
+                       .IsRequired();
+
+                entity.Property(x => x.StatusName)
+                       .HasMaxLength(50)
+                       .IsRequired();
+                       
+                entity.HasOne(x => x.ProductVariant)
+                       .WithMany()
+                       .HasForeignKey(x => x.ProductVariantId)
+                       .OnDelete(DeleteBehavior.Cascade);
+            });
+
+
+            
         }
     }
 }

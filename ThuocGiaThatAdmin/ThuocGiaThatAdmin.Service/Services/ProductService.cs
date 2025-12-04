@@ -7,8 +7,10 @@ using ThuocGiaThat.Infrastucture;
 using ThuocGiaThat.Infrastucture.Repositories;
 using ThuocGiaThatAdmin.Contract.DTOs;
 using ThuocGiaThatAdmin.Contract.Requests;
+using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using ThuocGiaThatAdmin.Domain.Enums;
 
 namespace ThuocGiaThatAdmin.Service.Services
 {
@@ -250,6 +252,19 @@ namespace ThuocGiaThatAdmin.Service.Services
                 .Select(g => new { VariantId = g.Key, SoldQuantity = g.Sum(oi => oi.Quantity) })
                 .ToDictionaryAsync(x => x.VariantId, x => x.SoldQuantity);
             
+            // Get ProductStatusMaps for all variants in one query
+            var productStatusMaps = await _context.ProductStatusMaps
+                .Where(psm => variantIds.Contains(psm.ProductVariantId))
+                .ToListAsync();
+            
+            // Group status maps by variant ID
+            var statusMapsByVariant = productStatusMaps
+                .GroupBy(psm => psm.ProductVariantId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(psm => new { psm.StatusType, psm.StatusName }).ToList()
+                );
+            
             // Map to dynamic result
             var result = products.Select(product => new
             {
@@ -288,11 +303,68 @@ namespace ThuocGiaThatAdmin.Service.Services
                     InventoryStock = variant.Inventories.Sum(inv => inv.QuantityOnHand),
                     
                     // Get sold quantity from pre-loaded dictionary
-                    SoldQuantity = soldQuantities.ContainsKey(variant.Id) ? soldQuantities[variant.Id] : 0
+                    SoldQuantity = soldQuantities.ContainsKey(variant.Id) ? soldQuantities[variant.Id] : 0,
+                    
+                    // Get ProductVariantStatuses from pre-loaded dictionary
+                    ProductVariantStatuses = statusMapsByVariant.ContainsKey(variant.Id) 
+                        ? statusMapsByVariant[variant.Id] 
+                        : Enumerable.Empty<object>().Select(x => new { StatusType = default(ProductStatusType), StatusName = string.Empty }).ToList()
                 }).ToList()
             });
 
             return (result, totalCount);
+        }
+
+
+        #endregion
+
+        #region ProductStatusMap Operations
+
+        /// <summary>
+        /// Create a new ProductStatusMap
+        /// </summary>
+        /// <param name="dto">ProductStatusMap creation data</param>
+        /// <returns>Created ProductStatusMap</returns>
+        public async Task<ProductStatusMapResponseDto> CreateProductStatusMapAsync(CreateProductStatusMapDto dto)
+        {
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto));
+
+            if (dto.ProductVariantId <= 0)
+                throw new ArgumentException("ProductVariantId must be greater than 0", nameof(dto.ProductVariantId));
+
+            // Validate ProductVariant exists
+            var variantExists = await _context.ProductVariants
+                .AnyAsync(v => v.Id == dto.ProductVariantId);
+
+            if (!variantExists)
+                throw new InvalidOperationException($"ProductVariant with ID {dto.ProductVariantId} not found");
+
+            // Check for duplicate (ProductVariantId + StatusType)
+            var duplicate = await _context.ProductStatusMaps
+                .AnyAsync(psm => psm.ProductVariantId == dto.ProductVariantId && psm.StatusType == dto.StatusType);
+
+            if (duplicate)
+                throw new InvalidOperationException($"ProductStatusMap already exists for ProductVariantId {dto.ProductVariantId} with StatusType {dto.StatusType}");
+
+            // Create new ProductStatusMap
+            var productStatusMap = new ProductStatusMap
+            {
+                ProductVariantId = dto.ProductVariantId,
+                StatusType = dto.StatusType,
+                StatusName = dto.StatusType.ToString()
+            };
+
+            _context.ProductStatusMaps.Add(productStatusMap);
+            await _context.SaveChangesAsync();
+
+            // Return response DTO
+            return new ProductStatusMapResponseDto
+            {
+                ProductVariantId = productStatusMap.ProductVariantId,
+                StatusType = productStatusMap.StatusType,
+                StatusName = productStatusMap.StatusName
+            };
         }
 
         #endregion
