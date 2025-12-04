@@ -48,7 +48,9 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     RegistrationNumber = dto.RegistrationNumber,
                     IsPrescriptionDrug = dto.IsPrescriptionDrug,
                     IsActive = dto.IsActive,
-                    IsFeatured = dto.IsFeatured
+                    IsFeatured = dto.IsFeatured,
+                    DrugEfficacy = dto.DrugEfficacy,
+                    DosageInstructions = dto.DosageInstructions
                 };
 
                 // Map Images
@@ -126,6 +128,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     createdProduct.CreatedDate,
                     createdProduct.UpdatedDate,
                     BrandName = createdProduct.Brand?.Name,
+                    createdProduct.DrugEfficacy,
+                    createdProduct.DosageInstructions,
                     CategoryName = createdProduct.Category?.Name,
                     Images = createdProduct.Images.Select(i => new
                     {
@@ -191,6 +195,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     product.IsFeatured,
                     product.CreatedDate,
                     product.UpdatedDate,
+                    product.DrugEfficacy,
+                    product.DosageInstructions,
                     Brand = new {
                         product.Brand?.Id,
                         product.Brand?.Name,
@@ -266,6 +272,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     product.StorageInstructions,
                     product.RegistrationNumber,
                     product.IsPrescriptionDrug,
+                    product.DrugEfficacy,
+                    product.DosageInstructions,
 
                     // Metadata
                     product.IsActive,
@@ -449,6 +457,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                         product.IsFeatured,
                         product.CreatedDate,
                         product.UpdatedDate,
+                        product.DosageInstructions,
+                        product.DrugEfficacy,
                         BrandName = product.Brand?.Name,
                         CategoryName = product.Category?.Name,
                         price = product.ProductVariants.FirstOrDefault()?.Price,
@@ -546,6 +556,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 existingProduct.IsPrescriptionDrug = dto.IsPrescriptionDrug;
                 existingProduct.IsActive = dto.IsActive;
                 existingProduct.IsFeatured = dto.IsFeatured;
+                existingProduct.DrugEfficacy = dto.DrugEfficacy;
+                existingProduct.DosageInstructions = dto.DosageInstructions;
 
                 // Update Images (clear and re-add)
                 existingProduct.Images.Clear();
@@ -623,6 +635,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     updatedProduct.IsFeatured,
                     updatedProduct.CreatedDate,
                     updatedProduct.UpdatedDate,
+                    updatedProduct.DrugEfficacy,
+                    updatedProduct.DosageInstructions,
                     BrandName = updatedProduct.Brand?.Name,
                     CategoryName = updatedProduct.Category?.Name,
                     Images = updatedProduct.Images.Select(i => new
