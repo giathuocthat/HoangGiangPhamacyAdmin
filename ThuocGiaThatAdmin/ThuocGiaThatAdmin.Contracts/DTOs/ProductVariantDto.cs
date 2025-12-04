@@ -31,7 +31,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         [StringLength(100, ErrorMessage = "Dimensions cannot exceed 100 characters")]
         public string? Dimensions { get; set; }
 
-        [Url(ErrorMessage = "Invalid URL format")]
+        
         public string? ImageUrl { get; set; }
 
         public bool IsActive { get; set; } = true;
