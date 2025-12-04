@@ -2,7 +2,10 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
+using ThuocGiaThat.Infrastucture.Repositories;
+using ThuocGiaThatAdmin.Contract.Responses;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Service.Interfaces;
 
@@ -12,11 +15,13 @@ namespace ThuocGiaThatAdmin.Service
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IRepository<ApplicationUser> _userRepository;
 
-        public UserService(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public UserService(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IRepository<ApplicationUser> userRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _userRepository = userRepository;
         }
 
         public async Task<ApplicationUser?> GetByIdAsync(string id)
@@ -40,6 +45,13 @@ namespace ThuocGiaThatAdmin.Service
         {
             if (user == null) throw new ArgumentNullException(nameof(user));
             if (string.IsNullOrEmpty(password)) throw new ArgumentNullException(nameof(password));
+
+            var existence = await _userManager.FindByEmailAsync(user.Email);
+
+            if (existence != null)
+            {
+                return IdentityResult.Failed(new IdentityError { Description = "Email already exist." });
+            }
 
             return await _userManager.CreateAsync(user, password);
         }
@@ -92,6 +104,40 @@ namespace ThuocGiaThatAdmin.Service
             if (string.IsNullOrWhiteSpace(role)) throw new ArgumentNullException(nameof(role));
 
             return await _userManager.RemoveFromRoleAsync(user, role);
+        }
+
+        public async Task<IEnumerable<UserResponse>> GetAllAsync(int pageIndex, int pageSize)
+        {
+            var users = _userManager.Users.Where(x => x.UserName != "ADMIN" && x.UserName != "admin")
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var result = users.Select(x => new UserResponse
+            {
+                Id = x.Id,
+                FullName = x.FullName,
+                UserName = x.UserName,
+                PhoneNumber = x.PhoneNumber,
+                Email = x.Email,
+                CreatedDate = x.CreatedDate,
+                IsActive = x.IsActive,
+                Roles = (_userManager.GetRolesAsync(x).Result).Select(r => new RoleResponse { Name = r }).ToArray()
+            });
+
+            return result;
+        }
+
+        public async Task DeactivateUser(string userName)
+        {
+            var userDetail = await _userRepository.FirstOrDefaultAsync(x => x.UserName == userName);
+
+            if (userDetail != null)
+            {
+                userDetail.IsActive = false;
+                _userRepository.Update(userDetail);
+                await _userRepository.SaveChangesAsync();
+            }
         }
     }
 }

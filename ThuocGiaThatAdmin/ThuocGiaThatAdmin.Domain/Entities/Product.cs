@@ -26,11 +26,13 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public string? StorageInstructions { get; set; }
         public string? RegistrationNumber { get; set; }
         public bool IsPrescriptionDrug { get; set; } = false;
+        public string? DrugEfficacy { get; set; }
+        public string? DosageInstructions { get; set; }
 
         // Metadata
         public bool IsActive { get; set; } = true;
         public bool IsFeatured { get; set; } = false;
-        
+
         public ProductSourceType SourceType { get; set; } = ProductSourceType.Regular;
         public bool IsHGSGSelected { get; set; } = false;
         // Dates inherited
