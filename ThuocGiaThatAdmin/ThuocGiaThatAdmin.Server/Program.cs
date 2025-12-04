@@ -115,6 +115,7 @@ builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 builder.Services.AddScoped<IProductOptionRepository, ProductOptionRepository>();
 builder.Services.AddScoped<IUploadedFileRepository, UploadedFileRepository>();
 builder.Services.AddScoped<IProductVariantRepository, ProductVariantRepository>();
+builder.Services.AddScoped<IAddressRepository, AddressRepository>();
 
 // Inventory Management Repositories
 builder.Services.AddScoped<IWarehouseRepository, WarehouseRepository>();
@@ -158,6 +159,7 @@ builder.Services.AddScoped<ICartService, CartService>();
 
 // Shopping Cart Service
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
+builder.Services.AddScoped<IAddressService, AddressService>();
 
 // ============================================================
 // Register CQRS - Dispatchers

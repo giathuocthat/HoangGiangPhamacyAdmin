@@ -59,7 +59,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                     CreatedDate = DateTime.UtcNow,
                     ProvinceId = dto.ProvinceId,
                     WardId = dto.WardId,
-                    RecipientName = dto.FullName,
+                    RecipientName = customer?.FullName ?? "",
                     PhoneNumber = dto.PhoneNumber
                 }
             };
@@ -77,7 +77,8 @@ namespace ThuocGiaThatAdmin.Service.Services
                 PhoneNumber = customer.PhoneNumber,
                 Email = customer.Email,
                 ExpiresAt = expiresAt,
-                Token = token
+                Token = token,
+                Id = customer.Id
             };
 
 
