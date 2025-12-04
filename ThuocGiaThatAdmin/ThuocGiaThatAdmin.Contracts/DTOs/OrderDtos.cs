@@ -138,6 +138,12 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public string? ProvinceName { get; set; }
         public int? CountryId { get; set; }
         public string? CountryName { get; set; }
+        public string DeliveryStatus { get; set; } = "NotShipped";
+        public string? ShippingCarrier { get; set; }
+        public string? TrackingNumber { get; set; }
+        public DateTime? ShippedDate { get; set; }
+        public DateTime? DeliveredDate { get; set; }
+        public string? DeliveryNotes { get; set; }
         public string? Note { get; set; }
         public List<OrderItemResponseDto> OrderItems { get; set; } = new List<OrderItemResponseDto>();
     }
@@ -179,5 +185,21 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
     public class UpdateOrderStatusDto
     {
         public string NewStatus { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// DTO for updating order delivery status
+    /// </summary>
+    public class UpdateOrderDeliveryStatusDto
+    {
+        [Required(ErrorMessage = "New delivery status is required")]
+        public string NewDeliveryStatus { get; set; } = string.Empty;
+
+        // Optional fields that can be updated with status change
+        public string? ShippingCarrier { get; set; }
+        public string? TrackingNumber { get; set; }
+        public DateTime? ShippedDate { get; set; }
+        public DateTime? DeliveredDate { get; set; }
+        public string? DeliveryNotes { get; set; }
     }
 }

@@ -2,16 +2,18 @@ namespace ThuocGiaThatAdmin.Domain.Enums
 {
     /// <summary>
     /// Order status enumeration
-    /// Workflow: Pending -> Confirmed -> Shipping -> Completed
+    /// Workflow: Pending -> Confirmed -> Processing -> InTransit -> Shipping -> Completed
     /// Any status can transition to Cancelled
     /// </summary>
     public enum OrderStatus
     {
         Pending = 0,
         Confirmed = 1,
-        Shipping = 2,
-        Completed = 3,
-        Cancelled = 4
+        Processing = 2,
+        InTransit = 3,      // Đang trung chuyển
+        Shipping = 4,
+        Completed = 5,
+        Cancelled = 6
     }
 
     /// <summary>
@@ -27,7 +29,9 @@ namespace ThuocGiaThatAdmin.Domain.Enums
             return currentStatus switch
             {
                 OrderStatus.Pending => new[] { OrderStatus.Confirmed, OrderStatus.Cancelled },
-                OrderStatus.Confirmed => new[] { OrderStatus.Shipping, OrderStatus.Cancelled },
+                OrderStatus.Confirmed => new[] { OrderStatus.Processing, OrderStatus.Cancelled },
+                OrderStatus.Processing => new[] { OrderStatus.InTransit, OrderStatus.Cancelled },
+                OrderStatus.InTransit => new[] { OrderStatus.Shipping, OrderStatus.Cancelled },
                 OrderStatus.Shipping => new[] { OrderStatus.Completed, OrderStatus.Cancelled },
                 OrderStatus.Completed => new OrderStatus[] { }, // No transitions from Completed
                 OrderStatus.Cancelled => new OrderStatus[] { }, // No transitions from Cancelled

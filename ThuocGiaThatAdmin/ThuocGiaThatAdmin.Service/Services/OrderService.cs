@@ -387,6 +387,65 @@ namespace ThuocGiaThatAdmin.Service.Services
         }
 
         /// <summary>
+        /// Update order delivery status
+        /// </summary>
+        public async Task<OrderResponseDto> UpdateDeliveryStatusAsync(int orderId, UpdateOrderDeliveryStatusDto dto)
+        {
+            var order = await _context.Orders
+                .Include(o => o.Customer)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.ProductVariant)
+                    .ThenInclude(v => v.Product)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null)
+                throw new ArgumentException($"Order with ID {orderId} not found");
+
+            // Parse current and new delivery status
+            var currentDeliveryStatus = OrderDeliveryStatusExtensions.ParseStatus(order.DeliveryStatus);
+            var newDeliveryStatus = OrderDeliveryStatusExtensions.ParseStatus(dto.NewDeliveryStatus);
+
+            // Validate delivery status transition
+            if (!currentDeliveryStatus.CanTransitionTo(newDeliveryStatus))
+            {
+                var validStatuses = string.Join(", ", currentDeliveryStatus.GetValidNextStatuses().Select(s => s.ToString()));
+                throw new InvalidOperationException(
+                    $"Cannot transition from {currentDeliveryStatus} to {newDeliveryStatus}. Valid transitions are: {validStatuses}");
+            }
+
+            // Update delivery status
+            order.DeliveryStatus = newDeliveryStatus.ToStatusString();
+
+            // Update optional fields if provided
+            if (!string.IsNullOrWhiteSpace(dto.ShippingCarrier))
+                order.ShippingCarrier = dto.ShippingCarrier;
+
+            if (!string.IsNullOrWhiteSpace(dto.TrackingNumber))
+                order.TrackingNumber = dto.TrackingNumber;
+
+            if (dto.ShippedDate.HasValue)
+                order.ShippedDate = dto.ShippedDate.Value;
+
+            if (dto.DeliveredDate.HasValue)
+                order.DeliveredDate = dto.DeliveredDate.Value;
+
+            if (!string.IsNullOrWhiteSpace(dto.DeliveryNotes))
+                order.DeliveryNotes = dto.DeliveryNotes;
+
+            // Auto-set timestamps for certain status transitions
+            if (newDeliveryStatus == OrderDeliveryStatus.InTransit && !order.ShippedDate.HasValue)
+                order.ShippedDate = DateTime.UtcNow;
+
+            if (newDeliveryStatus == OrderDeliveryStatus.Delivered && !order.DeliveredDate.HasValue)
+                order.DeliveredDate = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            // Return updated order
+            return MapToResponseDto(order, null, null, null);
+        }
+
+        /// <summary>
         /// Generate unique order number
         /// </summary>
         private string GenerateOrderNumber()
@@ -427,6 +486,12 @@ namespace ThuocGiaThatAdmin.Service.Services
                 ProvinceName = province?.Name,
                 CountryId = country?.Id,
                 CountryName = country?.CommonName,
+                DeliveryStatus = order.DeliveryStatus,
+                ShippingCarrier = order.ShippingCarrier,
+                TrackingNumber = order.TrackingNumber,
+                ShippedDate = order.ShippedDate,
+                DeliveredDate = order.DeliveredDate,
+                DeliveryNotes = order.DeliveryNotes,
                 Note = order.Note,
                 OrderItems = order.OrderItems.Select(oi => new OrderItemResponseDto
                 {

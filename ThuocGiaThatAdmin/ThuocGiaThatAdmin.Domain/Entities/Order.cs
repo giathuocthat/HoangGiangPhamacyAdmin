@@ -24,7 +24,15 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public string ShippingName { get; set; } = string.Empty;
         public string ShippingAddress { get; set; } = string.Empty;
         public string ShippingPhone { get; set; } = string.Empty;
-        
+
+        // Delivery Information
+        public string DeliveryStatus { get; set; } = "NotShipped"; // NotShipped, Preparing, ReadyToShip, InTransit, OutForDelivery, Delivered, Failed, Returned
+        public string? ShippingCarrier { get; set; } // e.g., "Viettel Post", "Giao Hang Nhanh"
+        public string? TrackingNumber { get; set; }
+        public DateTime? ShippedDate { get; set; }
+        public DateTime? DeliveredDate { get; set; }
+        public string? DeliveryNotes { get; set; }
+
         public string? Note { get; set; }
         // UpdatedDate inherited
 

@@ -133,5 +133,21 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 return Success(order, "Order status updated successfully");
             }, "Update Order Status");
         }
+
+        /// <summary>
+        /// Update order delivery status
+        /// </summary>
+        /// <param name="id">Order ID</param>
+        /// <param name="dto">Update delivery status DTO</param>
+        /// <returns>Updated order</returns>
+        [HttpPut("{id}/delivery-status")]
+        public async Task<IActionResult> UpdateDeliveryStatus(int id, [FromBody] UpdateOrderDeliveryStatusDto dto)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var order = await _orderService.UpdateDeliveryStatusAsync(id, dto);
+                return Success(order, "Order delivery status updated successfully");
+            }, "Update Delivery Status");
+        }
     }
 }
