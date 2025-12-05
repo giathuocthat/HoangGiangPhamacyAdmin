@@ -369,6 +369,22 @@ namespace ThuocGiaThatAdmin.Service.Services
 
         #endregion
 
-        
+        public async Task<IEnumerable<dynamic>> GetProductCollectionByTypeAsync(ProductStatusType productStatusType,int pageSize = 10)
+        {
+            var productVariantIds = _context.ProductStatusMaps.Where(x => x.StatusType == productStatusType).Take(pageSize).Select(x => x.ProductVariantId).ToList();
+            return await _context.ProductVariants.Where(x => productVariantIds.Contains(x.Id)).Select(x => new
+            {
+                Id = x.ProductId,
+                ProductId = x.ProductId,
+                ProductVariantId = x.Id,
+                Price = x.Price,
+                OriginalPrice = x.OriginalPrice,
+                Name = x.Product.Name,
+                MaxSalesQuantity = x.MaxSalesQuantity,
+                thumbnailUrl = x.ImageUrl
+            }).ToListAsync();
+        }
+
+
     }
 }

@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
-using ThuocGiaThatAdmin.Service.Services;
+using ThuocGiaThatAdmin.Contract.Requests;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
+using ThuocGiaThatAdmin.Domain.Enums;
 using ThuocGiaThatAdmin.Server.Models;
-using ThuocGiaThatAdmin.Contract.Requests;
 using ThuocGiaThatAdmin.Service.Interfaces;
+using ThuocGiaThatAdmin.Service.Services;
 
 namespace ThuocGiaThatAdmin.Server.Controllers
 {
@@ -690,6 +691,13 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             var cartProductDtos = await _cartService.GetCartProductsAsync(cartItems);
 
             return Ok(cartProductDtos);
+        }
+
+        [HttpGet("collection/{type}")]
+        public async Task<ActionResult<dynamic>> GetProductCollectionByTypeAsync(ProductStatusType type)
+        {
+            var result = await _productService.GetProductCollectionByTypeAsync(type);
+            return Ok(result);
         }
     }
 }
