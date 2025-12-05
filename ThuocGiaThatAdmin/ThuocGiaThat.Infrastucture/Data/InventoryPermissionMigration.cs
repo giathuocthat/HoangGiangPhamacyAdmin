@@ -8,17 +8,12 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using ThuocGiaThat.Infrastucture.Repositories;
 using ThuocGiaThatAdmin.Domain.Constants;
 using ThuocGiaThatAdmin.Domain.Entities;
 
 namespace ThuocGiaThat.Infrastucture.Data
 {
-    /// <summary>
-    /// Seeds role claims (permissions) for the Admin role.
-    /// This migration should run after UserMigration to ensure the Admin role exists.
-    /// </summary>
-    public static class RoleClaimsMigration
+    public static class InventoryPermissionMigration
     {
         public static async Task InitializeAsync(IServiceProvider serviceProvider, IConfiguration configuration)
         {
@@ -30,10 +25,10 @@ namespace ThuocGiaThat.Infrastucture.Data
 
             try
             {
-                var adminRole = "Admin";
+                var inventoryRole = "Inventory Manager";
 
                 // Ensure Admin role exists
-                var role = await roleManager.FindByNameAsync(adminRole);
+                var role = await roleManager.FindByNameAsync(inventoryRole);
                 if (role == null)
                 {
                     logger.LogWarning("Admin role not found. RoleClaims migration skipped. Please ensure UserMigration runs before RoleClaimsMigration.");
@@ -41,7 +36,7 @@ namespace ThuocGiaThat.Infrastucture.Data
                 }
 
                 // Get all permissions from the Permissions constants class
-                var adminPermissions = InventoryPermission.GetAllPermissions();
+                var inventoryPermission = InventoryPermission.GetAllPermissions();
 
                 // Get existing claims for the Admin role
                 var existingClaims = await roleManager.GetClaimsAsync(role);
@@ -55,7 +50,7 @@ namespace ThuocGiaThat.Infrastucture.Data
                 int skippedCount = 0;
 
                 // Add each permission as a claim if it doesn't already exist
-                foreach (var permission in adminPermissions)
+                foreach (var permission in inventoryPermission)
                 {
                     if (existingPermissions.Contains(permission))
                     {
@@ -81,64 +76,8 @@ namespace ThuocGiaThat.Infrastucture.Data
 
                 logger.LogInformation(
                     "RoleClaims seeding completed. Added: {AddedCount}, Skipped (already exists): {SkippedCount}, Total: {TotalCount}",
-                    addedCount, skippedCount, adminPermissions.Count);
+                    addedCount, skippedCount, inventoryPermission.Count);
 
-
-                var saleRole = "Sale";
-
-                // Ensure Admin role exists
-                var saleRoleDetail = await roleManager.FindByNameAsync(saleRole);
-
-                if (role == null)
-                {
-                    logger.LogWarning("Sale role not found. RoleClaims migration skipped. Please ensure UserMigration runs before RoleClaimsMigration.");
-                    return;
-                }
-
-                //// Get all permissions from the Permissions constants class
-                var salePermission = SalePermissions.GetAllPermissions();
-
-                // Get existing claims for the Admin role
-                var saleExistingClaims = await roleManager.GetClaimsAsync(saleRoleDetail);
-
-                var existingSlaePermissions = saleExistingClaims
-                    .Where(c => c.Type == SalePermissions.ClaimType)
-                    .Select(c => c.Value)
-                    .ToHashSet();
-
-                addedCount = 0;
-                skippedCount = 0;
-
-                var salePermissions = SalePermissions.GetAllPermissions();
-
-                // Add each permission as a claim if it doesn't already exist
-                foreach (var permission in salePermissions)
-                {
-                    if (existingSlaePermissions.Contains(permission))
-                    {
-                        skippedCount++;
-                        continue;
-                    }
-
-                    var claim = new Claim(SalePermissions.ClaimType, permission);
-                    var result = await roleManager.AddClaimAsync(saleRoleDetail, claim);
-
-                    if (result.Succeeded)
-                    {
-                        addedCount++;
-                        logger.LogInformation("Added permission claim: {Permission}", permission);
-                    }
-                    else
-                    {
-                        var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                        logger.LogError("Failed to add permission claim {Permission}: {Errors}", permission, errors);
-                    }
-                }
-
-
-                logger.LogInformation(
-                    "RoleClaims seeding completed. Added: {AddedCount}, Skipped (already exists): {SkippedCount}, Total: {TotalCount}",
-                    addedCount, skippedCount, salePermissions.Count);
             }
             catch (Exception ex)
             {

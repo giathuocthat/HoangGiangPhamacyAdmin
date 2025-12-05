@@ -10,7 +10,7 @@ namespace ThuocGiaThatAdmin.Domain.Constants
     /// Defines all permission claims used in the application.
     /// Use these constants in authorization policies and attributes.
     /// </summary>
-    public static class AdminPermissions
+    public static class AdminPermission
     {
         public const string ClaimType = "Permission";
 
