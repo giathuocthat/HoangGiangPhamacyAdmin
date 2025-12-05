@@ -26,7 +26,7 @@ namespace ThuocGiaThat.Infrastucture.Data
             var services = scope.ServiceProvider;
 
             var logger = services.GetRequiredService<ILoggerFactory>().CreateLogger("RoleClaimsMigration");
-            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
 
             try
             {
@@ -82,8 +82,6 @@ namespace ThuocGiaThat.Infrastucture.Data
                 logger.LogInformation(
                     "RoleClaims seeding completed. Added: {AddedCount}, Skipped (already exists): {SkippedCount}, Total: {TotalCount}",
                     addedCount, skippedCount, adminPermissions.Count);
-
-
 
 
                 var saleRole = "Sale";

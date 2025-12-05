@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using ThuocGiaThatAdmin.Domain.Entities;
 
 namespace ThuocGiaThatAdmin.Server.Controllers
 {
@@ -8,9 +9,9 @@ namespace ThuocGiaThatAdmin.Server.Controllers
     [ApiController]
     public class RoleController : ControllerBase
     {
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
 
-        public RoleController(RoleManager<IdentityRole> roleManager)
+        public RoleController(RoleManager<ApplicationRole> roleManager)
         {
             _roleManager = roleManager;
         }
