@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
@@ -14,10 +15,14 @@ namespace HoangGiangPhamacyAuthentication.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, RoleManager<ApplicationRole> _roleManager, UserManager<ApplicationUser> userManager)
         {
             _userService = userService;
+            this._roleManager = _roleManager;
+            _userManager = userManager;
         }
 
         // POST: api/user
@@ -37,10 +42,25 @@ namespace HoangGiangPhamacyAuthentication.Controllers
             };
 
             var result = await _userService.CreateAsync(user, dto.Password);
+
             if (!result.Succeeded)
             {
                 return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
             }
+            var roldeDetail = await _roleManager.FindByIdAsync(dto.Role.ToString());
+
+            if (roldeDetail != null)
+            {
+                var roleName = roldeDetail.Name;
+                var isInRole = await _userManager.IsInRoleAsync(user, roleName);
+
+                if(!isInRole)
+                {
+                    await _userManager.AddToRoleAsync(user, roleName);
+                }
+            }
+            
+
 
             // return location to the created resource
             var response = new { id = user.Id, username = user.UserName, email = user.Email };

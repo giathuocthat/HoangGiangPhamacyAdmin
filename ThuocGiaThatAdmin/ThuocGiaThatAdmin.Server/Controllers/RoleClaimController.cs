@@ -18,7 +18,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             this._service = _service;
         }
 
-        [HttpGet("{roleId}/Claims")]
+        [HttpGet("role/{roleId}")]
         public async Task<IActionResult> GetAll(string roleId)
         {
             var claims = await _service.GetAllClaimByRoleId(roleId);
@@ -27,7 +27,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             {
                 x.Id,
                 x.ClaimType,
-                x.ClaimValue
+                x.ClaimValue,
             });
 
             return Ok(result);
