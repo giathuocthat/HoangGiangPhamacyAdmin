@@ -186,5 +186,24 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 return Success(order, "Order delivery status updated successfully");
             }, "Update Delivery Status");
         }
+
+        [Authorize(Roles = "Customer")]
+        [HttpGet("listorders")]
+        public async Task<IActionResult> GetListOrders()
+        {
+            var customerId = int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
+            var  result = await _orderService.GetListOrders(customerId);
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Customer")]
+        [HttpGet("detail/{id}")]
+        public async Task<IActionResult> GetOrderDetail(int id)
+        {
+            var customerId = int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
+            var result = await _orderService.GetOrderDetailAsync(id);
+            return Ok(result);
+        }
+        
     }
 }

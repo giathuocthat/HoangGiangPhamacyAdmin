@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace ThuocGiaThatAdmin.Domain.Enums
 {
     /// <summary>
@@ -7,13 +9,24 @@ namespace ThuocGiaThatAdmin.Domain.Enums
     /// </summary>
     public enum OrderStatus
     {
+        [Description("Chờ xác nhận")]
         Pending = 0,
+        [Description("Đã xác nhận")]
         Confirmed = 1,
+        [Description("Đang xử lý")]
         Processing = 2,
+        [Description("Đang trung chuyển")]
         InTransit = 3,      // Đang trung chuyển
+        [Description("Đang giao hàng")]
         Shipping = 4,
-        Completed = 5,
-        Cancelled = 6
+        [Description("Đã giao")]
+        Delivered = 5,
+        [Description("Đã hoàn tất")]
+        Completed = 6,
+        [Description("Đang xử lý hủy")]
+        Cancelling = 7,
+        [Description("Đã hủy")]
+        Cancelled = 8,
     }
 
     /// <summary>
