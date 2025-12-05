@@ -14,10 +14,10 @@ namespace ThuocGiaThatAdmin.Service
     public class UserService : IUserService
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IRepository<ApplicationUser> _userRepository;
 
-        public UserService(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IRepository<ApplicationUser> userRepository)
+        public UserService(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IRepository<ApplicationUser> userRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -91,7 +91,15 @@ namespace ThuocGiaThatAdmin.Service
             // Create role if it doesn't exist (optional)
             if (!await _roleManager.RoleExistsAsync(role))
             {
-                var createRole = await _roleManager.CreateAsync(new IdentityRole(role));
+                var addedRole = new ApplicationRole
+                {
+                    Name = role,
+                    NormalizedName = role.ToUpper(),
+                    CreatedDate = DateTime.Now,
+                    IsActive = true
+                };
+
+                var createRole = await _roleManager.CreateAsync(addedRole);
                 if (!createRole.Succeeded) return createRole;
             }
 

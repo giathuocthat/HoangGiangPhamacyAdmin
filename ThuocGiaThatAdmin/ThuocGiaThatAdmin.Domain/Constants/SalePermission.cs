@@ -20,6 +20,9 @@ namespace ThuocGiaThatAdmin.Domain.Constants
             public const string Update = "Sale.Customer.Update";
             public const string Delete = "Sale.Customer.Delete";
             public const string View = "Sale.Customer.View";
+
+            public const string Import = "Sale.Customer.Import";
+            public const string Export = "Sale.Customer.Export";
         }
 
         public static class Order
@@ -28,6 +31,9 @@ namespace ThuocGiaThatAdmin.Domain.Constants
             public const string Update = "Sale.Order.Update";
             public const string Delete = "Sale.Order.Delete";
             public const string View = "Sale.Order.View";
+
+            public const string Import = "Sale.Order.Import";
+            public const string Export = "Sale.Order.Export";
         }
 
         public static class Brand
@@ -36,6 +42,9 @@ namespace ThuocGiaThatAdmin.Domain.Constants
             public const string Update = "Sale.Brand.Update";
             public const string Delete = "Sale.Brand.Delete";
             public const string View = "Sale.Brand.View";
+
+            public const string Import = "Sale.Brand.Import";
+            public const string Export = "Sale.Brand.Export";
         }
 
         public static class Category
@@ -44,6 +53,9 @@ namespace ThuocGiaThatAdmin.Domain.Constants
             public const string Update = "Sale.Category.Update";
             public const string Delete = "Sale.Category.Delete";
             public const string View = "Sale.Category.View";
+
+            public const string Import = "Sale.Category.Import";
+            public const string Export = "Sale.Category.Export";
         }
 
         public static class Product
@@ -52,6 +64,9 @@ namespace ThuocGiaThatAdmin.Domain.Constants
             public const string Update = "Sale.Product.Update";
             public const string Delete = "Sale.Product.Delete";
             public const string View = "Sale.Product.View";
+
+            public const string Import = "Sale.Product.Import";
+            public const string Export = "Sale.Product.Export";
         }
 
         public static class Inventory
@@ -60,6 +75,9 @@ namespace ThuocGiaThatAdmin.Domain.Constants
             public const string Update = "Sale.Inventory.Update";
             public const string Delete = "Sale.Inventory.Delete";
             public const string View = "Sale.Inventory.View";
+
+            public const string Import = "Sale.Inventory.Import";
+            public const string Export = "Sale.Inventory.Export";
         }
 
         public static class ProductCollection
@@ -68,6 +86,9 @@ namespace ThuocGiaThatAdmin.Domain.Constants
             public const string Update = "Sale.ProductCollection.Update";
             public const string Delete = "Sale.ProductCollection.Delete";
             public const string View = "Sale.ProductCollection.View";
+
+            public const string Import = "Sale.ProductCollection.Import";
+            public const string Export = "Sale.ProductCollection.Export";
         }
 
         public static class WareHouseCollection
@@ -76,6 +97,9 @@ namespace ThuocGiaThatAdmin.Domain.Constants
             public const string Update = "Sale.WareHouseCollection.Update";
             public const string Delete = "Sale.WareHouseCollection.Delete";
             public const string View = "Sale.WareHouseCollection.View";
+
+            public const string Import = "Sale.WareHouseCollection.Import";
+            public const string Export = "Sale.WareHouseCollection.Export";
         }
 
         public static class CustomerBusiness
@@ -84,6 +108,9 @@ namespace ThuocGiaThatAdmin.Domain.Constants
             public const string Update = "Sale.CustomerBusiness.Update";
             public const string Delete = "Sale.CustomerBusiness.Delete";
             public const string View = "Sale.CustomerBusiness.View";
+
+            public const string Import = "Sale.CustomerBusiness.Import";
+            public const string Export = "Sale.CustomerBusiness.Export";
         }
 
         /// <summary>

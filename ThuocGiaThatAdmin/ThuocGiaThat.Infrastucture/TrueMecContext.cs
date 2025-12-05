@@ -6,7 +6,8 @@ using ThuocGiaThatAdmin.Domain.Entities;
 
 namespace ThuocGiaThat.Infrastucture
 {
-    public class TrueMecContext : IdentityDbContext<ApplicationUser>
+
+    public class TrueMecContext : IdentityDbContext<ApplicationUser, ApplicationRole, string, IdentityUserClaim<string>, IdentityUserRole<string>, IdentityUserLogin<string>, ApplicationRoleClaim, IdentityUserToken<string>>
     {
         public TrueMecContext(DbContextOptions<TrueMecContext> options) : base(options)
         {
@@ -367,7 +368,10 @@ namespace ThuocGiaThat.Infrastucture
                 entity.ToTable(name: "Users");
                 entity.Property(u => u.FullName).HasMaxLength(200);
             });
-            
+
+            modelBuilder.Entity<ApplicationRole>().ToTable("Roles");
+            modelBuilder.Entity<ApplicationRoleClaim>().ToTable("RoleClaims");
+
             // ============ ShoppingCart Configuration ============
             modelBuilder.Entity<ShoppingCart>(entity =>
             {
@@ -430,11 +434,11 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(u => u.FullName).HasMaxLength(200);
             });
 
-            modelBuilder.Entity<IdentityRole>().ToTable("Roles");
+            //modelBuilder.Entity<IdentityRole>().ToTable("Roles");
             modelBuilder.Entity<IdentityUserRole<string>>().ToTable("UserRoles");
             modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("UserClaims");
             modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("UserLogins");
-            modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaims");
+            //modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaims");
             modelBuilder.Entity<IdentityUserToken<string>>().ToTable("UserTokens");
 
             modelBuilder.Entity<Country>().ToTable("Countries");
