@@ -159,6 +159,9 @@ builder.Services.AddScoped<ICartService, CartService>();
 // Shopping Cart Service
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 
+// other
+builder.Services.AddScoped<IRoleClaimService, RoleClaimService>();
+
 // ============================================================
 // Register CQRS - Dispatchers
 // ============================================================
