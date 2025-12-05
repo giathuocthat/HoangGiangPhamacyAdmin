@@ -62,6 +62,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// Customer login - returns JWT token
         /// </summary>
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] CustomerLoginDto dto)
         {
             return await ExecuteActionAsync(async () =>

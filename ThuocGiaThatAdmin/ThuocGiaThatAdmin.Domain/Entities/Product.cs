@@ -25,15 +25,12 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public string? Contraindications { get; set; }
         public string? StorageInstructions { get; set; }
         public string? RegistrationNumber { get; set; }
-        public bool IsPrescriptionDrug { get; set; } = false;
+        public bool? IsPrescriptionDrug { get; set; } = false;
 
         // Metadata
         public bool IsActive { get; set; } = true;
         public bool IsFeatured { get; set; } = false;
-        
-        public ProductSourceType SourceType { get; set; } = ProductSourceType.Regular;
-        public bool IsHGSGSelected { get; set; } = false;
-        // Dates inherited
+
 
         // Navigation properties
         public Category Category { get; set; } = null!;

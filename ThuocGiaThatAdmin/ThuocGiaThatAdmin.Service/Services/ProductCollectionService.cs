@@ -26,46 +26,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             _maxOrderConfigRepository = maxOrderConfigRepository;
         }
 
-        // Dynamic collections
-
-        public async Task<List<ProductDto>> GetHighProfitProductsAsync(decimal minRevenue = 100000000)
-        {
-            // Launching mode: Get Brand products
-            // Production mode: Get products with revenue >= minRevenue
-            // For now, implementing Launching mode logic as requested: "khi launching thì lấy danh sách hàng brand"
-            
-            var products = await _context.Products
-                .Where(p => p.IsActive)
-                .Where(p => p.SourceType == ProductSourceType.Brand)
-                .Include(p => p.Category)
-                .Include(p => p.Brand)
-                .Include(p => p.Images)
-                .Include(p => p.ProductVariants)
-                .Include(p => p.MaxOrderConfig)
-                .OrderByDescending(p => p.CreatedDate)
-                .ToListAsync();
-
-            return products.Select(MapToProductDto).ToList();
-        }
-
-        public async Task<List<ProductDto>> GetTopSellingProductsAsync(int minQuantity = 100)
-        {
-            // Launching mode: Brand + HGSG Selected
-            // "khi launching thì lấy danh sách hàng brand và hàng HGSG tuyển chọn"
-            
-            var products = await _context.Products
-                .Where(p => p.IsActive)
-                .Where(p => p.SourceType == ProductSourceType.Brand || p.IsHGSGSelected)
-                .Include(p => p.Category)
-                .Include(p => p.Brand)
-                .Include(p => p.Images)
-                .Include(p => p.ProductVariants)
-                .Include(p => p.MaxOrderConfig)
-                .OrderByDescending(p => p.CreatedDate)
-                .ToListAsync();
-
-            return products.Select(MapToProductDto).ToList();
-        }
+      
 
         public async Task<List<ProductDto>> GetNewProductsAsync(int days = 30)
         {
@@ -100,63 +61,6 @@ namespace ThuocGiaThatAdmin.Service.Services
                 .ToListAsync();
 
             return products.Select(MapToProductDto).ToList();
-        }
-
-        // Manual collections
-
-        public async Task<List<ProductDto>> GetCollectionProductsAsync(string slug)
-        {
-            var collection = await _collectionRepository.GetBySlugAsync(slug);
-            if (collection == null)
-            {
-                // If manual collection not found, try to map to dynamic logic based on slug
-                if (slug == "dang-ban-chay") // "Đang bán chạy"
-                {
-                    // Launching: Brand + HGSG Selected
-                     var products = await _context.Products
-                        .Where(p => p.IsActive)
-                        .Where(p => p.SourceType == ProductSourceType.Brand || p.IsHGSGSelected)
-                        .Include(p => p.Category)
-                        .Include(p => p.Brand)
-                        .Include(p => p.Images)
-                        .Include(p => p.ProductVariants)
-                        .Include(p => p.MaxOrderConfig)
-                        .OrderByDescending(p => p.CreatedDate)
-                        .ToListAsync();
-                    return products.Select(MapToProductDto).ToList();
-                }
-                return new List<ProductDto>();
-            }
-
-            if (collection.Type == CollectionType.Manual)
-            {
-                // Manual collection: return items in display order
-                var items = collection.Items.OrderBy(i => i.DisplayOrder).ToList();
-                var productDtos = new List<ProductDto>();
-                
-                foreach (var item in items)
-                {
-                    // Need to load full product details
-                    var product = await _context.Products
-                        .Include(p => p.Category)
-                        .Include(p => p.Brand)
-                        .Include(p => p.Images)
-                        .Include(p => p.ProductVariants)
-                        .Include(p => p.MaxOrderConfig)
-                        .FirstOrDefaultAsync(p => p.Id == item.ProductId);
-                        
-                    if (product != null && product.IsActive)
-                    {
-                        productDtos.Add(MapToProductDto(product));
-                    }
-                }
-                return productDtos;
-            }
-            else
-            {
-                // Auto collections logic if needed
-                return new List<ProductDto>();
-            }
         }
 
         public async Task<ProductCollectionDto> CreateCollectionAsync(CreateCollectionDto dto)
@@ -278,8 +182,6 @@ namespace ThuocGiaThatAdmin.Service.Services
                 IsPrescriptionDrug = product.IsPrescriptionDrug,
                 IsActive = product.IsActive,
                 IsFeatured = product.IsFeatured,
-                SourceType = product.SourceType,
-                IsHGSGSelected = product.IsHGSGSelected,
                 CreatedDate = product.CreatedDate,
                 Images = product.Images.Select(i => new ProductImageDto
                 {
@@ -346,6 +248,21 @@ namespace ThuocGiaThatAdmin.Service.Services
                 .Replace("ú", "u").Replace("ù", "u").Replace("ủ", "u").Replace("ũ", "u").Replace("ụ", "u")
                 .Replace("ư", "u").Replace("ứ", "u").Replace("ừ", "u").Replace("ử", "u").Replace("ữ", "u").Replace("ự", "u")
                 .Replace("ý", "y").Replace("ỳ", "y").Replace("ỷ", "y").Replace("ỹ", "y").Replace("ỵ", "y");
+        }
+
+        public Task<List<ProductDto>> GetHighProfitProductsAsync(decimal minRevenue = 100000000)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<ProductDto>> GetTopSellingProductsAsync(int minQuantity = 100)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<ProductDto>> GetCollectionProductsAsync(string slug)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -25,6 +25,9 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         [Range(0, int.MaxValue, ErrorMessage = "Stock quantity must be non-negative")]
         public int StockQuantity { get; set; } = 0;
 
+        [Range(1, int.MaxValue, ErrorMessage = "Max sales quantity must be greater than 0")]
+        public int? MaxSalesQuantity { get; set; }
+
         [Range(0.01, double.MaxValue, ErrorMessage = "Weight must be greater than 0")]
         public decimal? Weight { get; set; }
 

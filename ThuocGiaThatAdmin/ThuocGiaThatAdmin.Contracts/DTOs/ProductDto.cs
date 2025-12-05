@@ -25,13 +25,12 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public string? Contraindications { get; set; }
         public string? StorageInstructions { get; set; }
         public string? RegistrationNumber { get; set; }
-        public bool IsPrescriptionDrug { get; set; }
+        public bool? IsPrescriptionDrug { get; set; }
 
         // Metadata
         public bool IsActive { get; set; }
         public bool IsFeatured { get; set; }
         public ProductSourceType SourceType { get; set; }
-        public bool IsHGSGSelected { get; set; }
         public DateTime CreatedDate { get; set; }
 
         // Related entities
