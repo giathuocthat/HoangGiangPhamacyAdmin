@@ -68,7 +68,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ThuocGiaThat.Infrastucture.TrueMecContext>(options =>
     options.UseSqlServer(connectionString));
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
     .AddEntityFrameworkStores<ThuocGiaThat.Infrastucture.TrueMecContext>()
     .AddDefaultTokenProviders();
 
@@ -115,6 +115,7 @@ builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 builder.Services.AddScoped<IProductOptionRepository, ProductOptionRepository>();
 builder.Services.AddScoped<IUploadedFileRepository, UploadedFileRepository>();
 builder.Services.AddScoped<IProductVariantRepository, ProductVariantRepository>();
+builder.Services.AddScoped<IAddressRepository, AddressRepository>();
 
 // Inventory Management Repositories
 builder.Services.AddScoped<IWarehouseRepository, WarehouseRepository>();
@@ -158,6 +159,7 @@ builder.Services.AddScoped<ICartService, CartService>();
 
 // Shopping Cart Service
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
+builder.Services.AddScoped<IAddressService, AddressService>();
 
 // ============================================================
 // Register CQRS - Dispatchers
@@ -205,15 +207,15 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<ThuocGiaThat.Infrastucture.TrueMecContext>();
     db.Database.Migrate();
     // seed admin user and roles (reads AdminUser:* from configuration)
+    ChildrenRoleMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     UserMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     // seed role claims (permissions) for admin role
-    // RoleClaimsMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
+    RoleClaimsMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     CountryMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     ProvinceMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     WardMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     BusinessTypeMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     CategoryMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
-    SaleRoleMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
 }
 
 // ============================================================

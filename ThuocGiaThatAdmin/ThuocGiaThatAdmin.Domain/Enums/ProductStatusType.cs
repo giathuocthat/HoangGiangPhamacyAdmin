@@ -12,6 +12,8 @@ namespace ThuocGiaThatAdmin.Domain.Enums
         Hot = 1,
         Top = 2,
         Featured = 3,
-        Favorite = 4
+        Favorite = 4,
+        BestSeller = 5,
+        Recommendation = 6
     }
 }

@@ -4,6 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using ThuocGiaThat.Infrastucture;
+using ThuocGiaThatAdmin.Common;
+using ThuocGiaThatAdmin.Contract.DTOs;
+using ThuocGiaThatAdmin.Contract.Enums;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Domain.Enums;
@@ -505,6 +508,39 @@ namespace ThuocGiaThatAdmin.Service.Services
                     TotalLineAmount = oi.TotalLineAmount
                 }).ToList()
             };
+        }
+
+        public async Task<int> CreateOrderAsync(CheckoutOrderDto orderDto)
+        {
+            var order = new Order
+            {
+                OrderNumber = OrderNumberGenerator.GenerateOrderNumber(),
+                CustomerId = orderDto.CustomerId,
+                Note = orderDto.Note,
+                OrderStatus = OrderStatus.Pending.ToStatusString(),
+                PaymentStatus = PaymentStatus.WaitingConfirm.ToString(),
+                PaymentMethod = PaymentMethod.Cash.ToString(),
+                DiscountAmount = orderDto.DiscountAmount,
+                ShippingFee = orderDto.ShippingFee,
+                TotalAmount = orderDto.Total,
+                ShippingName = orderDto.ShippingName,
+                ShippingAddress = orderDto.ShippingAddress,
+                OrderItems = orderDto.Items
+                            .Select(x => new OrderItem { ProductId = x.ProductId, ProductVariantId = x.ProductVariantId, Quantity = x.Quantity, UnitPrice = x.Price, TotalLineAmount = x.Quantity * x.Price })
+                            .ToList(),
+                SubTotal = orderDto.SubTotal,
+                ShippingPhone = orderDto.ShippingPhone
+            };
+
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
+
+            return order.Id;
+        }
+
+        public async Task<OrderSummaryDto?> GetOrderSummary(int id)
+        {
+            return await _context.Orders.Where(x => x.Id == id).Select(x => new OrderSummaryDto { Id = x.Id, Total = x.TotalAmount, OrderNumber = x.OrderNumber }).FirstOrDefaultAsync();
         }
     }
 }

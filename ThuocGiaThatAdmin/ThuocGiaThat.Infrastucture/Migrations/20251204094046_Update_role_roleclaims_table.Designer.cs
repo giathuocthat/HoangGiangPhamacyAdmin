@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ThuocGiaThat.Infrastucture;
 
@@ -11,9 +12,11 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    partial class TrueMecContextModelSnapshot : ModelSnapshot
+    [Migration("20251204094046_Update_role_roleclaims_table")]
+    partial class Update_role_roleclaims_table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1033,7 +1036,10 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<bool>("IsFeatured")
                         .HasColumnType("bit");
 
-                    b.Property<bool?>("IsPrescriptionDrug")
+                    b.Property<bool>("IsHGSGSelected")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPrescriptionDrug")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
@@ -1051,6 +1057,9 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("SourceType")
+                        .HasColumnType("int");
 
                     b.Property<string>("StorageInstructions")
                         .HasColumnType("nvarchar(max)");

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using ThuocGiaThat.Infrastucture.Repositories;
 using ThuocGiaThatAdmin.Domain.Entities;
 
 namespace ThuocGiaThat.Infrastucture.Data
@@ -25,7 +26,9 @@ namespace ThuocGiaThat.Infrastucture.Data
             var logger = services.GetRequiredService<ILoggerFactory>().CreateLogger("UserMigration");
 
             var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
+
+            var roleRepository = services.GetRequiredService<IRepository<ApplicationRole>>();
 
             // Read from configuration (secure this in production)
             var adminUserName = configuration["AdminUser:UserName"] ?? "admin";
@@ -38,7 +41,15 @@ namespace ThuocGiaThat.Infrastucture.Data
                 // Ensure role exists
                 if (!await roleManager.RoleExistsAsync(adminRole))
                 {
-                    var roleResult = await roleManager.CreateAsync(new IdentityRole(adminRole));
+                    var addedRole = new ApplicationRole
+                    {
+                        Name = adminRole,
+                        NormalizedName = adminRole.ToUpper(),
+                        CreatedDate = DateTime.Now,
+                        IsActive = true
+                    };
+                    var roleResult = await roleManager.CreateAsync(addedRole);
+
                     if (!roleResult.Succeeded)
                         logger.LogError("Failed to create role {Role}: {Errors}", adminRole, string.Join(", ", roleResult.Errors.Select(e => e.Description)));
                 }

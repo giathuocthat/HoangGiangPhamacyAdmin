@@ -49,7 +49,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                         fullName = customer.FullName,
                         email = customer.Email,
                         businessTypeId = customer.BusinessTypeId,
-                        businessTypeName = customer.BusinessTypeName
+                        businessTypeName = customer.BusinessTypeName,
+                        phoneNumber = customer.PhoneNumber
                     }
                 };
 

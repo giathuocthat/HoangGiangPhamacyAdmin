@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Service.Services;
+using Microsoft.AspNetCore.Authorization;
+using ThuocGiaThatAdmin.Service.Interfaces;
+using ThuocGiaThatAdmin.Contract.DTOs;
 
 namespace ThuocGiaThatAdmin.Server.Controllers
 {
@@ -11,11 +14,13 @@ namespace ThuocGiaThatAdmin.Server.Controllers
     public class OrderController : BaseApiController
     {
         private readonly OrderService _orderService;
+        private readonly IAddressService _addressSevice;
 
-        public OrderController(OrderService orderService, ILogger<OrderController> logger)
+        public OrderController(OrderService orderService, ILogger<OrderController> logger, IAddressService addressService)
             : base(logger)
         {
             _orderService = orderService ?? throw new ArgumentNullException(nameof(orderService));
+            _addressSevice = addressService ?? throw new ArgumentNullException(nameof(addressService));
         }
 
         /// <summary>
@@ -132,6 +137,38 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 var order = await _orderService.UpdateOrderStatusAsync(id, dto.NewStatus);
                 return Success(order, "Order status updated successfully");
             }, "Update Order Status");
+        }
+
+        [Authorize(Roles = "Customer")]
+        [HttpGet("defaultAddress")]
+        public async Task<IActionResult> GetDefaultAddress()
+        {
+            var customerId = int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
+            var address = await _addressSevice.GetDefaultAddress(customerId);
+            return Ok(address);
+        }
+
+        [Authorize(Roles = "Customer")]
+        [HttpPost("checkout")]
+        public async Task<IActionResult> Checkout([FromBody] CheckoutOrderDto order)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var customerId = int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
+                order.CustomerId = customerId;
+                var orderId = await _orderService.CreateOrderAsync(order);
+                return Success<int>(orderId, "Create Order Sucessfully");
+            }, "Create Order Sucessfully");
+        }
+
+        [HttpGet("summary/{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var order = await _orderService.GetOrderSummary(id);
+                return Success(order, "Get Order Summary successfully");
+            }, "Get Order Summary");            
         }
 
         /// <summary>

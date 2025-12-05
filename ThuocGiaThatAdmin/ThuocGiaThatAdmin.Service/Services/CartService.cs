@@ -42,7 +42,8 @@ namespace ThuocGiaThatAdmin.Service.Services
                     ImageUrl = productVariant.ImageUrl,
                     ProductVariantId = productVariant.Id,
                     BrandId = productVariant.Product.BrandId,
-                    BrandName = productVariant.Product.Brand.Name
+                    BrandName = productVariant.Product.Brand.Name,
+                    MaxSalesQuantity = productVariant.MaxSalesQuantity
                 };
                 cartProductDtos.Add(dto);
             }

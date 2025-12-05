@@ -26,5 +26,6 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
         public int? ProvinceId { get; set; }
         public string? ProvinceName { get; set; }
         public bool IsDefault { get; set; }
+        public string FullAddress => $"{AddressLine}, {WardName}, {ProvinceName}";
     }
 }

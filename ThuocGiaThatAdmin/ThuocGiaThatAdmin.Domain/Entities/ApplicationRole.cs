@@ -5,13 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
 namespace ThuocGiaThatAdmin.Domain.Entities
 {
-    public class ApplicationUser : IdentityUser
+    public class ApplicationRole : IdentityRole
     {
         public DateTime CreatedDate { get; set; }
-        public string? FullName { get; set; }
+        public string? Description { get; set; }
         public bool IsActive { get; set; }
     }
 }

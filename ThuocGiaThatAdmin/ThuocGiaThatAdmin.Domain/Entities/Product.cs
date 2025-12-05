@@ -25,6 +25,8 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public string? Contraindications { get; set; }
         public string? StorageInstructions { get; set; }
         public string? RegistrationNumber { get; set; }
+        public string? DrugEfficacy { get; set; }
+        public string? DosageInstructions { get; set; }
         public bool? IsPrescriptionDrug { get; set; } = false;
 
         // Metadata

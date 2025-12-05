@@ -18,6 +18,7 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
         public string? ImageUrl { get; set; }        
         public int? BrandId { get; set; }
         public string BrandName { get; set; }
+        public int? MaxSalesQuantity { get; set; }
 
     }
 }

@@ -30,7 +30,10 @@ namespace HoangGiangPhamacyAuthentication.Controllers
             {
                 UserName = dto.Username,
                 Email = dto.Email,
-                FullName = dto.FullName,                
+                FullName = dto.FullName,
+                CreatedDate = DateTime.Now,
+                PhoneNumber = dto.Phone,
+                IsActive = true
             };
 
             var result = await _userService.CreateAsync(user, dto.Password);
@@ -55,8 +58,7 @@ namespace HoangGiangPhamacyAuthentication.Controllers
 
             // Map updatable fields
             existing.FullName = dto.FullName ?? existing.FullName;
-            existing.Email = dto.Email ?? existing.Email;
-            existing.UserName = dto.Username ?? existing.UserName;
+            existing.PhoneNumber = dto.PhoneNumber;
 
             var result = await _userService.UpdateAsync(existing);
             if (!result.Succeeded)
@@ -86,7 +88,10 @@ namespace HoangGiangPhamacyAuthentication.Controllers
                 Username = user.UserName,
                 Email = user.Email,
                 FullName = user.FullName,
-                Roles = roles?.ToArray() ?? Array.Empty<string>()
+                Roles = roles?.ToArray() ?? Array.Empty<string>(),
+                PhoneNumber = user.PhoneNumber,
+                CreatedDate = user.CreatedDate,
+                IsActive = user.IsActive
             };
 
             return Ok(dto);
@@ -123,6 +128,34 @@ namespace HoangGiangPhamacyAuthentication.Controllers
             };
 
             return Ok(dto);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUserList([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var users = await _userService.GetAllAsync(pageNumber, pageSize);
+
+            foreach (var item in users)
+            {
+                item.Role = string.Join(",", item.Roles.Select(x => x.Name));
+            }
+
+            return Ok(users);
+        }
+
+        [HttpDelete("{id}/deactivate")]
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+            var userDetail = await _userService.GetByIdAsync(id);
+
+            if (userDetail == null)
+            {
+                return NotFound(new { error = "user_not_found" });
+            }
+
+            await _userService.DeactivateUser(userDetail.UserName);
+
+            return Ok();
         }
     }
 }
