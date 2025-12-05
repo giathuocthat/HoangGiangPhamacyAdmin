@@ -45,8 +45,8 @@ namespace ThuocGiaThatAdmin.Domain.Enums
                 OrderStatus.Confirmed => new[] { OrderStatus.Processing, OrderStatus.Cancelled },
                 OrderStatus.Processing => new[] { OrderStatus.InTransit, OrderStatus.Cancelled },
                 OrderStatus.InTransit => new[] { OrderStatus.Shipping, OrderStatus.Cancelled },
-                OrderStatus.Shipping => new[] { OrderStatus.Deliveried, OrderStatus.Cancelled },
-                OrderStatus.Deliveried => new[] { OrderStatus.Completed },
+                OrderStatus.Shipping => new[] { OrderStatus.Delivered, OrderStatus.Cancelled },
+                OrderStatus.Delivered => new[] { OrderStatus.Completed },
                 OrderStatus.Completed => new OrderStatus[] { }, // No transitions from Completed
                 OrderStatus.Cancelled => new OrderStatus[] { }, // No transitions from Cancelled
                 _ => new OrderStatus[] { }
