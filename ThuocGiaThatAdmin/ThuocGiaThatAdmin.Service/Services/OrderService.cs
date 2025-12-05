@@ -525,6 +525,8 @@ namespace ThuocGiaThatAdmin.Service.Services
                 TotalAmount = orderDto.Total,
                 ShippingName = orderDto.ShippingName,
                 ShippingAddress = orderDto.ShippingAddress,
+                WardId = orderDto.WardId,
+                ProvinceId = orderDto.ProvinceId,
                 OrderItems = orderDto.Items
                             .Select(x => new OrderItem { ProductId = x.ProductId, ProductVariantId = x.ProductVariantId, Quantity = x.Quantity, UnitPrice = x.Price, TotalLineAmount = x.Quantity * x.Price })
                             .ToList(),
@@ -533,9 +535,75 @@ namespace ThuocGiaThatAdmin.Service.Services
             };
 
             _context.Orders.Add(order);
+            
+            // Create snapshots for all order items (using navigation property, not ID)
+            foreach (var orderItem in order.OrderItems)
+            {
+                CreateOrderItemSnapshotForNewItem(orderItem);
+            }
+            
+            // Save everything in one transaction
             await _context.SaveChangesAsync();
 
             return order.Id;
+        }
+        
+        /// <summary>
+        /// Create snapshot of product information for a new order item (before save)
+        /// Uses navigation property instead of OrderItemId
+        /// </summary>
+        private void CreateOrderItemSnapshotForNewItem(OrderItem orderItem)
+        {
+            var variant = _context.ProductVariants
+                .Include(v => v.Product)
+                    .ThenInclude(p => p.Category)
+                .Include(v => v.Product.Brand)
+                .FirstOrDefault(v => v.Id == orderItem.ProductVariantId);
+            
+            if (variant == null) return;
+            
+            var product = variant.Product;
+            
+            // Get variant attributes as JSON string
+            var variantAttributes = _context.VariantOptionValues
+                .Where(vov => vov.ProductVariantId == variant.Id)
+                .Include(vov => vov.ProductOptionValue)
+                    .ThenInclude(pov => pov.ProductOption)
+                .Select(vov => new { vov.ProductOptionValue.ProductOption.Name, vov.ProductOptionValue.Value })
+                .ToList();
+            
+            var variantAttributesJson = variantAttributes.Any() 
+                ? System.Text.Json.JsonSerializer.Serialize(variantAttributes) 
+                : null;
+            
+            var snapshot = new OrderItemSnapshot
+            {
+                OrderItem = orderItem, // Use navigation property instead of OrderItemId
+                ProductId = product.Id,
+                ProductVariantId = variant.Id,
+                ProductName = product.Name,
+                SKU = variant.SKU,
+                Barcode = variant.Barcode,
+                ShortDescription = product.ShortDescription,
+                FullDescription = product.FullDescription,
+                VariantAttributes = variantAttributesJson,
+                Price = variant.Price,
+                OriginalPrice = variant.OriginalPrice,
+                ThumbnailUrl = product.ThumbnailUrl,
+                VariantImageUrl = variant.ImageUrl,
+                CategoryName = product.Category?.Name,
+                BrandName = product.Brand?.Name,
+                Ingredients = product.Ingredients,
+                UsageInstructions = product.UsageInstructions,
+                Contraindications = product.Contraindications,
+                StorageInstructions = product.StorageInstructions,
+                RegistrationNumber = product.RegistrationNumber,
+                DrugEfficacy = product.DrugEfficacy,
+                DosageInstructions = product.DosageInstructions,
+                IsPrescriptionDrug = product.IsPrescriptionDrug
+            };
+            
+            _context.OrderItemSnapshots.Add(snapshot);
         }
 
         public async Task<OrderSummaryDto?> GetOrderSummary(int id)

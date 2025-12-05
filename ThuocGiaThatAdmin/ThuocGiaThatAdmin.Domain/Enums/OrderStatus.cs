@@ -10,10 +10,11 @@ namespace ThuocGiaThatAdmin.Domain.Enums
         Pending = 0,
         Confirmed = 1,
         Processing = 2,
-        InTransit = 3,      // Đang trung chuyển
+        InTransit = 3,      
         Shipping = 4,
-        Completed = 5,
-        Cancelled = 6
+        Deliveried = 5,
+        Completed = 6,
+        Cancelled = 7,
     }
 
     /// <summary>
@@ -32,7 +33,8 @@ namespace ThuocGiaThatAdmin.Domain.Enums
                 OrderStatus.Confirmed => new[] { OrderStatus.Processing, OrderStatus.Cancelled },
                 OrderStatus.Processing => new[] { OrderStatus.InTransit, OrderStatus.Cancelled },
                 OrderStatus.InTransit => new[] { OrderStatus.Shipping, OrderStatus.Cancelled },
-                OrderStatus.Shipping => new[] { OrderStatus.Completed, OrderStatus.Cancelled },
+                OrderStatus.Shipping => new[] { OrderStatus.Deliveried, OrderStatus.Cancelled },
+                OrderStatus.Deliveried => new[] { OrderStatus.Completed },
                 OrderStatus.Completed => new OrderStatus[] { }, // No transitions from Completed
                 OrderStatus.Cancelled => new OrderStatus[] { }, // No transitions from Cancelled
                 _ => new OrderStatus[] { }

@@ -21,6 +21,8 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
         public string ShippingName { get; set; }
         public string ShippingPhone { get; set; }
         public string ShippingAddress { get; set; }
+        public int? WardId { get; set; }
+        public int? ProvinceId { get; set; }
 
     }
 

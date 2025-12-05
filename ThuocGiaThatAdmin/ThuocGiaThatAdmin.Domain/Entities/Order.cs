@@ -36,7 +36,16 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public string? Note { get; set; }
         // UpdatedDate inherited
 
+        // Location Information
+        public int? WardId { get; set; }
+        public int? ProvinceId { get; set; }
+        
+        // Sales Information
+        public int? SaleUserId { get; set; }
+
         public Customer? Customer { get; set; }
+        public Ward? Ward { get; set; }
+        public Province? Province { get; set; }
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 }

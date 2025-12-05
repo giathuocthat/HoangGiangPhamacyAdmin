@@ -40,6 +40,7 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<OrderItemSnapshot> OrderItemSnapshots { get; set; }
         public DbSet<Country> Countries { get; set; }
         public DbSet<Province> Provinces { get; set; }
         public DbSet<Ward>  Wards { get; set; }
@@ -349,8 +350,23 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.TotalAmount).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
                 entity.Property(e => e.UpdatedDate);
+                
                 entity.HasOne(e => e.Customer).WithMany(e => e.Orders).HasForeignKey(e => e.CustomerId).OnDelete(DeleteBehavior.SetNull);
+                
+                // Location relationships
+                entity.HasOne(e => e.Ward)
+                    .WithMany()
+                    .HasForeignKey(e => e.WardId)
+                    .OnDelete(DeleteBehavior.SetNull);
+                    
+                entity.HasOne(e => e.Province)
+                    .WithMany()
+                    .HasForeignKey(e => e.ProvinceId)
+                    .OnDelete(DeleteBehavior.SetNull);
+                
                 entity.HasIndex(e => e.OrderNumber).IsUnique();
+                entity.HasIndex(e => e.WardId);
+                entity.HasIndex(e => e.ProvinceId);
             });
 
             // ============ OrderItem Configuration ============
@@ -361,6 +377,30 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.TotalLineAmount).HasColumnType("decimal(18,2)");
                 entity.HasOne(e => e.Order).WithMany(e => e.OrderItems).HasForeignKey(e => e.OrderId).OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(e => e.ProductVariant).WithMany().HasForeignKey(e => e.ProductVariantId).OnDelete(DeleteBehavior.Restrict);
+            });
+            
+            // ============ OrderItemSnapshot Configuration ============
+            modelBuilder.Entity<OrderItemSnapshot>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.ProductName).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.SKU).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Barcode).HasMaxLength(100);
+                entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.OriginalPrice).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.ThumbnailUrl).HasMaxLength(500);
+                entity.Property(e => e.VariantImageUrl).HasMaxLength(500);
+                entity.Property(e => e.CategoryName).HasMaxLength(255);
+                entity.Property(e => e.BrandName).HasMaxLength(255);
+                entity.Property(e => e.RegistrationNumber).HasMaxLength(100);
+                
+                entity.HasOne(e => e.OrderItem)
+                    .WithOne()
+                    .HasForeignKey<OrderItemSnapshot>(e => e.OrderItemId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                
+                entity.HasIndex(e => e.OrderItemId).IsUnique();
+                entity.HasIndex(e => e.ProductVariantId);
             });
 
             modelBuilder.Entity<ApplicationUser>(entity =>

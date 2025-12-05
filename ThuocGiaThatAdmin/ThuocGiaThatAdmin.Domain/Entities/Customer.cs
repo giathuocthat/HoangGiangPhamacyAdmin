@@ -28,6 +28,9 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public string? BusinessPhone { get; set; }              // SĐT công ty
         public string? BusinessEmail { get; set; }              // Email công ty
         
+        // ========== Sales Information ==========
+        public int? SaleUserId { get; set; }                 // Nhân viên sale phụ trách
+        
         // ========== Navigation Properties ==========
         // Dates inherited
         public ICollection<Address> Addresses { get; set; } = new List<Address>();
