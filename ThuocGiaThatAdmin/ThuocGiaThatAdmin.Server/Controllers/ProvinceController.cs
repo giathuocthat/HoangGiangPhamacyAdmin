@@ -25,7 +25,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         public async Task<IActionResult> GetAll()
         {
             var provinces = await _provinceRepo.GetAllAsync();
-            var result = provinces.Select(p => new ProvinceListDto(p.Id, p.Name, p.Code, p.CountryId)).ToList();
+            var result = provinces.OrderBy(p => p.Name).Select(p => new ProvinceListDto(p.Id, p.Name, p.Code, p.CountryId)).ToList();
             return Ok(result);
         }
 

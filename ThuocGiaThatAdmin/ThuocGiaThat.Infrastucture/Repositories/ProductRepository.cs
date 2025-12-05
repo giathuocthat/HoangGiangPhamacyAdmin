@@ -103,8 +103,8 @@ namespace ThuocGiaThat.Infrastucture.Repositories
             var totalCount = await query.CountAsync();
 
             var products = await query
-                .Include(p => p.ProductVariants.OrderBy(v => v.CreatedDate).Take(1))
-                .OrderByDescending(b => b.CreatedDate)
+                .Include(p => p.ProductVariants.Take(1))
+                .OrderByDescending(b => b.Id)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
