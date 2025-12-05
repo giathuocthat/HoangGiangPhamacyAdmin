@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -609,6 +610,69 @@ namespace ThuocGiaThatAdmin.Service.Services
         public async Task<OrderSummaryDto?> GetOrderSummary(int id)
         {
             return await _context.Orders.Where(x => x.Id == id).Select(x => new OrderSummaryDto { Id = x.Id, Total = x.TotalAmount, OrderNumber = x.OrderNumber }).FirstOrDefaultAsync();
+        }
+
+        public async Task<IEnumerable<dynamic>> GetListOrders(int customerId)
+        {
+            return await _context.Orders.Where(x => x.CustomerId == customerId).OrderByDescending(x => x.CreatedDate).Select(x => new
+            {
+                Id = x.Id,
+                OrderNumber = x.OrderNumber,
+                OrderStatus = Enum.Parse<OrderStatus>(x.OrderStatus),
+                OrderStatusDescription = Enum.Parse<OrderStatus>(x.OrderStatus).GetDescription(),
+                NumberOfProducts = x.OrderItems.Count,
+                TotalOfItems = x.OrderItems.Sum(i => i.Quantity),
+                CreatedDate = x.CreatedDate
+            }).ToListAsync();
+        }
+
+        public async Task<dynamic?> GetOrderDetailAsync(int id)
+        {
+            try
+            {
+                var orderDetail = await _context.Orders.Where(x => x.Id == id).Select(x => new
+                {
+                    Id = x.Id,
+                    OrderNumber = x.OrderNumber,
+                    OrderStatus = Enum.Parse<OrderStatus>(x.OrderStatus),
+                    OrderStatusDescription = Enum.Parse<OrderStatus>(x.OrderStatus).GetDescription(),
+                    NumberOfProducts = x.OrderItems.Count,
+                    TotalOfItems = x.OrderItems.Sum(i => i.Quantity),
+                    CreatedDate = x.CreatedDate,
+                    Receiver = new
+                    {
+                        Name = x.ShippingName,
+                        Address = x.ShippingAddress,
+                        Phone = x.ShippingPhone
+                    },
+                    PaymentMethod = x.PaymentMethod,
+                    DeliveryDate = x.CreatedDate.AddDays(7),
+                    DeliveryMethod = "",
+                    Note = x.Note,
+                    Items = x.OrderItems.Select(y => new
+                    {
+                        Name = y.ProductVariant.Product.Name,
+                        ImageUrl = y.ProductVariant.ImageUrl,
+                        BrandName = y.ProductVariant.Product.Brand.Name,
+                        Quantity = y.Quantity,
+                        Price = y.UnitPrice,
+                        TotalAmount = y.UnitPrice * y.Quantity
+                    }),
+                    Total = x.TotalAmount,
+                    SubTotal = x.SubTotal,
+                    ShippingFee = x.ShippingFee,
+                    UtilityFee = 0,
+
+                }).FirstOrDefaultAsync();
+
+                return orderDetail;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+            
         }
     }
 }
