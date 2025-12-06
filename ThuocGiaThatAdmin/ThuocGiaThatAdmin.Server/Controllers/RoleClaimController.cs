@@ -28,6 +28,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 x.Id,
                 x.ClaimType,
                 x.ClaimValue,
+                x.IsActive
             });
 
             return Ok(result);
