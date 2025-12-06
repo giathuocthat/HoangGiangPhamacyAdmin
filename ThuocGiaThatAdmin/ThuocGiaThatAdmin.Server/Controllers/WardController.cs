@@ -59,7 +59,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         public async Task<IActionResult> GetByProvinceId(int provinceId)
         {
             var wards = await _wardRepo.FindAsync(x => x.ProvinceId == provinceId);
-            var result = wards.Select(w => new WardListDto(w.Id, w.Name, w.Code, w.ProvinceId)).ToList();
+            var result = wards.OrderBy(w => w.Name).Select(w => new WardListDto(w.Id, w.Name, w.Code, w.ProvinceId)).ToList();
             return Ok(result);
         }
 
