@@ -10,6 +10,9 @@
   <Project Path="GiathuocthatAdmin.Application.Command/ThuocGiaThatAdmin.Commands.csproj" Id="2f6bc1e4-fb27-4942-b012-0373f192533f">
     <BuildType Solution="Dev|*" Project="Release" />
   </Project>
+  <Project Path="Test.GiaThuocThat/Test.GiaThuocThat.csproj" Id="394d6982-7d72-48bf-a62f-0d758813f424">
+    <BuildType Solution="Dev|*" Project="Release" />
+  </Project>
   <Project Path="ThuocGiaThat.Common/ThuocGiaThatAdmin.Common.csproj" Id="62d1963f-f385-49ee-9bb0-66c46546512f">
     <BuildType Solution="Dev|*" Project="Release" />
   </Project>
@@ -24,9 +27,6 @@
   </Project>
   <Project Path="ThuocGiaThatAdmin.Server/ThuocGiaThatAdmin.Server.csproj" />
   <Project Path="ThuocGiaThatAdmin.Service/ThuocGiaThatAdmin.Service.csproj">
-    <BuildType Solution="Dev|*" Project="Release" />
-  </Project>
-    <Project Path="Test.GiaThuocThat/Test.GiaThuocThat.csproj" Id="394d6982-7d72-48bf-a62f-0d758813f424">
     <BuildType Solution="Dev|*" Project="Release" />
   </Project>
 </Solution>

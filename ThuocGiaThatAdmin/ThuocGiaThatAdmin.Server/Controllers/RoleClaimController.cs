@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using ThuocGiaThatAdmin.Contract.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Service.Interfaces;
 
@@ -12,10 +13,12 @@ namespace ThuocGiaThatAdmin.Server.Controllers
     {
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IRoleClaimService _service;
-        public RoleClaimController(RoleManager<ApplicationRole> roleManager, IRoleClaimService _service)
+        private readonly IRoleClaimService _roleClaimService;
+        public RoleClaimController(RoleManager<ApplicationRole> roleManager, IRoleClaimService _service, IRoleClaimService roleClaimService)
         {
             _roleManager = roleManager;
             this._service = _service;
+            _roleClaimService = roleClaimService;
         }
 
         [HttpGet("role/{roleId}")]
@@ -30,6 +33,14 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 x.ClaimValue,
                 x.IsActive
             });
+
+            return Ok(result);
+        }
+
+        [HttpPut("role/{roleId}")]
+        public async Task<IActionResult> UpdateRoleClaims(string roleId, [FromBody] IEnumerable<RoleClaimDto> request)
+        {
+            var result = _roleClaimService.UpdateRoleClaims(request);
 
             return Ok(result);
         }
