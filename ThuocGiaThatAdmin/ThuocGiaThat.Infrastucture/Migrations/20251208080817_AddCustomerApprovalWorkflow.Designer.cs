@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ThuocGiaThat.Infrastucture;
 
@@ -11,9 +12,11 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    partial class TrueMecContextModelSnapshot : ModelSnapshot
+    [Migration("20251208080817_AddCustomerApprovalWorkflow")]
+    partial class AddCustomerApprovalWorkflow
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1315,9 +1318,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("Specification")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StorageInstructions")
                         .HasColumnType("nvarchar(max)");

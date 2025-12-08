@@ -156,6 +156,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 Contraindications = dto.Contraindications,
                 StorageInstructions = dto.StorageInstructions,
                 RegistrationNumber = dto.RegistrationNumber,
+                Specification = dto.Specification,
                 IsPrescriptionDrug = dto.IsPrescriptionDrug,
                 IsActive = dto.IsActive,
                 IsFeatured = dto.IsFeatured,
@@ -344,6 +345,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             existingProduct.Contraindications = dto.Contraindications;
             existingProduct.StorageInstructions = dto.StorageInstructions;
             existingProduct.RegistrationNumber = dto.RegistrationNumber;
+            existingProduct.Specification = dto.Specification;
             existingProduct.IsPrescriptionDrug = dto.IsPrescriptionDrug;
             existingProduct.IsActive = dto.IsActive;
             existingProduct.IsFeatured = dto.IsFeatured;
@@ -599,6 +601,10 @@ namespace ThuocGiaThatAdmin.Service.Services
                 .Include(p => p.Category)
                 .Include(p => p.ProductVariants)
                     .ThenInclude(v => v.Inventories)
+                .Include(p => p.ProductVariants)
+                    .ThenInclude(v => v.VariantOptionValues)
+                        .ThenInclude(vov => vov.ProductOptionValue)
+                            .ThenInclude(pov => pov.ProductOption)
                 .OrderByDescending(p => p.CreatedDate)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
@@ -645,6 +651,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 product.Contraindications,
                 product.StorageInstructions,
                 product.RegistrationNumber,
+                product.Specification,
                 product.IsPrescriptionDrug,
                 product.IsActive,
                 product.IsFeatured,
@@ -663,17 +670,26 @@ namespace ThuocGiaThatAdmin.Service.Services
                     variant.OriginalPrice,
                     variant.StockQuantity,
                     variant.MaxSalesQuantity,
-                    
+
                     // Aggregate inventory stock from all warehouses
                     InventoryStock = variant.Inventories.Sum(inv => inv.QuantityOnHand),
-                    
+
                     // Get sold quantity from pre-loaded dictionary
                     SoldQuantity = soldQuantities.ContainsKey(variant.Id) ? soldQuantities[variant.Id] : 0,
-                    
+
                     // Get ProductVariantStatuses from pre-loaded dictionary
-                    ProductVariantStatuses = statusMapsByVariant.ContainsKey(variant.Id) 
-                        ? statusMapsByVariant[variant.Id] 
-                        : Enumerable.Empty<object>().Select(x => new { StatusType = default(ProductStatusType), StatusName = string.Empty }).ToList()
+                    ProductVariantStatuses = statusMapsByVariant.ContainsKey(variant.Id)
+                        ? statusMapsByVariant[variant.Id]
+                        : Enumerable.Empty<object>().Select(x => new { StatusType = default(ProductStatusType), StatusName = string.Empty }).ToList(),
+
+                    // Option values (e.g., Màu đen, Size X)
+                    OptionValues = variant.VariantOptionValues.Select(vov => new
+                    {
+                        OptionId = vov.ProductOptionValue.ProductOption.Id,
+                        OptionName = vov.ProductOptionValue.ProductOption.Name,
+                        OptionValueId = vov.ProductOptionValueId,
+                        OptionValue = vov.ProductOptionValue.Value
+                    }).ToList()
                 }).ToList()
             });
 

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ThuocGiaThat.Infrastucture;
 
@@ -11,9 +12,11 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    partial class TrueMecContextModelSnapshot : ModelSnapshot
+    [Migration("20251208031910_AddPointCustomer")]
+    partial class AddPointCustomer
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -496,12 +499,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ApprovedByUserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime?>("ApprovedDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("BusinessAddress")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -545,9 +542,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsLoginEnabled")
-                        .HasColumnType("bit");
-
                     b.Property<string>("LegalRepresentative")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -566,9 +560,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<int?>("SaleUserId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
                     b.Property<string>("TaxCode")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
@@ -577,8 +568,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ApprovedByUserId");
 
                     b.HasIndex("BusinessTypeId");
 
@@ -589,77 +578,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("TaxCode");
 
                     b.ToTable("Customers");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.CustomerDocument", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("DocumentNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("DocumentType")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("ExpiryDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsRequired")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsVerified")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("IssueDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("IssuingAuthority")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RejectionReason")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UploadedFileId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("VerifiedByUserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime?>("VerifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("UploadedFileId");
-
-                    b.HasIndex("VerifiedByUserId");
-
-                    b.HasIndex("CustomerId", "DocumentType");
-
-                    b.HasIndex("IsRequired", "IsVerified");
-
-                    b.ToTable("CustomerDocuments");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.CustomerPaymentAccount", b =>
@@ -724,69 +642,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("CustomerId", "IsDefault");
 
                     b.ToTable("CustomerPaymentAccounts");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.CustomerVerification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("IpAddress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsInitialApproval")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("NewStatus")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("OldStatus")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ProcessedByUserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("ProcessedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RejectionReason")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RequiredDocuments")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserAgent")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("ProcessedByUserId");
-
-                    b.HasIndex("ProcessedDate");
-
-                    b.HasIndex("CustomerId", "ProcessedDate");
-
-                    b.ToTable("CustomerVerifications");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Inventory", b =>
@@ -1315,9 +1170,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("Specification")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StorageInstructions")
                         .HasColumnType("nvarchar(max)");
@@ -2161,45 +2013,12 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Customer", b =>
                 {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ApplicationUser", "ApprovedByUser")
-                        .WithMany()
-                        .HasForeignKey("ApprovedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.BusinessType", "BusinessType")
                         .WithMany()
                         .HasForeignKey("BusinessTypeId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("ApprovedByUser");
-
                     b.Navigation("BusinessType");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.CustomerDocument", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Customer", "Customer")
-                        .WithMany("Documents")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.UploadedFile", "UploadedFile")
-                        .WithMany()
-                        .HasForeignKey("UploadedFileId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ApplicationUser", "VerifiedByUser")
-                        .WithMany()
-                        .HasForeignKey("VerifiedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("UploadedFile");
-
-                    b.Navigation("VerifiedByUser");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.CustomerPaymentAccount", b =>
@@ -2211,24 +2030,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsRequired();
 
                     b.Navigation("Customer");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.CustomerVerification", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Customer", "Customer")
-                        .WithMany("VerificationHistory")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ApplicationUser", "ProcessedByUser")
-                        .WithMany()
-                        .HasForeignKey("ProcessedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("ProcessedByUser");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Inventory", b =>
@@ -2578,13 +2379,9 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                 {
                     b.Navigation("Addresses");
 
-                    b.Navigation("Documents");
-
                     b.Navigation("Orders");
 
                     b.Navigation("PaymentAccounts");
-
-                    b.Navigation("VerificationHistory");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Inventory", b =>
