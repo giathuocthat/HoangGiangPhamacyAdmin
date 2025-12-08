@@ -28,7 +28,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         [Range(1, int.MaxValue, ErrorMessage = "Max sales quantity must be greater than 0")]
         public int? MaxSalesQuantity { get; set; }
 
-        [Range(0.01, double.MaxValue, ErrorMessage = "Weight must be greater than 0")]
+        [Range(0, double.MaxValue, ErrorMessage = "Weight must be greater than 0")]
         public decimal? Weight { get; set; }
 
         [StringLength(100, ErrorMessage = "Dimensions cannot exceed 100 characters")]
