@@ -9,11 +9,11 @@ namespace ThuocGiaThatAdmin.Domain.Enums
     /// </summary>
     public enum OrderStatus
     {
-        [Description("Chá» xÃ¡c nháº­n")]
+        [Description("Chờ xác nhận")]
         Pending = 0,
-        [Description("ÄÃ£ xÃ¡c nháº­n")]
+        [Description("Đã xác nhận")]
         Confirmed = 1,
-        [Description("Äang xá»­ lÃ½")]
+        [Description("Đang xử lý")]
         Processing = 2,
         [Description("Đang trung chuyển")]
         InTransit = 3,      // Đang trung chuyển
