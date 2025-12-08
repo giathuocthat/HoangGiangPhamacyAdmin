@@ -131,6 +131,152 @@ namespace ThuocGiaThatAdmin.Service.Services
             return await _productRepository.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Create a new product from DTO with complete mapping and response
+        /// </summary>
+        /// <param name="dto">Product creation data</param>
+        /// <returns>Created product with full details</returns>
+        public async Task<ProductResponseDto> CreateProductFromDtoAsync(CreateProductDto dto)
+        {
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto));
+
+            // Map DTO to Product entity
+            var product = new Product
+            {
+                CategoryId = dto.CategoryId,
+                BrandId = dto.BrandId,
+                Name = dto.Name,
+                ShortDescription = dto.ShortDescription,
+                FullDescription = dto.FullDescription,
+                Slug = dto.Slug,
+                ThumbnailUrl = dto.ThumbnailUrl,
+                Ingredients = dto.Ingredients,
+                UsageInstructions = dto.UsageInstructions,
+                Contraindications = dto.Contraindications,
+                StorageInstructions = dto.StorageInstructions,
+                RegistrationNumber = dto.RegistrationNumber,
+                IsPrescriptionDrug = dto.IsPrescriptionDrug,
+                IsActive = dto.IsActive,
+                IsFeatured = dto.IsFeatured,
+                DrugEfficacy = dto.DrugEfficacy,
+                DosageInstructions = dto.DosageInstructions
+            };
+
+            // Map Images
+            if (dto.Images != null && dto.Images.Any())
+            {
+                foreach (var imageDto in dto.Images)
+                {
+                    product.Images.Add(new ProductImage
+                    {
+                        ImageUrl = imageDto.ImageUrl,
+                        AltText = imageDto.AltText,
+                        DisplayOrder = imageDto.DisplayOrder
+                    });
+                }
+            }
+
+            // Map Product Variants
+            if (dto.ProductVariants != null && dto.ProductVariants.Any())
+            {
+                foreach (var variantDto in dto.ProductVariants)
+                {
+                    var variant = new ProductVariant
+                    {
+                        SKU = variantDto.SKU,
+                        Barcode = variantDto.Barcode,
+                        Price = variantDto.Price,
+                        OriginalPrice = variantDto.OriginalPrice,
+                        StockQuantity = variantDto.StockQuantity,
+                        MaxSalesQuantity = variantDto.MaxSalesQuantity,
+                        Weight = variantDto.Weight,
+                        Dimensions = variantDto.Dimensions,
+                        ImageUrl = variantDto.ImageUrl,
+                        IsActive = variantDto.IsActive
+                    };
+
+                    // Map Variant Option Values
+                    if (variantDto.VariantOptionValueIds != null && variantDto.VariantOptionValueIds.Any())
+                    {
+                        foreach (var optionValueId in variantDto.VariantOptionValueIds)
+                        {
+                            variant.VariantOptionValues.Add(new VariantOptionValue
+                            {
+                                ProductOptionValueId = optionValueId
+                            });
+                        }
+                    }
+
+                    product.ProductVariants.Add(variant);
+                }
+            }
+
+            // Create product using existing method
+            await CreateProductAsync(product);
+
+            // Retrieve created product with all related data
+            var createdProduct = await GetProductByIdAsync(product.Id);
+            
+            if (createdProduct == null)
+                throw new InvalidOperationException("Failed to retrieve created product");
+
+            // Map to response DTO
+            return new ProductResponseDto
+            {
+                Id = createdProduct.Id,
+                CategoryId = createdProduct.CategoryId,
+                BrandId = createdProduct.BrandId,
+                Name = createdProduct.Name,
+                ShortDescription = createdProduct.ShortDescription,
+                FullDescription = createdProduct.FullDescription,
+                Slug = createdProduct.Slug,
+                ThumbnailUrl = createdProduct.ThumbnailUrl,
+                Ingredients = createdProduct.Ingredients,
+                UsageInstructions = createdProduct.UsageInstructions,
+                Contraindications = createdProduct.Contraindications,
+                StorageInstructions = createdProduct.StorageInstructions,
+                RegistrationNumber = createdProduct.RegistrationNumber,
+                IsPrescriptionDrug = createdProduct.IsPrescriptionDrug,
+                IsActive = createdProduct.IsActive,
+                IsFeatured = createdProduct.IsFeatured,
+                CreatedDate = createdProduct.CreatedDate,
+                UpdatedDate = createdProduct.UpdatedDate,
+                DrugEfficacy = createdProduct.DrugEfficacy,
+                DosageInstructions = createdProduct.DosageInstructions,
+                BrandName = createdProduct.Brand?.Name,
+                CategoryName = createdProduct.Category?.Name,
+                Images = createdProduct.Images.Select(i => new ProductImageResponseDto
+                {
+                    Id = i.Id,
+                    ImageUrl = i.ImageUrl,
+                    AltText = i.AltText,
+                    DisplayOrder = i.DisplayOrder
+                }).ToList(),
+                ProductVariants = createdProduct.ProductVariants.Select(v => new ProductVariantResponseDto
+                {
+                    Id = v.Id,
+                    SKU = v.SKU,
+                    Barcode = v.Barcode,
+                    Price = v.Price,
+                    OriginalPrice = v.OriginalPrice,
+                    StockQuantity = v.StockQuantity,
+                    MaxSalesQuantity = v.MaxSalesQuantity,
+                    Weight = v.Weight,
+                    Dimensions = v.Dimensions,
+                    ImageUrl = v.ImageUrl,
+                    IsActive = v.IsActive,
+                    OptionValues = v.VariantOptionValues.Select(vov => new VariantOptionValueResponseDto
+                    {
+                        OptionValueId = vov.ProductOptionValueId,
+                        OptionValue = vov.ProductOptionValue.Value,
+                        OptionId = vov.ProductOptionValue.ProductOption.Id,
+                        OptionName = vov.ProductOptionValue.ProductOption.Name
+                    }).ToList()
+                }).ToList()
+            };
+        }
+
         #endregion
 
         #region Update Operation
@@ -159,6 +305,225 @@ namespace ThuocGiaThatAdmin.Service.Services
 
             _productRepository.Update(product);
             return await _productRepository.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Update an existing product using DTO
+        /// </summary>
+        /// <param name="id">Product ID</param>
+        /// <param name="dto">Product update data</param>
+        /// <returns>Number of affected records</returns>
+        public async Task<int> UpdateProductAsync(int id, CreateProductDto dto)
+        {
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto));
+
+            if (id <= 0)
+                throw new ArgumentException("Product ID must be greater than 0", nameof(id));
+
+            // Get existing product with all related data
+            var existingProduct = await _context.Products
+                .Include(p => p.Images)
+                .Include(p => p.ProductVariants)
+                    .ThenInclude(v => v.VariantOptionValues)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (existingProduct == null)
+                throw new InvalidOperationException($"Product with ID {id} not found");
+
+            // Update basic properties
+            existingProduct.CategoryId = dto.CategoryId;
+            existingProduct.BrandId = dto.BrandId;
+            existingProduct.Name = dto.Name;
+            existingProduct.ShortDescription = dto.ShortDescription;
+            existingProduct.FullDescription = dto.FullDescription;
+            existingProduct.Slug = dto.Slug;
+            existingProduct.ThumbnailUrl = dto.ThumbnailUrl;
+            existingProduct.Ingredients = dto.Ingredients;
+            existingProduct.UsageInstructions = dto.UsageInstructions;
+            existingProduct.Contraindications = dto.Contraindications;
+            existingProduct.StorageInstructions = dto.StorageInstructions;
+            existingProduct.RegistrationNumber = dto.RegistrationNumber;
+            existingProduct.IsPrescriptionDrug = dto.IsPrescriptionDrug;
+            existingProduct.IsActive = dto.IsActive;
+            existingProduct.IsFeatured = dto.IsFeatured;
+            existingProduct.DrugEfficacy = dto.DrugEfficacy;
+            existingProduct.DosageInstructions = dto.DosageInstructions;
+
+            // Update Images - Smart update logic
+            if (dto.Images != null && dto.Images.Any())
+            {
+                // Get existing image URLs
+                var existingImageUrls = existingProduct.Images
+                    .Select(img => img.ImageUrl)
+                    .ToList();
+
+                // Get DTO image URLs
+                var dtoImageUrls = dto.Images
+                    .Select(img => img.ImageUrl)
+                    .ToList();
+
+                // Remove images not in DTO
+                var imagesToRemove = existingProduct.Images
+                    .Where(img => !dtoImageUrls.Contains(img.ImageUrl))
+                    .ToList();
+
+                foreach (var image in imagesToRemove)
+                {
+                    existingProduct.Images.Remove(image);
+                }
+
+                // Update existing images or add new ones
+                foreach (var imageDto in dto.Images)
+                {
+                    var existingImage = existingProduct.Images
+                        .FirstOrDefault(img => img.ImageUrl == imageDto.ImageUrl);
+
+                    if (existingImage != null)
+                    {
+                        // Update existing image
+                        existingImage.AltText = imageDto.AltText;
+                        existingImage.DisplayOrder = imageDto.DisplayOrder;
+                    }
+                    else
+                    {
+                        // Add new image
+                        existingProduct.Images.Add(new ProductImage
+                        {
+                            ImageUrl = imageDto.ImageUrl,
+                            AltText = imageDto.AltText,
+                            DisplayOrder = imageDto.DisplayOrder
+                        });
+                    }
+                }
+            }
+            else
+            {
+                // If no images in DTO, clear all
+                existingProduct.Images.Clear();
+            }
+
+            // Update Product Variants - Smart update logic
+            if (dto.ProductVariants != null && dto.ProductVariants.Any())
+            {
+                // Get IDs of variants in the DTO
+                var dtoVariantIds = dto.ProductVariants
+                    .Where(v => v.Id > 0)
+                    .Select(v => v.Id)
+                    .ToList();
+
+                // Inactive variants that are not in the DTO
+                foreach (var existingVariant in existingProduct.ProductVariants)
+                {
+                    if (!dtoVariantIds.Contains(existingVariant.Id))
+                    {
+                        existingVariant.IsActive = false;
+                    }
+                }
+
+                // Process each variant from DTO
+                foreach (var variantDto in dto.ProductVariants)
+                {
+                    if (variantDto.Id == 0)
+                    {
+                        // Create new variant
+                        var newVariant = new ProductVariant
+                        {
+                            ProductId = id,
+                            SKU = variantDto.SKU,
+                            Barcode = variantDto.Barcode,
+                            Price = variantDto.Price,
+                            OriginalPrice = variantDto.OriginalPrice,
+                            StockQuantity = variantDto.StockQuantity,
+                            MaxSalesQuantity = variantDto.MaxSalesQuantity,
+                            Weight = variantDto.Weight,
+                            Dimensions = variantDto.Dimensions,
+                            ImageUrl = variantDto.ImageUrl,
+                            IsActive = variantDto.IsActive
+                        };
+
+                        // Map Variant Option Values
+                        if (variantDto.VariantOptionValueIds != null && variantDto.VariantOptionValueIds.Any())
+                        {
+                            foreach (var optionValueId in variantDto.VariantOptionValueIds)
+                            {
+                                newVariant.VariantOptionValues.Add(new VariantOptionValue
+                                {
+                                    ProductOptionValueId = optionValueId
+                                });
+                            }
+                        }
+
+                        existingProduct.ProductVariants.Add(newVariant);
+                    }
+                    else
+                    {
+                        // Update existing variant
+                        var existingVariant = existingProduct.ProductVariants
+                            .FirstOrDefault(v => v.Id == variantDto.Id);
+
+                        if (existingVariant != null)
+                        {
+                            existingVariant.SKU = variantDto.SKU;
+                            existingVariant.Barcode = variantDto.Barcode;
+                            existingVariant.Price = variantDto.Price;
+                            existingVariant.OriginalPrice = variantDto.OriginalPrice;
+                            existingVariant.StockQuantity = variantDto.StockQuantity;
+                            existingVariant.MaxSalesQuantity = variantDto.MaxSalesQuantity;
+                            existingVariant.Weight = variantDto.Weight;
+                            existingVariant.Dimensions = variantDto.Dimensions;
+                            existingVariant.ImageUrl = variantDto.ImageUrl;
+                            existingVariant.IsActive = variantDto.IsActive;
+
+                            // Update Variant Option Values - Smart update logic
+                            if (variantDto.VariantOptionValueIds != null && variantDto.VariantOptionValueIds.Any())
+                            {
+                                // Get existing option value IDs
+                                var existingOptionValueIds = existingVariant.VariantOptionValues
+                                    .Select(vov => vov.ProductOptionValueId)
+                                    .ToList();
+
+                                // Remove option values not in DTO
+                                var optionValuesToRemove = existingVariant.VariantOptionValues
+                                    .Where(vov => !variantDto.VariantOptionValueIds.Contains(vov.ProductOptionValueId))
+                                    .ToList();
+
+                                foreach (var optionValue in optionValuesToRemove)
+                                {
+                                    existingVariant.VariantOptionValues.Remove(optionValue);
+                                }
+
+                                // Add new option values from DTO
+                                foreach (var optionValueId in variantDto.VariantOptionValueIds)
+                                {
+                                    if (!existingOptionValueIds.Contains(optionValueId))
+                                    {
+                                        existingVariant.VariantOptionValues.Add(new VariantOptionValue
+                                        {
+                                            ProductOptionValueId = optionValueId
+                                        });
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                // If no option values in DTO, clear all
+                                existingVariant.VariantOptionValues.Clear();
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // If no variants in DTO, inactive all existing variants
+                foreach (var existingVariant in existingProduct.ProductVariants)
+                {
+                    existingVariant.IsActive = false;
+                }
+            }
+
+            return await _context.SaveChangesAsync();
         }
 
         #endregion
