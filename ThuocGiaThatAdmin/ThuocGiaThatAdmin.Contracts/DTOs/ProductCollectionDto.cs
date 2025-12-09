@@ -15,7 +15,16 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public int DisplayOrder { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public int ProductCount { get; set; }
         public List<ProductDto>? Products { get; set; }
+        public List<ProductCollectionItemDto>? Items { get; set; }
+    }
+
+    public class ProductCollectionItemDto
+    {
+        public int ProductId { get; set; }
+        public string? ProductName { get; set; }
+        public int DisplayOrder { get; set; }
     }
 
     public class CreateCollectionDto

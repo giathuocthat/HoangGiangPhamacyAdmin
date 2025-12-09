@@ -14,10 +14,48 @@ namespace ThuocGiaThatAdmin.Server.Controllers
     {
         private readonly IProductCollectionService _service;
 
-        public ProductCollectionController(IProductCollectionService service, ILogger<ProductCollectionController> logger) 
+        public ProductCollectionController(IProductCollectionService service, ILogger<ProductCollectionController> logger)
             : base(logger)
         {
             _service = service;
+        }
+
+        /// <summary>
+        /// Get all product collections with pagination and search
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetAllCollections([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string? searchName = null)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var (collections, totalCount) = await _service.GetAllCollectionsAsync(pageNumber, pageSize, searchName);
+                return Ok(new
+                {
+                    Data = collections,
+                    Pagination = new
+                    {
+                        PageNumber = pageNumber,
+                        PageSize = pageSize,
+                        TotalCount = totalCount,
+                        TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+                    }
+                });
+            }, "Get All Collections");
+        }
+
+        /// <summary>
+        /// Get product collection by ID for editing
+        /// </summary>
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetCollectionById(int id)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var collection = await _service.GetCollectionByIdAsync(id);
+                if (collection == null)
+                    return NotFound(new { message = $"Collection with ID {id} not found" });
+                return Ok(collection);
+            }, "Get Collection By Id");
         }
 
         [HttpGet("high-profit")]
