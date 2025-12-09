@@ -26,6 +26,31 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public int DisplayOrder { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public List<CreateCollectionItemDto>? Items { get; set; }
+    }
+
+    public class CreateCollectionItemDto
+    {
+        public int ProductId { get; set; }
+        public int DisplayOrder { get; set; }
+    }
+
+    public class UpdateProductCollectionDto
+    {
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public CollectionType Type { get; set; }
+        public bool IsActive { get; set; }
+        public int DisplayOrder { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public List<UpdateCollectionItemDto>? Items { get; set; }
+    }
+
+    public class UpdateCollectionItemDto
+    {
+        public int ProductId { get; set; }
+        public int DisplayOrder { get; set; }
     }
 
     public class SetMaxOrderDto

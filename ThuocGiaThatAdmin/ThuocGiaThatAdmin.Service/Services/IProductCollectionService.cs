@@ -14,8 +14,9 @@ namespace ThuocGiaThatAdmin.Service.Services
         Task<List<ProductDto>> GetLowStockProductsAsync(int maxStock = 100);
         
         // Manual collections
-        Task<List<ProductDto>> GetCollectionProductsAsync(string slug);
+        Task<List<CollectionProductResponseDto>> GetCollectionProductsAsync(string slugOrName);
         Task<ProductCollectionDto> CreateCollectionAsync(CreateCollectionDto dto);
+        Task<ProductCollectionDto> UpdateCollectionAsync(int id, UpdateProductCollectionDto dto);
         Task AddProductsToCollectionAsync(int collectionId, List<int> productIds);
         
         // Max order config

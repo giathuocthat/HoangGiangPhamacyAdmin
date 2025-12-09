@@ -70,8 +70,18 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             }, $"Get Collection {slug}");
         }
 
+        [HttpGet("products")]
+        public async Task<IActionResult> GetProducts([FromQuery] string collection)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var products = await _service.GetCollectionProductsAsync(collection);
+                return Ok(products);
+            }, $"Get Products for Collection {collection}");
+        }
+
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] CreateCollectionDto dto)
         {
             return await ExecuteActionAsync(async () =>
@@ -79,6 +89,17 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 var collection = await _service.CreateCollectionAsync(dto);
                 return CreatedAtAction(nameof(GetBySlug), new { slug = collection.Slug }, collection);
             }, "Create Collection");
+        }
+
+        [HttpPut("{id}")]
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateProductCollectionDto dto)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var collection = await _service.UpdateCollectionAsync(id, dto);
+                return Ok(collection);
+            }, "Update Collection");
         }
 
         [HttpPost("{id}/products")]
@@ -113,5 +134,6 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 return Ok(new { message = "Max order config updated successfully" });
             }, "Set Max Order Config");
         }
+        
     }
 }
