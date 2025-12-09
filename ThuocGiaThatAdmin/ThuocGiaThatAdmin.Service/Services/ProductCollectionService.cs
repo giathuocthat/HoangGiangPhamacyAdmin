@@ -75,12 +75,82 @@ namespace ThuocGiaThatAdmin.Service.Services
                 StartDate = dto.StartDate,
                 EndDate = dto.EndDate,
                 IsActive = true,
-                CreatedDate = DateTime.UtcNow
+                CreatedDate = DateTime.Now
             };
+
+            if (dto.Items != null && dto.Items.Any())
+            {
+                foreach (var item in dto.Items)
+                {
+                    collection.Items.Add(new ProductCollectionItem
+                    {
+                        ProductId = item.ProductId,
+                        DisplayOrder = item.DisplayOrder,
+                        AddedDate = DateTime.Now
+                    });
+                }
+            }
 
             await _collectionRepository.AddAsync(collection);
             await _context.SaveChangesAsync();
 
+            return MapToCollectionDto(collection);
+        }
+
+        public async Task<ProductCollectionDto> UpdateCollectionAsync(int id, UpdateProductCollectionDto dto)
+        {
+            var collection = await _collectionRepository.GetWithProductsAsync(id);
+            if (collection == null)
+            {
+                throw new KeyNotFoundException($"Product collection with id {id} not found");
+            }
+
+            collection.Name = dto.Name;
+            collection.Slug = GenerateSlug(dto.Name);
+            collection.Description = dto.Description;
+            collection.Type = dto.Type;
+            collection.DisplayOrder = dto.DisplayOrder;
+            collection.StartDate = dto.StartDate;
+            collection.EndDate = dto.EndDate;
+            collection.IsActive = dto.IsActive;
+            collection.UpdatedDate = DateTime.UtcNow;
+
+            if (dto.Items != null)
+            {
+                // Smart sync items
+                var dtoItems = dto.Items;
+                var dtoProductIds = dtoItems.Select(i => i.ProductId).ToList();
+
+                // 1. Remove items not in DTO
+                var itemsToRemove = collection.Items.Where(i => !dtoProductIds.Contains(i.ProductId)).ToList();
+                foreach (var item in itemsToRemove)
+                {
+                    collection.Items.Remove(item);
+                }
+
+                // 2. Update existing and Add new
+                foreach (var dtoItem in dtoItems)
+                {
+                    var existingItem = collection.Items.FirstOrDefault(i => i.ProductId == dtoItem.ProductId);
+                    if (existingItem != null)
+                    {
+                        // Update
+                        existingItem.DisplayOrder = dtoItem.DisplayOrder;
+                    }
+                    else
+                    {
+                        // Add
+                        collection.Items.Add(new ProductCollectionItem
+                        {
+                            ProductId = dtoItem.ProductId,
+                            DisplayOrder = dtoItem.DisplayOrder,
+                            AddedDate = DateTime.UtcNow
+                        });
+                    }
+                }
+            }
+
+            await _collectionRepository.UpdateAsync(collection);
             return MapToCollectionDto(collection);
         }
 
@@ -260,9 +330,50 @@ namespace ThuocGiaThatAdmin.Service.Services
             throw new NotImplementedException();
         }
 
-        public Task<List<ProductDto>> GetCollectionProductsAsync(string slug)
+        public async Task<List<CollectionProductResponseDto>> GetCollectionProductsAsync(string slugOrName)
         {
-            throw new NotImplementedException();
+            var collection = await _context.ProductCollections
+                .Include(c => c.Items)
+                .ThenInclude(i => i.Product)
+                    .ThenInclude(p => p.ProductVariants)
+                .Include(c => c.Items)
+                    .ThenInclude(i => i.Product)
+                .Include(c => c.Items)
+                    .ThenInclude(i => i.Product)
+                        .ThenInclude(p => p.Images)
+                .FirstOrDefaultAsync(c => c.Slug == slugOrName || c.Name == slugOrName);
+
+            if (collection == null)
+            {
+                return new List<CollectionProductResponseDto>();
+            }
+
+            var dtos = collection.Items
+                .OrderBy(i => i.DisplayOrder)
+                .Select(i =>
+                {
+                    var product = i.Product;
+                    var firstVariant = product.ProductVariants.FirstOrDefault(v => v.IsActive) 
+                                       ?? product.ProductVariants.FirstOrDefault();
+
+                    return new CollectionProductResponseDto
+                    {
+                        Id = product.Id,
+                        Name = product.Name,
+                        Slug = product.Slug,
+                        ThumbnailUrl = product.ThumbnailUrl,
+                        ProductVariantId = firstVariant?.Id,        
+                        OriginalPrice = firstVariant?.OriginalPrice,
+                        Price = firstVariant?.Price,
+                        Specification = product.Specification,
+                        MaxQuantityPerOrder = product.MaxOrderConfig?.MaxQuantityPerOrder,
+                        ShortDescription = product.ShortDescription,
+                        DisplayOrder = i.DisplayOrder
+                    };
+                })
+                .ToList();
+
+            return dtos;
         }
     }
 }

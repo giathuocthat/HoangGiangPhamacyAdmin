@@ -27,6 +27,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public string? RegistrationNumber { get; set; }
         public string? DrugEfficacy { get; set; }
         public string? DosageInstructions { get; set; }
+        public string? Specification { get; set; } // Quy cách đóng gói (vd: Hộp 30 viên, Chai 100ml)
         public bool? IsPrescriptionDrug { get; set; } = false;
 
         // Metadata

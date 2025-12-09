@@ -142,6 +142,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     product.Contraindications,
                     product.StorageInstructions,
                     product.RegistrationNumber,
+                    product.Specification,
                     product.IsPrescriptionDrug,
                     product.DrugEfficacy,
                     product.DosageInstructions,

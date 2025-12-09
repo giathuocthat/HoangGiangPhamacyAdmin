@@ -48,6 +48,8 @@ namespace ThuocGiaThat.Infrastucture
         
         public DbSet<BusinessType>  BusinessTypes { get; set; }
         public DbSet<CustomerPaymentAccount> CustomerPaymentAccounts { get; set; }
+        public DbSet<CustomerDocument> CustomerDocuments { get; set; }
+        public DbSet<CustomerVerification> CustomerVerifications { get; set; }
         
         // Shopping Cart
         public DbSet<ShoppingCart> ShoppingCarts { get; set; }
@@ -315,6 +317,22 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasIndex(e => e.Email).IsUnique();
                 entity.HasIndex(e => e.TaxCode);
                 entity.HasIndex(e => e.BusinessTypeId);
+                
+                // Approval Workflow Relationships
+                entity.HasMany(e => e.Documents)
+                    .WithOne(d => d.Customer)
+                    .HasForeignKey(d => d.CustomerId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                
+                entity.HasMany(e => e.VerificationHistory)
+                    .WithOne(v => v.Customer)
+                    .HasForeignKey(v => v.CustomerId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                
+                entity.HasOne(e => e.ApprovedByUser)
+                    .WithMany()
+                    .HasForeignKey(e => e.ApprovedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
             
             // ============ CustomerPaymentAccount Configuration ============
@@ -560,6 +578,42 @@ namespace ThuocGiaThat.Infrastucture
                        .WithMany()
                        .HasForeignKey(x => x.ProductVariantId)
                        .OnDelete(DeleteBehavior.Cascade);
+            });
+            
+            // ============ CustomerDocument Configuration ============
+            modelBuilder.Entity<CustomerDocument>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                
+                entity.HasIndex(e => e.CustomerId);
+                entity.HasIndex(e => new { e.CustomerId, e.DocumentType });
+                entity.HasIndex(e => e.UploadedFileId);
+                entity.HasIndex(e => new { e.IsRequired, e.IsVerified });
+                
+                entity.HasOne(d => d.UploadedFile)
+                    .WithMany()
+                    .HasForeignKey(d => d.UploadedFileId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                
+                entity.HasOne(d => d.VerifiedByUser)
+                    .WithMany()
+                    .HasForeignKey(d => d.VerifiedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+            
+            // ============ CustomerVerification Configuration ============
+            modelBuilder.Entity<CustomerVerification>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                
+                entity.HasIndex(e => e.CustomerId);
+                entity.HasIndex(e => e.ProcessedDate);
+                entity.HasIndex(e => new { e.CustomerId, e.ProcessedDate });
+                
+                entity.HasOne(v => v.ProcessedByUser)
+                    .WithMany()
+                    .HasForeignKey(v => v.ProcessedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             // ============ Voucher Configuration ============

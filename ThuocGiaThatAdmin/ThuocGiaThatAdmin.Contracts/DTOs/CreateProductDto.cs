@@ -45,6 +45,9 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         [StringLength(100, ErrorMessage = "Registration number cannot exceed 100 characters")]
         public string? RegistrationNumber { get; set; }
 
+        [StringLength(200, ErrorMessage = "Specification cannot exceed 200 characters")]
+        public string? Specification { get; set; }
+
         public bool IsPrescriptionDrug { get; set; } = false;
 
         // Metadata
