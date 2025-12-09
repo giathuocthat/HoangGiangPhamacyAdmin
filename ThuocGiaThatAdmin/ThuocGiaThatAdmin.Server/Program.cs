@@ -1,21 +1,22 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 using ThuocGiaThat.Infrastucture.Data;
+using ThuocGiaThat.Infrastucture.Interfaces;
 using ThuocGiaThat.Infrastucture.Repositories;
+using ThuocGiaThatAdmin.Commands;
+using ThuocGiaThatAdmin.Common.Interfaces;
 using ThuocGiaThatAdmin.Contracts.Models;
 using ThuocGiaThatAdmin.Domain.Entities;
+using ThuocGiaThatAdmin.Queries;
+using ThuocGiaThatAdmin.Server.Extensions;
 using ThuocGiaThatAdmin.Service;
 using ThuocGiaThatAdmin.Service.Interfaces;
 using ThuocGiaThatAdmin.Service.Services;
-using ThuocGiaThat.Infrastucture.Interfaces;
-using ThuocGiaThatAdmin.Server.Extensions;
-
-using ThuocGiaThatAdmin.Common.Interfaces;
-using ThuocGiaThatAdmin.Queries;
-using ThuocGiaThatAdmin.Commands;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,7 +26,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    options.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "Thuoc Gia That API",
         Version = "v1",
@@ -33,26 +34,26 @@ builder.Services.AddSwaggerGen(options =>
     });
 
     // Add JWT Authentication to Swagger
-    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Type = SecuritySchemeType.Http,
         Scheme = "Bearer",
         BearerFormat = "JWT",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        In = ParameterLocation.Header,
         Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n" +
                       "Enter your token in the text input below.\r\n\r\n" +
                       "Example: '12345abcdef'"
     });
 
-    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            new OpenApiSecurityScheme
             {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                Reference = new OpenApiReference
                 {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Type = ReferenceType.SecurityScheme,
                     Id = "Bearer"
                 }
             },
@@ -100,6 +101,12 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtAudience,
         IssuerSigningKey = signingKey
     };
+});
+
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<GzipCompressionProvider>();
 });
 
 // Configure FileUploadSettings

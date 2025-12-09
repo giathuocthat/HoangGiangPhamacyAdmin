@@ -61,6 +61,14 @@ namespace ThuocGiaThat.Infrastucture
         // Product Status Mapping
         public DbSet<ProductStatusMap> ProductStatusMaps { get; set; }
 
+        // Voucher System
+        public DbSet<Voucher> Vouchers { get; set; }
+        public DbSet<VoucherCategory> VoucherCategories { get; set; }
+        public DbSet<VoucherProductVariant> VoucherProductVariants { get; set; }
+        public DbSet<VoucherUsageHistory> VoucherUsageHistories { get; set; }
+        public DbSet<OrderVoucher> OrderVouchers { get; set; }
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -554,8 +562,147 @@ namespace ThuocGiaThat.Infrastucture
                        .OnDelete(DeleteBehavior.Cascade);
             });
 
+            // ============ Voucher Configuration ============
+            modelBuilder.Entity<Voucher>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Code).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Description).HasMaxLength(1000);
+                
+                entity.Property(e => e.DiscountType).HasConversion<int>().IsRequired();
+                entity.Property(e => e.DiscountValue).HasColumnType("decimal(18,2)").IsRequired();
+                entity.Property(e => e.MaxDiscountAmount).HasColumnType("decimal(18,2)");
+                
+                entity.Property(e => e.MinimumQuantityType).HasConversion<int?>();
+                entity.Property(e => e.MinimumQuantityValue);
+                entity.Property(e => e.MinimumOrderValue).HasColumnType("decimal(18,2)");
+                
+                entity.Property(e => e.ApplicableType).HasConversion<int>().IsRequired();
+                
+                entity.Property(e => e.TotalUsageLimit);
+                entity.Property(e => e.UsagePerUserLimit);
+                entity.Property(e => e.CurrentUsageCount).HasDefaultValue(0);
+                
+                entity.Property(e => e.CanStackWithOthers).HasDefaultValue(false);
+                entity.Property(e => e.StackPriority);
+                
+                entity.Property(e => e.StartDate).IsRequired();
+                entity.Property(e => e.EndDate).IsRequired();
+                entity.Property(e => e.IsActive).HasDefaultValue(true);
+                
+                entity.Property(e => e.CreatedBy).HasMaxLength(100);
+                entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+                
+                // Indexes
+                entity.HasIndex(e => e.Code).IsUnique();
+                entity.HasIndex(e => new { e.IsActive, e.StartDate, e.EndDate });
+                entity.HasIndex(e => e.CanStackWithOthers);
+            });
 
-            
+            // ============ VoucherCategory Configuration ============
+            modelBuilder.Entity<VoucherCategory>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                
+                entity.HasOne(e => e.Voucher)
+                    .WithMany(v => v.VoucherCategories)
+                    .HasForeignKey(e => e.VoucherId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                entity.HasOne(e => e.Category)
+                    .WithMany()
+                    .HasForeignKey(e => e.CategoryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                
+                // Unique constraint: một voucher chỉ liên kết một lần với một category
+                entity.HasIndex(e => new { e.VoucherId, e.CategoryId }).IsUnique();
+                entity.HasIndex(e => e.VoucherId);
+                entity.HasIndex(e => e.CategoryId);
+            });
+
+            // ============ VoucherProductVariant Configuration ============
+            modelBuilder.Entity<VoucherProductVariant>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                
+                entity.HasOne(e => e.Voucher)
+                    .WithMany(v => v.VoucherProductVariants)
+                    .HasForeignKey(e => e.VoucherId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                entity.HasOne(e => e.ProductVariant)
+                    .WithMany()
+                    .HasForeignKey(e => e.ProductVariantId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                
+                // Unique constraint: một voucher chỉ liên kết một lần với một product variant
+                entity.HasIndex(e => new { e.VoucherId, e.ProductVariantId }).IsUnique();
+                entity.HasIndex(e => e.VoucherId);
+                entity.HasIndex(e => e.ProductVariantId);
+            });
+
+            // ============ VoucherUsageHistory Configuration ============
+            modelBuilder.Entity<VoucherUsageHistory>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                
+                entity.Property(e => e.DiscountAmount).HasColumnType("decimal(18,2)").IsRequired();
+                entity.Property(e => e.OrderTotalBeforeDiscount).HasColumnType("decimal(18,2)").IsRequired();
+                entity.Property(e => e.OrderTotalAfterDiscount).HasColumnType("decimal(18,2)").IsRequired();
+                entity.Property(e => e.UsedAt).HasDefaultValueSql("GETUTCDATE()");
+                
+                entity.HasOne(e => e.Voucher)
+                    .WithMany(v => v.UsageHistory)
+                    .HasForeignKey(e => e.VoucherId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                entity.HasOne(e => e.Order)
+                    .WithMany()
+                    .HasForeignKey(e => e.OrderId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                
+                // Indexes
+                entity.HasIndex(e => e.VoucherId);
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.OrderId);
+                entity.HasIndex(e => e.UsedAt);
+            });
+
+            // ============ OrderVoucher Configuration ============
+            modelBuilder.Entity<OrderVoucher>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                
+                entity.Property(e => e.AppliedOrder).IsRequired();
+                entity.Property(e => e.DiscountAmount).HasColumnType("decimal(18,2)").IsRequired();
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                
+                entity.HasOne(e => e.Order)
+                    .WithMany()
+                    .HasForeignKey(e => e.OrderId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                entity.HasOne(e => e.Voucher)
+                    .WithMany(v => v.OrderVouchers)
+                    .HasForeignKey(e => e.VoucherId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                
+                // Unique constraint: một voucher chỉ áp dụng một lần cho một order
+                entity.HasIndex(e => new { e.OrderId, e.VoucherId }).IsUnique();
+                entity.HasIndex(e => e.OrderId);
+                entity.HasIndex(e => e.VoucherId);
+            });
+
         }
     }
 }
