@@ -7,13 +7,12 @@ using System.Threading.Tasks;
 
 namespace ThuocGiaThatAdmin.Contract.Enums
 {
-    public enum PaymentStatus
+    public enum OrderPaymentStatus
     {
-        [Description("Chờ xác nhận")]
-        WaitingConfirm,
-
-        [Description("Đã xác nhận")]
-        Confirmed,
+        Unpaid,
+        Paid,
+        Failed,
+        Pending
     }
 
     public enum PaymentMethod
@@ -22,5 +21,12 @@ namespace ThuocGiaThatAdmin.Contract.Enums
         Cash,
         CreditCard,
         DebitCard
+    }
+
+    public enum PaymentTransactionStatus
+    {
+        Pending = 0,
+        Success,
+        Failed
     }
 }

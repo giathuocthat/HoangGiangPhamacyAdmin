@@ -23,6 +23,8 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
         public string ShippingAddress { get; set; }
         public int? WardId { get; set; }
         public int? ProvinceId { get; set; }
+        public string PaymentMethod { get; set; }
+        public string? IpAddress { get; set; }
 
     }
 

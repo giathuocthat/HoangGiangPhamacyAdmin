@@ -8,6 +8,7 @@ using ThuocGiaThat.Infrastucture;
 using ThuocGiaThatAdmin.Common;
 using ThuocGiaThatAdmin.Contract.DTOs;
 using ThuocGiaThatAdmin.Contract.Enums;
+using ThuocGiaThatAdmin.Contract.Models;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Domain.Enums;
@@ -20,10 +21,11 @@ namespace ThuocGiaThatAdmin.Service.Services
     public class OrderService
     {
         private readonly TrueMecContext _context;
-
-        public OrderService(TrueMecContext context)
+        private readonly VNPayService _vnPayService;
+        public OrderService(TrueMecContext context, VNPayService vnPayService)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _vnPayService = vnPayService;
         }
 
         /// <summary>
@@ -511,7 +513,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             };
         }
 
-        public async Task<int> CreateOrderAsync(CheckoutOrderDto orderDto)
+        public async Task<dynamic> CreateOrderAsync(CheckoutOrderDto orderDto)
         {
             var order = new Order
             {
@@ -519,8 +521,8 @@ namespace ThuocGiaThatAdmin.Service.Services
                 CustomerId = orderDto.CustomerId,
                 Note = orderDto.Note,
                 OrderStatus = OrderStatus.Pending.ToStatusString(),
-                PaymentStatus = PaymentStatus.WaitingConfirm.ToString(),
-                PaymentMethod = PaymentMethod.Cash.ToString(),
+                PaymentStatus = OrderPaymentStatus.Pending.ToString(),
+                PaymentMethod = orderDto.PaymentMethod,
                 DiscountAmount = orderDto.DiscountAmount,
                 ShippingFee = orderDto.ShippingFee,
                 TotalAmount = orderDto.Total,
@@ -535,18 +537,49 @@ namespace ThuocGiaThatAdmin.Service.Services
                 ShippingPhone = orderDto.ShippingPhone
             };
 
-            _context.Orders.Add(order);
-            
             // Create snapshots for all order items (using navigation property, not ID)
             foreach (var orderItem in order.OrderItems)
             {
                 CreateOrderItemSnapshotForNewItem(orderItem);
-            }
-            
-            // Save everything in one transaction
-            await _context.SaveChangesAsync();
+            }            
 
-            return order.Id;
+            if (order.PaymentMethod == PaymentMethod.Cash.ToString()) 
+            {
+                _context.Orders.Add(order);
+                // Save everything in one transaction
+                await _context.SaveChangesAsync();
+
+                return order.Id;
+            } else
+            {
+                var transaction = new PaymentTransaction
+                {
+                    OrderId = order.Id,
+                    TransactionCode = Guid.NewGuid().ToString(),
+                    Amount = order.TotalAmount,
+                    PaymentStatus = (int)PaymentTransactionStatus.Pending,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                order.PaymentTransactions = new List<PaymentTransaction> { transaction };
+
+                _context.Orders.Add(order);
+
+                // Save everything in one transaction
+                await _context.SaveChangesAsync();
+
+                var paymentInfo = new PaymentInformationModel
+                {
+                    OrderId = transaction.TransactionCode, // Dùng TransactionCode làm vnp_TxnRef
+                    Amount = order.TotalAmount,
+                    CreatedDate = DateTime.Now,
+                    BankCode = order.PaymentMethod
+                };
+
+                var paymentUrl = _vnPayService.CreatePaymentUrl(paymentInfo, orderDto.IpAddress);
+
+                return paymentUrl;
+            }
         }
         
         /// <summary>

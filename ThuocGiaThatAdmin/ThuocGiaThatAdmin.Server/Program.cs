@@ -18,6 +18,11 @@ using ThuocGiaThatAdmin.Service;
 using ThuocGiaThatAdmin.Service.Interfaces;
 using ThuocGiaThatAdmin.Service.Services;
 
+using ThuocGiaThatAdmin.Common.Interfaces;
+using ThuocGiaThatAdmin.Queries;
+using ThuocGiaThatAdmin.Commands;
+using ThuocGiaThatAdmin.Contract.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -192,6 +197,7 @@ builder.Services.AddScoped<ICustomerAuthService, CustomerAuthService>();
 // Customer Management Service
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IProductCollectionService, ProductCollectionService>();
+builder.Services.AddScoped<VNPayService>();
 
 // Add CORS to allow frontend to call this API
 builder.Services.AddCors(options =>
@@ -204,6 +210,8 @@ builder.Services.AddCors(options =>
                   .AllowAnyHeader(); // Allows any header in the request
         });
 });
+
+builder.Services.Configure<VNPaySetting>(builder.Configuration.GetSection("VNPAY"));
 
 //builder.WebHost.UseUrls("https://0.0.0.0:5000");
 
