@@ -1,10 +1,13 @@
-using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using ThuocGiaThatAdmin.Contracts.DTOs;
-using ThuocGiaThatAdmin.Service.Services;
 using Microsoft.AspNetCore.Authorization;
-using ThuocGiaThatAdmin.Service.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Globalization;
+using System.Threading.Tasks;
 using ThuocGiaThatAdmin.Contract.DTOs;
+using ThuocGiaThatAdmin.Contracts.DTOs;
+using ThuocGiaThatAdmin.Domain.Entities;
+using ThuocGiaThatAdmin.Service.Interfaces;
+using ThuocGiaThatAdmin.Service.Services;
 
 namespace ThuocGiaThatAdmin.Server.Controllers
 {
@@ -15,12 +18,13 @@ namespace ThuocGiaThatAdmin.Server.Controllers
     {
         private readonly OrderService _orderService;
         private readonly IAddressService _addressSevice;
-
-        public OrderController(OrderService orderService, ILogger<OrderController> logger, IAddressService addressService)
+        private readonly VNPayService _vnPayService;
+        public OrderController(OrderService orderService, ILogger<OrderController> logger, IAddressService addressService, VNPayService vnPayService)
             : base(logger)
         {
             _orderService = orderService ?? throw new ArgumentNullException(nameof(orderService));
             _addressSevice = addressService ?? throw new ArgumentNullException(nameof(addressService));
+            _vnPayService = vnPayService ?? throw new ArgumentNullException(nameof(_vnPayService));
         }
 
         /// <summary>
@@ -156,8 +160,10 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             {
                 var customerId = int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
                 order.CustomerId = customerId;
-                var orderId = await _orderService.CreateOrderAsync(order);
-                return Success<int>(orderId, "Create Order Sucessfully");
+                order.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+                var result = await _orderService.CreateOrderAsync(order);
+
+                return Success<dynamic>(result, "Create Order Sucessfully");
             }, "Create Order Sucessfully");
         }
 
@@ -168,7 +174,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             {
                 var order = await _orderService.GetOrderSummary(id);
                 return Success(order, "Get Order Summary successfully");
-            }, "Get Order Summary");            
+            }, "Get Order Summary");
         }
 
         /// <summary>
@@ -192,7 +198,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         public async Task<IActionResult> GetListOrders()
         {
             var customerId = int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
-            var  result = await _orderService.GetListOrders(customerId);
+            var result = await _orderService.GetListOrders(customerId);
             return Ok(result);
         }
 
@@ -204,6 +210,55 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             var result = await _orderService.GetOrderDetailAsync(id);
             return Ok(result);
         }
-        
+
+        [HttpGet("ipn")]
+        [AllowAnonymous]
+        public async Task VNPayIPN()
+        {
+            var rawData = await FormatRequestData(Request);
+
+
+
+            var vnpParams = new SortedList<string, string>();
+            foreach (var key in Request.Query.Keys)
+            {
+                if (!string.IsNullOrEmpty(key) && key.StartsWith("vnp_"))
+                {
+                    vnpParams.Add(key, Request.Query[key]);
+                }
+            }
+
+            string vnpHash = Request.Query["vnp_SecureHash"];
+
+            await _vnPayService.UpdatePayIPN(vnpParams, rawData);
+        }
+
+        private async Task<string> FormatRequestData(HttpRequest request)
+        {
+            // Format raw request data for logging
+            return $"{request.Method} {request.Path} {request.QueryString}";
+        }
+
+
+        [HttpPost("vnpay-return")]
+        [AllowAnonymous] // Có th? c?n anonymous vì ???c g?i t? frontend
+        public async Task<IActionResult> VerifyVNPayReturn([FromBody] VNPayReturnDto vnpayDto)
+        {
+            try
+            {
+                dynamic result = await _vnPayService.VerifyVNPayReturn(vnpayDto);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                //_logger.LogError(ex, "Error verifying VNPay return");
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "?ã có l?i x?y ra khi xác minh thanh toán"
+                });
+            }
+        }
+
     }
 }
