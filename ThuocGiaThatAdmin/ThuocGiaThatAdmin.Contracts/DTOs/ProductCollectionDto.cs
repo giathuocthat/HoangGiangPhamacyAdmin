@@ -15,14 +15,23 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public int DisplayOrder { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+        public int ProductCount { get; set; }
         public List<ProductDto>? Products { get; set; }
+        public List<ProductCollectionItemDto>? Items { get; set; }
+    }
+
+    public class ProductCollectionItemDto
+    {
+        public int ProductId { get; set; }
+        public string? ProductName { get; set; }
+        public int DisplayOrder { get; set; }
     }
 
     public class CreateCollectionDto
     {
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
-        public CollectionType Type { get; set; }
+        //public CollectionType? Type { get; set; }
         public int DisplayOrder { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
@@ -39,7 +48,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
     {
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
-        public CollectionType Type { get; set; }
+        //public CollectionType? Type { get; set; }
         public bool IsActive { get; set; }
         public int DisplayOrder { get; set; }
         public DateTime? StartDate { get; set; }

@@ -766,6 +766,45 @@ namespace ThuocGiaThatAdmin.Service.Services
             }).ToListAsync();
         }
 
+        /// <summary>
+        /// Search products by name or SKU for AutoComplete
+        /// </summary>
+        /// <param name="keyword">Search keyword (name or SKU)</param>
+        /// <param name="limit">Max results to return</param>
+        /// <returns>List of products with variant info</returns>
+        public async Task<IEnumerable<dynamic>> SearchProductsForSelectionAsync(string keyword, int limit = 20)
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+                return Enumerable.Empty<dynamic>();
+
+            keyword = keyword.Trim().ToLower();
+
+            var results = await _context.Products
+                .Where(p => p.IsActive)
+                .Where(p => p.Name.ToLower().Contains(keyword) ||
+                            p.ProductVariants.Any(v => v.SKU.ToLower().Contains(keyword)))
+                .Include(p => p.ProductVariants.Where(v => v.IsActive))
+                .Take(limit)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return results.Select(p =>
+            {
+                var firstVariant = p.ProductVariants.FirstOrDefault();
+                return new
+                {
+                    ProductId = p.Id,
+                    ProductName = p.Name,
+                    ThumbnailUrl = p.ThumbnailUrl,
+                    Specification = p.Specification,
+                    ProductVariantId = firstVariant?.Id,
+                    SKU = firstVariant?.SKU,
+                    Price = firstVariant?.Price,
+                    OriginalPrice = firstVariant?.OriginalPrice,
+                    ImageUrl = firstVariant?.ImageUrl ?? p.ThumbnailUrl
+                };
+            });
+        }
 
     }
 }

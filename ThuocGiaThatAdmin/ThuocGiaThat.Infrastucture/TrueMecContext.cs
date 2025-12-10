@@ -69,6 +69,7 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<VoucherProductVariant> VoucherProductVariants { get; set; }
         public DbSet<VoucherUsageHistory> VoucherUsageHistories { get; set; }
         public DbSet<OrderVoucher> OrderVouchers { get; set; }
+        public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
 
 
 
@@ -757,6 +758,53 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasIndex(e => e.VoucherId);
             });
 
+
+            // ============ Payment Transaction ============
+            modelBuilder.Entity<PaymentTransaction>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                // Relationships
+                entity.HasOne(x => x.Order)
+                       .WithMany(o => o.PaymentTransactions)
+                       .HasForeignKey(x => x.OrderId)
+                       .OnDelete(DeleteBehavior.Restrict);
+
+                // Fields
+                entity.Property(x => x.TransactionCode)
+                       .HasMaxLength(50);
+
+                entity.HasIndex(x => x.TransactionCode)
+                       .IsUnique();
+
+                entity.Property(x => x.VNPAYTransactionNo)
+                       .HasMaxLength(50);
+
+                entity.Property(x => x.BankCode)
+                       .HasMaxLength(20);
+
+                entity.Property(x => x.Amount)
+                       .HasColumnType("decimal(18,2)")
+                       .IsRequired();
+
+                entity.Property(x => x.PaymentGateway)
+                       .HasMaxLength(50)
+                       .HasDefaultValue("VNPAY");
+
+                entity.Property(x => x.PaymentStatus)
+                       .IsRequired();
+
+                entity.Property(x => x.ResponseCode)
+                       .HasMaxLength(10);
+
+                entity.Property(x => x.Message)
+                       .HasMaxLength(500);
+
+                entity.Property(x => x.CardType)
+                       .HasMaxLength(100);
+
+                entity.Property(x => x.BankTranNo)
+                       .HasMaxLength(50);
+            });
         }
     }
 }

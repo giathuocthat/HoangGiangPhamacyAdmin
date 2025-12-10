@@ -14,6 +14,8 @@ namespace ThuocGiaThatAdmin.Service.Services
         Task<List<ProductDto>> GetLowStockProductsAsync(int maxStock = 100);
         
         // Manual collections
+        Task<(List<ProductCollectionDto> Collections, int TotalCount)> GetAllCollectionsAsync(int pageNumber = 1, int pageSize = 10, string? searchName = null);
+        Task<ProductCollectionDto?> GetCollectionByIdAsync(int id);
         Task<List<CollectionProductResponseDto>> GetCollectionProductsAsync(string slugOrName);
         Task<ProductCollectionDto> CreateCollectionAsync(CreateCollectionDto dto);
         Task<ProductCollectionDto> UpdateCollectionAsync(int id, UpdateProductCollectionDto dto);

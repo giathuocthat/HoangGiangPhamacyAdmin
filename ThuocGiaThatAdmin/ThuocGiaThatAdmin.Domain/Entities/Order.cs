@@ -11,8 +11,8 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         
         // CreatedDate inherited (replaces OrderDate)
         public string OrderStatus { get; set; } = string.Empty; // Pending, Confirmed, Shipping, Completed, Cancelled
-        public string PaymentStatus { get; set; } = string.Empty; // Pending, Paid, Failed
-        public string PaymentMethod { get; set; } = string.Empty;
+        public string PaymentStatus { get; set; } = string.Empty; // Pending, Paid, Failed, Unpaid
+        public string PaymentMethod { get; set; } = string.Empty; // Cash, VNPAY
         
         // Pricing snapshots
         public decimal SubTotal { get; set; }
@@ -47,5 +47,6 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public Ward? Ward { get; set; }
         public Province? Province { get; set; }
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+        public ICollection<PaymentTransaction> PaymentTransactions { get; set; }
     }
 }

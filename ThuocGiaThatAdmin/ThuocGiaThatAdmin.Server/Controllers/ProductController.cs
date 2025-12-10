@@ -498,5 +498,26 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             var result = await _productService.GetProductCollectionByTypeAsync(type);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Search products by name or SKU for AutoComplete selection
+        /// </summary>
+        /// <param name="keyword">Search keyword</param>
+        /// <param name="limit">Max results (default 20)</param>
+        /// <returns>List of products with basic variant info</returns>
+        [HttpGet("search-for-selection")]
+        public async Task<ActionResult<dynamic>> SearchProductsForSelection([FromQuery] string keyword, [FromQuery] int limit = 20)
+        {
+            try
+            {
+                var results = await _productService.SearchProductsForSelectionAsync(keyword, limit);
+                return Ok(results);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error searching products for selection");
+                return StatusCode(500, new { message = "An error occurred while searching products", error = ex.Message });
+            }
+        }
     }
 }

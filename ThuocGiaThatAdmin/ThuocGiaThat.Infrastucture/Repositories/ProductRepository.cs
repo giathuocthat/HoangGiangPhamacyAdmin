@@ -96,6 +96,8 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         public async Task<(IList<Product> products, int TotalCount)> GetPagedProductsAsync(int pageNumber, int pageSize)
         {
             var query = _context.Set<Product>()
+                .Include(x => x.Brand)
+                .Include(x => x.Category)
                 .Where(x => x.IsActive)
                 .AsQueryable()
                 .AsNoTracking();

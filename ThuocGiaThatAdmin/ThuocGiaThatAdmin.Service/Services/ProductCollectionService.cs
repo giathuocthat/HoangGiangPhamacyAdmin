@@ -26,7 +26,62 @@ namespace ThuocGiaThatAdmin.Service.Services
             _maxOrderConfigRepository = maxOrderConfigRepository;
         }
 
-      
+        public async Task<(List<ProductCollectionDto> Collections, int TotalCount)> GetAllCollectionsAsync(int pageNumber = 1, int pageSize = 10, string? searchName = null)
+        {
+            var query = _context.ProductCollections
+                .Include(c => c.Items)
+                .AsQueryable();
+
+            // Filter by name if provided
+            if (!string.IsNullOrWhiteSpace(searchName))
+            {
+                query = query.Where(c => c.Name.Contains(searchName));
+            }
+
+            // Get total count
+            var totalCount = await query.CountAsync();
+
+            // Get paged data
+            var collections = await query
+                .OrderByDescending(c => c.CreatedDate)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var result = collections.Select(c =>
+            {
+                var dto = MapToCollectionDto(c);
+                dto.ProductCount = c.Items.Count;
+                return dto;
+            }).ToList();
+
+            return (result, totalCount);
+        }
+
+        public async Task<ProductCollectionDto?> GetCollectionByIdAsync(int id)
+        {
+            var collection = await _context.ProductCollections
+                .Include(c => c.Items)
+                    .ThenInclude(i => i.Product)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (collection == null)
+                return null;
+
+            var dto = MapToCollectionDto(collection);
+            dto.ProductCount = collection.Items.Count;
+            dto.Items = collection.Items
+                .OrderBy(i => i.DisplayOrder)
+                .Select(i => new ProductCollectionItemDto
+                {
+                    ProductId = i.ProductId,
+                    ProductName = i.Product?.Name,
+                    DisplayOrder = i.DisplayOrder
+                })
+                .ToList();
+
+            return dto;
+        }
 
         public async Task<List<ProductDto>> GetNewProductsAsync(int days = 30)
         {
@@ -70,7 +125,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 Name = dto.Name,
                 Slug = GenerateSlug(dto.Name),
                 Description = dto.Description,
-                Type = dto.Type,
+                Type = CollectionType.Manual,
                 DisplayOrder = dto.DisplayOrder,
                 StartDate = dto.StartDate,
                 EndDate = dto.EndDate,
@@ -108,7 +163,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             collection.Name = dto.Name;
             collection.Slug = GenerateSlug(dto.Name);
             collection.Description = dto.Description;
-            collection.Type = dto.Type;
+            collection.Type = CollectionType.Manual;
             collection.DisplayOrder = dto.DisplayOrder;
             collection.StartDate = dto.StartDate;
             collection.EndDate = dto.EndDate;
