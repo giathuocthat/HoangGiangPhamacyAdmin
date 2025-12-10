@@ -125,7 +125,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 Name = dto.Name,
                 Slug = GenerateSlug(dto.Name),
                 Description = dto.Description,
-                Type = dto.Type,
+                Type = CollectionType.Manual,
                 DisplayOrder = dto.DisplayOrder,
                 StartDate = dto.StartDate,
                 EndDate = dto.EndDate,
@@ -163,7 +163,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             collection.Name = dto.Name;
             collection.Slug = GenerateSlug(dto.Name);
             collection.Description = dto.Description;
-            collection.Type = dto.Type;
+            collection.Type = CollectionType.Manual;
             collection.DisplayOrder = dto.DisplayOrder;
             collection.StartDate = dto.StartDate;
             collection.EndDate = dto.EndDate;
