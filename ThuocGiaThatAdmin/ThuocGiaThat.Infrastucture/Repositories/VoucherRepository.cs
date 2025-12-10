@@ -17,6 +17,12 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         {
         }
 
+        public async Task<IEnumerable<Voucher?>> GetAll()
+        {
+
+            return await _dbSet.ToListAsync();
+        }
+
         /// <summary>
         /// Get voucher by code
         /// </summary>

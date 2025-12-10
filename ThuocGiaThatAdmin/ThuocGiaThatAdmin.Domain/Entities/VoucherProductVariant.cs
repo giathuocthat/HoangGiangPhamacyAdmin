@@ -20,6 +20,11 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public int ProductVariantId { get; set; }
 
         /// <summary>
+        /// Áp dụng cho ApplicableType = ProductVariants
+        /// </summary>
+        public int? MinimumQuantity { get; set; }
+
+        /// <summary>
         /// Ngày tạo liên kết
         /// </summary>
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;

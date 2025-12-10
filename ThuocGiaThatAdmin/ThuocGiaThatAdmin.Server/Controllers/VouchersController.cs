@@ -20,10 +20,17 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             _voucherService = voucherService ?? throw new ArgumentNullException(nameof(voucherService));
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetVouchers()
+        {
+            var result = await _voucherService.GetAllAsync();
+            return Ok(result);
+        }
+
         /// <summary>
         /// Get all active vouchers
         /// </summary>
-        [HttpGet]
+        [HttpGet("active")]
         public async Task<IActionResult> GetActiveVouchers()
         {
             return await ExecuteActionAsync(async () =>
@@ -154,12 +161,12 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             return await ExecuteActionAsync(async () =>
             {
                 var (totalDiscount, applications) = await _voucherService.CalculateStackedDiscountsAsync(
-                    dto.VoucherCodes, 
-                    dto.CartItems, 
+                    dto.VoucherCodes,
+                    dto.CartItems,
                     dto.OrderSubTotal);
 
-                return Success(new 
-                { 
+                return Success(new
+                {
                     totalDiscountAmount = totalDiscount,
                     finalAmount = dto.OrderSubTotal - totalDiscount,
                     applications = applications
