@@ -519,5 +519,42 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 return StatusCode(500, new { message = "An error occurred while searching products", error = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Get product variants with filtering, searching, and pagination
+        /// </summary>
+        /// <param name="request">Request parameters for filtering and pagination</param>
+        /// <returns>Paginated list of product variants with product name, SKU, price, and option values</returns>
+        [HttpGet("variants")]
+        public async Task<ActionResult<dynamic>> GetProductVariants([FromQuery] GetProductVariantsRequestDto request)
+        {
+            try
+            {
+                var (variants, totalCount) = await _productService.GetProductVariantsAsync(request);
+
+                var response = new
+                {
+                    Data = variants,
+                    Pagination = new
+                    {
+                        PageNumber = request.PageNumber,
+                        PageSize = request.PageSize,
+                        TotalCount = totalCount,
+                        TotalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize)
+                    }
+                };
+
+                return Ok(response);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error getting product variants");
+                return StatusCode(500, new { message = "An error occurred while retrieving product variants", error = ex.Message });
+            }
+        }
     }
 }

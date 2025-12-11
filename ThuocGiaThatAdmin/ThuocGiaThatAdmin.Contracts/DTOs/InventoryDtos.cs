@@ -115,7 +115,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public int Quantity { get; set; }
         public int QuantitySold { get; set; }
         public int QuantityRemaining { get; set; }
-        public decimal CostPrice { get; set; }
+        public decimal? CostPrice { get; set; }
         public string? Supplier { get; set; }
         public string? PurchaseOrderNumber { get; set; }
         public BatchStatus Status { get; set; }
@@ -200,9 +200,8 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         [Range(1, int.MaxValue)]
         public int Quantity { get; set; }
         
-        [Required]
-        [Range(0.01, double.MaxValue)]
-        public decimal CostPrice { get; set; }
+        [Range(0, double.MaxValue)]
+        public decimal? CostPrice { get; set; }
         
         [MaxLength(255)]
         public string? Supplier { get; set; }
@@ -223,6 +222,176 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public TransactionDto Transaction { get; set; } = null!;
         public string Message { get; set; } = string.Empty;
     }
+    
+    // ========== Sale Transaction DTOs ==========
+    
+    public class SaleInventoryDto
+    {
+        [Required]
+        public int ProductVariantId { get; set; }
+        
+        [Required]
+        public int WarehouseId { get; set; }
+        
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Quantity must be greater than 0")]
+        public int Quantity { get; set; }
+        
+        /// <summary>
+        /// Optional: Order ID if this sale is from an order
+        /// </summary>
+        public int? OrderId { get; set; }
+        
+        /// <summary>
+        /// Optional: Specific batch to sell from. If not provided, FEFO will be used
+        /// </summary>
+        public int? BatchId { get; set; }
+        
+        public string? Notes { get; set; }
+    }
+    
+    // ========== Return Transaction DTOs ==========
+    
+    public class ReturnInventoryDto
+    {
+        [Required]
+        public int ProductVariantId { get; set; }
+        
+        [Required]
+        public int WarehouseId { get; set; }
+        
+        /// <summary>
+        /// Batch to return to (original batch customer purchased from)
+        /// </summary>
+        [Required]
+        public int BatchId { get; set; }
+        
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Quantity must be greater than 0")]
+        public int Quantity { get; set; }
+        
+        /// <summary>
+        /// Optional: Order ID if this return is from an order
+        /// </summary>
+        public int? OrderId { get; set; }
+        
+        [Required]
+        [MaxLength(500)]
+        public string Reason { get; set; } = string.Empty;
+        
+        public string? Notes { get; set; }
+    }
+    
+    // ========== Return to Supplier DTOs ==========
+    
+    public class ReturnToSupplierDto
+    {
+        [Required]
+        public int ProductVariantId { get; set; }
+        
+        [Required]
+        public int WarehouseId { get; set; }
+        
+        [Required]
+        public int BatchId { get; set; }
+        
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Quantity must be greater than 0")]
+        public int Quantity { get; set; }
+        
+        [Required]
+        [MaxLength(500)]
+        public string Reason { get; set; } = string.Empty;
+        
+        [MaxLength(255)]
+        public string? SupplierName { get; set; }
+        
+        public string? Notes { get; set; }
+    }
+    
+    // ========== Transfer Transaction DTOs ==========
+    
+    public class TransferInventoryDto
+    {
+        [Required]
+        public int ProductVariantId { get; set; }
+        
+        [Required]
+        public int FromWarehouseId { get; set; }
+        
+        [Required]
+        public int ToWarehouseId { get; set; }
+        
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Quantity must be greater than 0")]
+        public int Quantity { get; set; }
+        
+        /// <summary>
+        /// Optional: Specific batch to transfer. If not provided, FEFO will be used
+        /// </summary>
+        public int? BatchId { get; set; }
+        
+        [MaxLength(500)]
+        public string? Reason { get; set; }
+        
+        public string? Notes { get; set; }
+    }
+    
+    public class TransferInventoryResponseDto
+    {
+        public TransactionDto TransferOutTransaction { get; set; } = null!;
+        public TransactionDto TransferInTransaction { get; set; } = null!;
+        public InventoryDto SourceInventory { get; set; } = null!;
+        public InventoryDto DestinationInventory { get; set; } = null!;
+        public string Message { get; set; } = string.Empty;
+    }
+    
+    // ========== Adjustment Transaction DTOs ==========
+    
+    public class AdjustmentInventoryDto
+    {
+        [Required]
+        public int ProductVariantId { get; set; }
+        
+        [Required]
+        public int WarehouseId { get; set; }
+        
+        /// <summary>
+        /// Actual quantity counted during stocktaking
+        /// </summary>
+        [Required]
+        [Range(0, int.MaxValue, ErrorMessage = "Actual quantity cannot be negative")]
+        public int ActualQuantity { get; set; }
+        
+        [Required]
+        [MaxLength(500)]
+        public string Reason { get; set; } = string.Empty;
+        
+        public string? Notes { get; set; }
+    }
+    
+    // ========== Generic Transaction Response ==========
+    
+    public class InventoryTransactionResponseDto
+    {
+        public InventoryDto Inventory { get; set; } = null!;
+        public TransactionDto Transaction { get; set; } = null!;
+        public string Message { get; set; } = string.Empty;
+    }
+    
+    // ========== Transaction Query DTOs ==========
+    
+    public class TransactionFilterDto
+    {
+        public TransactionType? Type { get; set; }
+        public int? WarehouseId { get; set; }
+        public int? ProductVariantId { get; set; }
+        public DateTime? FromDate { get; set; }
+        public DateTime? ToDate { get; set; }
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 20;
+    }
+    
     
     // ========== Alert DTOs ==========
     

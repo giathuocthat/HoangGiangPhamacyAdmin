@@ -806,5 +806,95 @@ namespace ThuocGiaThatAdmin.Service.Services
             });
         }
 
+        /// <summary>
+        /// Get product variants with filtering, searching, and pagination
+        /// </summary>
+        /// <param name="request">Request parameters for filtering and pagination</param>
+        /// <returns>Tuple containing list of product variants and total count</returns>
+        public async Task<(IEnumerable<ProductVariantListItemDto> variants, int totalCount)> GetProductVariantsAsync(GetProductVariantsRequestDto request)
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            if (request.PageNumber <= 0)
+                throw new ArgumentException("Page number must be greater than 0", nameof(request.PageNumber));
+
+            if (request.PageSize <= 0 || request.PageSize > 100)
+                throw new ArgumentException("Page size must be between 1 and 100", nameof(request.PageSize));
+
+            // Build query
+            var query = _context.ProductVariants
+                .Include(v => v.Product)
+                .Include(v => v.VariantOptionValues)
+                    .ThenInclude(vov => vov.ProductOptionValue)
+                        .ThenInclude(pov => pov.ProductOption)
+                .AsQueryable();
+
+            // Apply filters
+            if (request.IsProductActive.HasValue)
+            {
+                query = query.Where(v => v.Product.IsActive == request.IsProductActive.Value);
+            }
+            else
+            {
+                query = query.Where(v => v.Product.IsActive == true);
+            }
+
+            if (request.IsVariantActive.HasValue)
+            {
+                query = query.Where(v => v.IsActive == request.IsVariantActive.Value);
+            }
+            else
+            {
+                query = query.Where(v => v.IsActive ==  true);
+            }
+
+            // Apply search
+            if (!string.IsNullOrWhiteSpace(request.SearchKeyword))
+            {
+                var keyword = request.SearchKeyword.Trim().ToLower();
+                query = query.Where(v =>
+                    v.Product.Name.Contains(keyword) ||
+                    v.SKU.Contains(keyword));
+            }
+
+            // Get total count
+            var totalCount = await query.CountAsync();
+
+            // Apply pagination and get results
+            var variants = await query
+                .OrderByDescending(v => v.CreatedDate)
+                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .AsNoTracking()
+                .ToListAsync();
+
+            // Map to DTOs
+            var result = variants.Select(v => new ProductVariantListItemDto
+            {
+                VariantId = v.Id,
+                ProductId = v.ProductId,
+                ProductName = v.Product.Name,
+                SKU = v.SKU,
+                Barcode = v.Barcode,
+                Price = v.Price,
+                OriginalPrice = v.OriginalPrice,
+                StockQuantity = v.StockQuantity,
+                MaxSalesQuantity = v.MaxSalesQuantity,
+                ImageUrl = v.ImageUrl,
+                IsProductActive = v.Product.IsActive,
+                IsVariantActive = v.IsActive,
+                OptionValues = v.VariantOptionValues.Select(vov => new VariantOptionInfo
+                {
+                    OptionId = vov.ProductOptionValue.ProductOption.Id,
+                    OptionName = vov.ProductOptionValue.ProductOption.Name,
+                    OptionValueId = vov.ProductOptionValueId,
+                    OptionValue = vov.ProductOptionValue.Value
+                }).ToList()
+            }).ToList();
+
+            return (result, totalCount);
+        }
+
     }
 }

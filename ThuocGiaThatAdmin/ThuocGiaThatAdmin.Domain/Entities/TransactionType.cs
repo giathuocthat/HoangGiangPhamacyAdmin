@@ -9,11 +9,12 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         Sale = 2,               // Bán hàng
         Return = 3,             // Trả hàng (khách trả)
         ReturnToSupplier = 4,   // Trả hàng cho nhà cung cấp
-        Transfer = 5,           // Chuyển kho
         Adjustment = 6,         // Điều chỉnh (kiểm kê)
         Damaged = 7,            // Hư hỏng
         Expired = 8,            // Hết hạn
         Promotion = 9,          // Khuyến mãi/Tặng
-        Sample = 10             // Mẫu thử
+        Sample = 10,            // Mẫu thử
+        TransferOut = 11,       // Chuyển kho - Xuất
+        TransferIn = 12         // Chuyển kho - Nhập
     }
 }
