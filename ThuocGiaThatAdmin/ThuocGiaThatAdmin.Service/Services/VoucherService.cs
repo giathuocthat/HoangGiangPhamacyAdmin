@@ -24,6 +24,13 @@ namespace ThuocGiaThatAdmin.Service.Services
 
         #region CRUD Operations
 
+
+        public async Task<IEnumerable<VoucherResponseDto>> GetAllAsync()
+        {
+            var vouchers = await _voucherRepository.GetAllAsync();
+            return vouchers.Select(MapToDto);
+        }
+
         public async Task<VoucherResponseDto?> GetByIdAsync(int id)
         {
             var voucher = await _voucherRepository.GetByIdWithDetailsAsync(id);
@@ -431,8 +438,9 @@ namespace ThuocGiaThatAdmin.Service.Services
                 CreatedBy = voucher.CreatedBy,
                 UpdatedDate = voucher.UpdatedDate,
                 UpdatedBy = voucher.UpdatedBy,
-                CategoryIds = voucher.VoucherCategories?.Select(vc => vc.CategoryId).ToList() ?? new List<int>(),
-                ProductVariantIds = voucher.VoucherProductVariants?.Select(vpv => vpv.ProductVariantId).ToList() ?? new List<int>()
+                DiscountTypeName = Enum.GetName(typeof(DiscountType), voucher.DiscountType),
+                CategoryIds = voucher.VoucherCategories?.Select(vc => vc.CategoryId).ToList() ?? [],
+                ProductVariantIds = voucher.VoucherProductVariants?.Select(vpv => vpv.ProductVariantId).ToList() ?? []
             };
         }
 

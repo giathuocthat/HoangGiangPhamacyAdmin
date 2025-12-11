@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ThuocGiaThat.Infrastucture;
 
@@ -11,9 +12,11 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    partial class TrueMecContextModelSnapshot : ModelSnapshot
+    [Migration("20251210095308_UpdateVoucherProductVariant")]
+    partial class UpdateVoucherProductVariant
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -984,69 +987,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.ToTable("InventoryTransactions");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.LocationStockMovement", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("FromLocationCode")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int?>("MovedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("MovementDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ProductVariantId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Reason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("ToLocationCode")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("VariantLocationStockId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("WarehouseId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FromLocationCode");
-
-                    b.HasIndex("MovementDate");
-
-                    b.HasIndex("ProductVariantId");
-
-                    b.HasIndex("ToLocationCode");
-
-                    b.HasIndex("VariantLocationStockId");
-
-                    b.HasIndex("WarehouseId");
-
-                    b.ToTable("LocationStockMovements");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Order", b =>
                 {
                     b.Property<int>("Id")
@@ -1319,84 +1259,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsUnique();
 
                     b.ToTable("OrderVouchers");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.PaymentTransaction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("BankCode")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("BankTranNo")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("CardType")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Message")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTimeOffset>("ModifiedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset?>("PayDate")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("PaymentGateway")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasDefaultValue("VNPAY");
-
-                    b.Property<int>("PaymentStatus")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ResponseCode")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<string>("TransactionCode")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("VNPAYTransactionNo")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("TransactionCode")
-                        .IsUnique()
-                        .HasFilter("[TransactionCode] IS NOT NULL");
-
-                    b.ToTable("PaymentTransactions");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.PriceHistory", b =>
@@ -2123,78 +1985,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.ToTable("UploadedFiles");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.VariantLocationStock", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BinName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<bool>("IsPrimaryLocation")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LocationCode")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int>("ProductVariantId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<int>("QuantityReserved")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RackName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("ShelfName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("WarehouseId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ZoneName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IsPrimaryLocation");
-
-                    b.HasIndex("LocationCode");
-
-                    b.HasIndex("ProductVariantId");
-
-                    b.HasIndex("WarehouseId");
-
-                    b.HasIndex("ProductVariantId", "WarehouseId", "LocationCode")
-                        .IsUnique();
-
-                    b.ToTable("VariantLocationStocks");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.VariantOptionValue", b =>
                 {
                     b.Property<int>("Id")
@@ -2748,29 +2538,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("Warehouse");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.LocationStockMovement", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ProductVariant", "ProductVariant")
-                        .WithMany()
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.VariantLocationStock", null)
-                        .WithMany("Movements")
-                        .HasForeignKey("VariantLocationStockId");
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Warehouse", "Warehouse")
-                        .WithMany()
-                        .HasForeignKey("WarehouseId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ProductVariant");
-
-                    b.Navigation("Warehouse");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Order", b =>
                 {
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Customer", "Customer")
@@ -2842,17 +2609,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("Order");
 
                     b.Navigation("Voucher");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.PaymentTransaction", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Order", "Order")
-                        .WithMany("PaymentTransactions")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.PriceHistory", b =>
@@ -3043,25 +2799,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("Warehouse");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.VariantLocationStock", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ProductVariant", "ProductVariant")
-                        .WithMany()
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Warehouse", "Warehouse")
-                        .WithMany("VariantLocationStocks")
-                        .HasForeignKey("WarehouseId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ProductVariant");
-
-                    b.Navigation("Warehouse");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.VariantOptionValue", b =>
                 {
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ProductOptionValue", "ProductOptionValue")
@@ -3193,8 +2930,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Order", b =>
                 {
                     b.Navigation("OrderItems");
-
-                    b.Navigation("PaymentTransactions");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Product", b =>
@@ -3246,11 +2981,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("CartItems");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.VariantLocationStock", b =>
-                {
-                    b.Navigation("Movements");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Voucher", b =>
                 {
                     b.Navigation("OrderVouchers");
@@ -3267,8 +2997,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("Inventories");
 
                     b.Navigation("Transactions");
-
-                    b.Navigation("VariantLocationStocks");
                 });
 #pragma warning restore 612, 618
         }

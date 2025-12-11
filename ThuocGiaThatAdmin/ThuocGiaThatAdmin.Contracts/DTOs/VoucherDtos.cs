@@ -15,6 +15,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public string? Description { get; set; }
         
         public DiscountType DiscountType { get; set; }
+        public string DiscountTypeName { get; set; }
         public decimal DiscountValue { get; set; }
         public decimal? MaxDiscountAmount { get; set; }
         

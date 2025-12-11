@@ -10,6 +10,8 @@ namespace ThuocGiaThat.Infrastucture.Repositories
     /// </summary>
     public interface IVoucherRepository : IRepository<Voucher>
     {
+
+        Task<IEnumerable<Voucher?>> GetAll();
         /// <summary>
         /// Get voucher by code
         /// </summary>

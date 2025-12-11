@@ -12,6 +12,7 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
     public interface IVoucherService
     {
         // CRUD Operations
+        Task<IEnumerable<VoucherResponseDto>> GetAllAsync();
         Task<VoucherResponseDto?> GetByIdAsync(int id);
         Task<VoucherResponseDto?> GetByCodeAsync(string code);
         Task<IEnumerable<VoucherResponseDto>> GetAllActiveAsync();

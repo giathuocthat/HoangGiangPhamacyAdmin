@@ -168,6 +168,9 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<BusinessTypeService>();
 builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IVoucherService, VoucherService>();
+
+builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
 
 // Shopping Cart Service
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
