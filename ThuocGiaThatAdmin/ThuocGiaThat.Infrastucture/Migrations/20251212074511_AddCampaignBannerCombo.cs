@@ -17,13 +17,13 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                 type: "int",
                 nullable: true);
 
-            migrationBuilder.AddColumn<string>(
-                name: "BatchNumber",
-                table: "LocationStockMovements",
-                type: "nvarchar(100)",
-                maxLength: 100,
-                nullable: false,
-                defaultValue: "");
+            //migrationBuilder.AddColumn<string>(
+            //    name: "BatchNumber",
+            //    table: "LocationStockMovements",
+            //    type: "nvarchar(100)",
+            //    maxLength: 100,
+            //    nullable: false,
+            //    defaultValue: "");
 
             migrationBuilder.AlterColumn<decimal>(
                 name: "CostPrice",
@@ -377,9 +377,9 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                 name: "BannerId",
                 table: "Vouchers");
 
-            migrationBuilder.DropColumn(
-                name: "BatchNumber",
-                table: "LocationStockMovements");
+            //migrationBuilder.DropColumn(
+            //    name: "BatchNumber",
+            //    table: "LocationStockMovements");
 
             migrationBuilder.AlterColumn<decimal>(
                 name: "CostPrice",
