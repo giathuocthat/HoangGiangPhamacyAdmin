@@ -162,6 +162,7 @@ builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<WarehouseService>();
 builder.Services.AddScoped<InventoryService>();
 builder.Services.AddScoped<StockAlertService>();
+builder.Services.AddScoped<ProductBatchService>();
 
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUserService, UserService>();

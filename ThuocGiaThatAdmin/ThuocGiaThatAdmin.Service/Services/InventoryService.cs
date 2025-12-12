@@ -13,6 +13,7 @@ namespace ThuocGiaThatAdmin.Service.Services
         private readonly IInventoryBatchRepository _batchRepository;
         private readonly IInventoryTransactionRepository _transactionRepository;
         private readonly IStockAlertRepository _alertRepository;
+        private readonly IRepository<ProductBatch> _productBatchRepository;
 
         public InventoryService(
             IRepository<Inventory> inventoryRepository,
@@ -20,7 +21,8 @@ namespace ThuocGiaThatAdmin.Service.Services
             IWarehouseRepository warehouseRepository,
             IInventoryBatchRepository batchRepository,
             IInventoryTransactionRepository transactionRepository,
-            IStockAlertRepository alertRepository)
+            IStockAlertRepository alertRepository,
+            IRepository<ProductBatch> productBatchRepository)
         {
             _inventoryRepository = inventoryRepository;
             _productVariantRepository = productVariantRepository;
@@ -28,24 +30,12 @@ namespace ThuocGiaThatAdmin.Service.Services
             _batchRepository = batchRepository;
             _transactionRepository = transactionRepository;
             _alertRepository = alertRepository;
+            _productBatchRepository = productBatchRepository;
         }
 
         public async Task<PurchaseInventoryResponseDto> PurchaseInventoryAsync(PurchaseInventoryDto dto, string? userId = null)
         {
-            // 1. Validate expiry date
-            if (dto.ExpiryDate <= DateTime.Now)
-            {
-                throw new ArgumentException("Expiry date must be in the future");
-            }
-
-            // 2. Check if product variant exists
-            var productVariant = await _productVariantRepository.GetByIdAsync(dto.ProductVariantId);
-            if (productVariant == null)
-            {
-                throw new KeyNotFoundException($"Product variant with ID {dto.ProductVariantId} not found");
-            }
-
-            // 3. Check if warehouse exists and is active
+            // 1. Check if warehouse exists and is active
             var warehouse = await _warehouseRepository.GetByIdAsync(dto.WarehouseId);
             if (warehouse == null)
             {
@@ -57,90 +47,84 @@ namespace ThuocGiaThatAdmin.Service.Services
                 throw new InvalidOperationException($"Warehouse '{warehouse.Name}' is not active");
             }
 
+            // 2. Lookup ProductBatch
+            var productBatch = await _productBatchRepository.FirstOrDefaultAsync(b => b.BatchNumber == dto.BatchNumber);
+            if (productBatch == null)
+            {
+                throw new KeyNotFoundException($"Batch number '{dto.BatchNumber}' not found. Please create the batch first.");
+            }
+
+            // 3. Get Product Variant
+            var productVariant = await _productVariantRepository.GetByIdAsync(productBatch.ProductVariantId);
+            if (productVariant == null)
+            {
+                throw new KeyNotFoundException($"Product variant for batch '{dto.BatchNumber}' not found");
+            }
+
             // 4. Get or create inventory record
             var inventory = await _inventoryRepository.FirstOrDefaultAsync(i => 
-                i.ProductVariantId == dto.ProductVariantId && 
+                i.ProductVariantId == productBatch.ProductVariantId && 
                 i.WarehouseId == dto.WarehouseId);
 
             if (inventory == null)
             {
                 inventory = new Inventory
                 {
-                    ProductVariantId = dto.ProductVariantId,
+                    ProductVariantId = productBatch.ProductVariantId,
                     WarehouseId = dto.WarehouseId,
                     QuantityOnHand = 0,
                     QuantityReserved = 0,
-                    Location = dto.Location
+                    // Default location logic or leave empty
                 };
                 await _inventoryRepository.AddAsync(inventory);
                 await _inventoryRepository.SaveChangesAsync();
             }
 
-            // 5. Get or create batch (check if batch number already exists for this inventory)
-            var batch = await _batchRepository.FirstOrDefaultAsync(b => 
+            // 5. Get or create inventory batch (linking to physical location)
+            // Note: InventoryBatch tracks stock AT THIS WAREHOUSE, ProductBatch tracks master batch info
+            var inventoryBatch = await _batchRepository.FirstOrDefaultAsync(b => 
                 b.InventoryId == inventory.Id && 
                 b.BatchNumber == dto.BatchNumber);
 
-            bool isNewBatch = false;
-            if (batch == null)
+            bool isNewInventoryBatch = false;
+            if (inventoryBatch == null)
             {
-                // Create new batch
-                batch = new InventoryBatch
+                // Create new inventory batch
+                inventoryBatch = new InventoryBatch
                 {
                     InventoryId = inventory.Id,
                     BatchNumber = dto.BatchNumber,
-                    ManufactureDate = dto.ManufactureDate,
-                    ExpiryDate = dto.ExpiryDate,
+                    ManufactureDate = productBatch.ManufactureDate,
+                    ExpiryDate = productBatch.ExpiryDate,
                     Quantity = dto.Quantity,
                     QuantitySold = 0,
-                    CostPrice = dto.CostPrice,
-                    Supplier = dto.Supplier,
-                    PurchaseOrderNumber = dto.PurchaseOrderNumber,
-                    Status = DetermineBatchStatus(dto.ExpiryDate),
+                    CostPrice = productBatch.CostPrice,
+                    Supplier = productBatch.Supplier,
+                    PurchaseOrderNumber = productBatch.PurchaseOrderNumber,
+                    Status = DetermineBatchStatus(productBatch.ExpiryDate),
                     Notes = dto.Notes
                 };
                 
-                await _batchRepository.AddAsync(batch);
-                isNewBatch = true;
+                await _batchRepository.AddAsync(inventoryBatch);
+                isNewInventoryBatch = true;
             }
             else
             {
-                // Update existing batch - add more quantity to existing batch
-                batch.Quantity += dto.Quantity;
+                // Update existing batch - add more quantity
+                inventoryBatch.Quantity += dto.Quantity;
                 
-                // Optionally update other fields if they differ
-                if (dto.ManufactureDate.HasValue && batch.ManufactureDate != dto.ManufactureDate)
-                {
-                    batch.ManufactureDate = dto.ManufactureDate;
-                }
-                
-                if (batch.ExpiryDate != dto.ExpiryDate)
-                {
-                    batch.ExpiryDate = dto.ExpiryDate;
-                    batch.Status = DetermineBatchStatus(dto.ExpiryDate);
-                }
-                
-                // Update cost price to weighted average
-                if (dto.CostPrice.HasValue)
-                {
-                    var existingValue = (batch.CostPrice ?? 0) * (batch.Quantity - dto.Quantity);
-                    var newValue = dto.CostPrice.Value * dto.Quantity;
-                    batch.CostPrice = (existingValue + newValue) / batch.Quantity;
-                }
-                
-                if (!string.IsNullOrEmpty(dto.Supplier))
-                {
-                    batch.Supplier = dto.Supplier;
-                }
-                
+                // Update notes if provided
                 if (!string.IsNullOrEmpty(dto.Notes))
                 {
-                    batch.Notes = string.IsNullOrEmpty(batch.Notes) 
+                    inventoryBatch.Notes = string.IsNullOrEmpty(inventoryBatch.Notes) 
                         ? dto.Notes 
-                        : $"{batch.Notes}; {dto.Notes}";
+                        : $"{inventoryBatch.Notes}; {dto.Notes}";
                 }
                 
-                _batchRepository.Update(batch);
+                // Recalculate status just in case (e.g. if expiry changed in master - unlikely here but safe)
+                inventoryBatch.Status = DetermineBatchStatus(productBatch.ExpiryDate);
+                
+                _batchRepository.Update(inventoryBatch);
             }
             
             await _batchRepository.SaveChangesAsync();
@@ -148,25 +132,21 @@ namespace ThuocGiaThatAdmin.Service.Services
             // 6. Update inventory quantity
             var quantityBefore = inventory.QuantityOnHand;
             inventory.QuantityOnHand += dto.Quantity;
-            if (!string.IsNullOrEmpty(dto.Location))
-            {
-                inventory.Location = dto.Location;
-            }
             _inventoryRepository.Update(inventory);
 
             // 7. Create transaction record
             var transaction = new InventoryTransaction
             {
-                ProductVariantId = dto.ProductVariantId,
+                ProductVariantId = productBatch.ProductVariantId,
                 WarehouseId = dto.WarehouseId,
-                BatchId = batch.Id,
+                BatchId = inventoryBatch.Id,
                 Type = TransactionType.Purchase,
                 Quantity = dto.Quantity,
                 QuantityBefore = quantityBefore,
                 QuantityAfter = inventory.QuantityOnHand,
-                UnitPrice = dto.CostPrice,
-                TotalValue = dto.CostPrice * dto.Quantity,
-                ReferenceNumber = dto.PurchaseOrderNumber,
+                UnitPrice = productBatch.CostPrice, // Use standard cost from master batch
+                TotalValue = productBatch.CostPrice * dto.Quantity,
+                ReferenceNumber = productBatch.PurchaseOrderNumber,
                 ReferenceType = "PurchaseOrder",
                 PerformedByUserId = userId,
                 Reason = "Purchase from supplier",
@@ -177,18 +157,18 @@ namespace ThuocGiaThatAdmin.Service.Services
             await _transactionRepository.SaveChangesAsync();
 
             // 8. Check and create alerts if needed
-            await CheckAndCreateAlertsAsync(inventory, batch);
+            await CheckAndCreateAlertsAsync(inventory, inventoryBatch);
 
             // 9. Return response
-            var message = isNewBatch 
-                ? $"Successfully created new batch and purchased {dto.Quantity} units of {productVariant.SKU}"
-                : $"Successfully updated existing batch '{dto.BatchNumber}' with {dto.Quantity} more units of {productVariant.SKU}";
+            var message = isNewInventoryBatch 
+                ? $"Successfully added {dto.Quantity} units of batch '{dto.BatchNumber}' ({productVariant.SKU}) to inventory"
+                : $"Successfully updated batch '{dto.BatchNumber}' with {dto.Quantity} more units of {productVariant.SKU}";
                 
             return new PurchaseInventoryResponseDto
             {
                 Inventory = MapToInventoryDto(inventory, productVariant, warehouse),
-                Batch = MapToBatchDto(batch),
-                Transaction = MapToTransactionDto(transaction, productVariant, warehouse, batch),
+                Batch = MapToBatchDto(inventoryBatch),
+                Transaction = MapToTransactionDto(transaction, productVariant, warehouse, inventoryBatch),
                 Message = message
             };
         }

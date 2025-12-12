@@ -182,35 +182,15 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
     public class PurchaseInventoryDto
     {
         [Required]
-        public int ProductVariantId { get; set; }
-        
-        [Required]
         public int WarehouseId { get; set; }
         
         [Required]
         [MaxLength(100)]
         public string BatchNumber { get; set; } = string.Empty;
         
-        public DateTime? ManufactureDate { get; set; }
-        
-        [Required]
-        public DateTime ExpiryDate { get; set; }
-        
         [Required]
         [Range(1, int.MaxValue)]
         public int Quantity { get; set; }
-        
-        [Range(0, double.MaxValue)]
-        public decimal? CostPrice { get; set; }
-        
-        [MaxLength(255)]
-        public string? Supplier { get; set; }
-        
-        [MaxLength(100)]
-        public string? PurchaseOrderNumber { get; set; }
-        
-        [MaxLength(100)]
-        public string? Location { get; set; }
         
         public string? Notes { get; set; }
     }

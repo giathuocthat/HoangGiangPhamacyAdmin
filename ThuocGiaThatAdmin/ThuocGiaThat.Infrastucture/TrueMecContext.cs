@@ -34,6 +34,7 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<Warehouse> Warehouses { get; set; }
         public DbSet<InventoryBatch> InventoryBatches { get; set; }
         public DbSet<InventoryTransaction> InventoryTransactions { get; set; }
+        public DbSet<ProductBatch> ProductBatches { get; set; }
         public DbSet<StockAlert> StockAlerts { get; set; }
         public DbSet<VariantLocationStock> VariantLocationStocks { get; set; }
         public DbSet<LocationStockMovement> LocationStockMovements { get; set; }
@@ -220,6 +221,29 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasIndex(e => e.BatchNumber);
                 entity.HasIndex(e => e.ExpiryDate);
                 entity.HasIndex(e => e.Status);
+            });
+            
+            // ============ ProductBatch Configuration ============
+            modelBuilder.Entity<ProductBatch>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.BatchNumber).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.CostPrice).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.PurchaseOrderNumber).HasMaxLength(100);
+                entity.Property(e => e.Supplier).HasMaxLength(255);
+                entity.Property(e => e.QRCodePath).HasMaxLength(500);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+                
+                entity.HasOne(e => e.ProductVariant)
+                    .WithMany(v => v.ProductBatches)
+                    .HasForeignKey(e => e.ProductVariantId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                
+                entity.HasIndex(e => e.BatchNumber).IsUnique();
+                entity.HasIndex(e => e.ExpiryDate);
+                entity.HasIndex(e => e.IsActive);
+                entity.HasIndex(e => e.ProductVariantId);
             });
             
             // ============ InventoryTransaction Configuration ============

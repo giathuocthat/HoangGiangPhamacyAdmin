@@ -13,5 +13,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
     public interface IProductVariantRepository : IRepository<ProductVariant>
     {
         Task<IEnumerable<ProductVariant>> GetByIdsAsync(IList<int> ids);
+
+        Task<ProductVariant?> GetVariantWithProduct(int variantId);
     }
 }
