@@ -4,10 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ThuocGiaThatAdmin.Domain.Entities
 {
-    public class BannerAnalytics
+    public class BannerAnalytics : AuditableEntity
     {
-        public int Id { get; set; }
-
         public int BannerId { get; set; }
 
         public int? CustomerId { get; set; }
