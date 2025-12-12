@@ -203,6 +203,10 @@ builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IProductCollectionService, ProductCollectionService>();
 builder.Services.AddScoped<VNPayService>();
 
+// Order Fulfillment Service
+builder.Services.AddScoped<IOrderFulfillmentService, OrderFulfillmentService>();
+builder.Services.AddScoped<IOrderFulfillmentRepository, OrderFulfillmentRepository>();
+
 // Add CORS to allow frontend to call this API
 builder.Services.AddCors(options =>
 {

@@ -73,6 +73,7 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<VoucherUsageHistory> VoucherUsageHistories { get; set; }
         public DbSet<OrderVoucher> OrderVouchers { get; set; }
         public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
+        public DbSet<OrderItemFulfillment> OrderItemFulfillments { get; set; }
 
 
 
@@ -523,6 +524,29 @@ namespace ThuocGiaThat.Infrastucture
                 
                 entity.HasIndex(e => e.OrderItemId).IsUnique();
                 entity.HasIndex(e => e.ProductVariantId);
+            });
+            
+            // ============ OrderItemFulfillment Configuration ============
+            modelBuilder.Entity<OrderItemFulfillment>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+                entity.Property(e => e.Notes).HasMaxLength(500);
+                
+                entity.HasOne(e => e.OrderItem)
+                    .WithMany(oi => oi.Fulfillments)
+                    .HasForeignKey(e => e.OrderItemId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                entity.HasOne(e => e.InventoryBatch)
+                    .WithMany()
+                    .HasForeignKey(e => e.InventoryBatchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                
+                entity.HasIndex(e => e.OrderItemId);
+                entity.HasIndex(e => e.InventoryBatchId);
+                entity.HasIndex(e => e.FulfilledDate);
             });
 
             modelBuilder.Entity<ApplicationUser>(entity =>
