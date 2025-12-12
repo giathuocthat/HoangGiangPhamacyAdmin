@@ -173,6 +173,18 @@ builder.Services.AddScoped<IVoucherService, VoucherService>();
 
 builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
 
+// Banner/Campaign/Combo Repositories
+builder.Services.AddScoped<ICampaignRepository, CampaignRepository>();
+builder.Services.AddScoped<IBannerRepository, BannerRepository>();
+builder.Services.AddScoped<IComboRepository, ComboRepository>();
+builder.Services.AddScoped<IBannerAnalyticsRepository, BannerAnalyticsRepository>();
+
+// Banner/Campaign/Combo Services
+builder.Services.AddScoped<ICampaignService, CampaignService>();
+builder.Services.AddScoped<IBannerService, BannerService>();
+builder.Services.AddScoped<IComboService, ComboService>();
+builder.Services.AddScoped<IBannerAnalyticsService, BannerAnalyticsService>();
+
 // Shopping Cart Service
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
