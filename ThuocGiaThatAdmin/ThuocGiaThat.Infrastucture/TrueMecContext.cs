@@ -35,6 +35,8 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<InventoryBatch> InventoryBatches { get; set; }
         public DbSet<InventoryTransaction> InventoryTransactions { get; set; }
         public DbSet<StockAlert> StockAlerts { get; set; }
+        public DbSet<VariantLocationStock> VariantLocationStocks { get; set; }
+        public DbSet<LocationStockMovement> LocationStockMovements { get; set; }
         
         public virtual DbSet<Customer> Customers { get; set; }
         public DbSet<Address> Addresses { get; set; }
@@ -288,6 +290,75 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
                 entity.HasOne(e => e.ProductVariant).WithMany(e => e.PriceHistories).HasForeignKey(e => e.ProductVariantId).OnDelete(DeleteBehavior.Cascade);
+            });
+            
+            // ============ VariantLocationStock Configuration ============
+            modelBuilder.Entity<VariantLocationStock>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.LocationCode).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.ZoneName).HasMaxLength(100);
+                entity.Property(e => e.RackName).HasMaxLength(100);
+                entity.Property(e => e.ShelfName).HasMaxLength(100);
+                entity.Property(e => e.BinName).HasMaxLength(100);
+                entity.Property(e => e.Notes).HasMaxLength(500);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+                
+                entity.HasOne(e => e.ProductVariant)
+                    .WithMany()
+                    .HasForeignKey(e => e.ProductVariantId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                entity.HasOne(e => e.Warehouse)
+                    .WithMany(e => e.VariantLocationStocks)
+                    .HasForeignKey(e => e.WarehouseId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                
+                // Composite unique constraint: Mỗi variant chỉ có 1 record tại mỗi location code trong 1 warehouse
+                entity.HasIndex(e => new { e.ProductVariantId, e.WarehouseId, e.LocationCode }).IsUnique();
+                
+                // Index cho LocationCode để tìm kiếm nhanh
+                entity.HasIndex(e => e.LocationCode);
+                entity.HasIndex(e => e.WarehouseId);
+                entity.HasIndex(e => e.ProductVariantId);
+                entity.HasIndex(e => e.IsPrimaryLocation);
+            });
+            
+            // ============ LocationStockMovement Configuration ============
+            modelBuilder.Entity<LocationStockMovement>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.FromLocationCode).HasMaxLength(100);
+                entity.Property(e => e.ToLocationCode).HasMaxLength(100);
+                entity.Property(e => e.BatchNumber).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Reason).HasMaxLength(500);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+                
+                entity.HasOne(e => e.ProductVariant)
+                    .WithMany()
+                    .HasForeignKey(e => e.ProductVariantId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                entity.HasOne(e => e.Warehouse)
+                    .WithMany()
+                    .HasForeignKey(e => e.WarehouseId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                
+                // Unique constraint: Same batch cannot be at same location in same warehouse
+                // This ensures batch location consistency
+                entity.HasIndex(e => new { e.BatchNumber, e.WarehouseId, e.ToLocationCode })
+                    .IsUnique()
+                    .HasFilter("[ToLocationCode] IS NOT NULL"); // Only apply when ToLocationCode is not null
+                
+                // Indexes for queries
+                entity.HasIndex(e => e.ProductVariantId);
+                entity.HasIndex(e => e.WarehouseId);
+                entity.HasIndex(e => e.MovementDate);
+                entity.HasIndex(e => e.BatchNumber);
+                entity.HasIndex(e => e.FromLocationCode);
+                entity.HasIndex(e => e.ToLocationCode);
             });
 
             // ============ Customer Configuration ============

@@ -45,7 +45,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         /// <summary>
         /// Giá nhập của lô này
         /// </summary>
-        public decimal CostPrice { get; set; }
+        public decimal? CostPrice { get; set; }
         
         /// <summary>
         /// Nhà cung cấp

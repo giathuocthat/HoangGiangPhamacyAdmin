@@ -54,5 +54,72 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 return Ok(inventories);
             }, "Get Low Stock Inventories");
         }
+
+        /// <summary>
+        /// Record sale transaction (xuất kho để giao hàng)
+        /// </summary>
+        [HttpPost("sale")]
+        public async Task<IActionResult> SaleInventory([FromBody] SaleInventoryDto dto)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                // TODO: Get userId from authentication
+                var result = await _inventoryService.SaleInventoryAsync(dto, userId: null);
+                return Created(result, result.Message);
+            }, "Sale Inventory");
+        }
+
+        /// <summary>
+        /// Record customer return transaction (khách trả hàng)
+        /// </summary>
+        [HttpPost("return")]
+        public async Task<IActionResult> ReturnInventory([FromBody] ReturnInventoryDto dto)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var result = await _inventoryService.ReturnInventoryAsync(dto, userId: null);
+                return Created(result, result.Message);
+            }, "Return Inventory");
+        }
+
+        /// <summary>
+        /// Record return to supplier transaction (trả hàng cho nhà cung cấp)
+        /// </summary>
+        [HttpPost("return-to-supplier")]
+        public async Task<IActionResult> ReturnToSupplier([FromBody] ReturnToSupplierDto dto)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var result = await _inventoryService.ReturnToSupplierAsync(dto, userId: null);
+                return Created(result, result.Message);
+            }, "Return To Supplier");
+        }
+
+        /// <summary>
+        /// Record warehouse transfer (chuyển kho)
+        /// Creates both TransferOut and TransferIn transactions
+        /// </summary>
+        [HttpPost("transfer")]
+        public async Task<IActionResult> TransferInventory([FromBody] TransferInventoryDto dto)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var result = await _inventoryService.TransferInventoryAsync(dto, userId: null);
+                return Created(result, result.Message);
+            }, "Transfer Inventory");
+        }
+
+        /// <summary>
+        /// Record inventory adjustment (kiểm kê/điều chỉnh)
+        /// </summary>
+        [HttpPost("adjustment")]
+        public async Task<IActionResult> AdjustInventory([FromBody] AdjustmentInventoryDto dto)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var result = await _inventoryService.AdjustInventoryAsync(dto, userId: null);
+                return Created(result, result.Message);
+            }, "Adjust Inventory");
+        }
     }
 }

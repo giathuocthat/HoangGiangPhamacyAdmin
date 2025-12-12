@@ -9,6 +9,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         NearExpiry = 2,     // Gần hết hạn (< 3 tháng)
         Expired = 3,        // Hết hạn
         Recalled = 4,       // Thu hồi
-        Damaged = 5         // Hư hỏng
+        Damaged = 5,        // Hư hỏng
+        OutOfStock = 6     // Hết hàng
     }
 }
