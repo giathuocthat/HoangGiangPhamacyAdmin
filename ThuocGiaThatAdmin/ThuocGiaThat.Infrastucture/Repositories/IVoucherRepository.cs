@@ -76,5 +76,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         /// Increment voucher usage count
         /// </summary>
         Task IncrementUsageCountAsync(int voucherId);
+
+        Task<(IEnumerable<Voucher>, int totalCount)> GetPagedVoucher(int pageNumber = 1, int pageSize = 20);
     }
 }

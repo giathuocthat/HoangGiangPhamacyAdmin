@@ -513,6 +513,11 @@ namespace ThuocGiaThatAdmin.Service.Services
             });
         }
 
+        public Task<(IEnumerable<Voucher>, int totalCount)> GetPagedVoucher(int pageNumber = 1, int pageSize = 20)
+        {
+           return _voucherRepository.GetPagedVoucher(pageNumber, pageSize);
+        }
+
         #endregion
     }
 }

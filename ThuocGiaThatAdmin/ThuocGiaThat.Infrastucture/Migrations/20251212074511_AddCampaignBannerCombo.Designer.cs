@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ThuocGiaThat.Infrastucture;
 
@@ -11,9 +12,11 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    partial class TrueMecContextModelSnapshot : ModelSnapshot
+    [Migration("20251212074511_AddCampaignBannerCombo")]
+    partial class AddCampaignBannerCombo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1532,9 +1535,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<int>("QuantityFulfilled")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("TotalLineAmount")
                         .HasColumnType("decimal(18,2)");
 
@@ -1548,52 +1548,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("ProductVariantId");
 
                     b.ToTable("OrderItems");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.OrderItemFulfillment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<Guid>("FulfilledByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("FulfilledDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("InventoryBatchId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int>("OrderItemId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("QuantityFulfilled")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FulfilledDate");
-
-                    b.HasIndex("InventoryBatchId");
-
-                    b.HasIndex("OrderItemId");
-
-                    b.ToTable("OrderItemFulfillments");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.OrderItemSnapshot", b =>
@@ -1929,74 +1883,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsUnique();
 
                     b.ToTable("Products");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductBatch", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BatchNumber")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<decimal>("CostPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("CreatedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<DateTime>("ExpiryDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("ManufactureDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ProductVariantId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PurchaseOrderNumber")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("QRCodePath")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime>("ReceivedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Supplier")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BatchNumber")
-                        .IsUnique();
-
-                    b.HasIndex("ExpiryDate");
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("ProductVariantId");
-
-                    b.ToTable("ProductBatches");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductCollection", b =>
@@ -3358,25 +3244,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("ProductVariant");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.OrderItemFulfillment", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.InventoryBatch", "InventoryBatch")
-                        .WithMany()
-                        .HasForeignKey("InventoryBatchId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.OrderItem", "OrderItem")
-                        .WithMany("Fulfillments")
-                        .HasForeignKey("OrderItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("InventoryBatch");
-
-                    b.Navigation("OrderItem");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.OrderItemSnapshot", b =>
                 {
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.OrderItem", "OrderItem")
@@ -3445,17 +3312,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("Brand");
 
                     b.Navigation("Category");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductBatch", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ProductVariant", "ProductVariant")
-                        .WithMany("ProductBatches")
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ProductVariant");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductCollectionItem", b =>
@@ -3799,11 +3655,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("PaymentTransactions");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.OrderItem", b =>
-                {
-                    b.Navigation("Fulfillments");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Product", b =>
                 {
                     b.Navigation("CollectionItems");
@@ -3839,8 +3690,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("InventoryTransactions");
 
                     b.Navigation("PriceHistories");
-
-                    b.Navigation("ProductBatches");
 
                     b.Navigation("VariantOptionValues");
                 });
