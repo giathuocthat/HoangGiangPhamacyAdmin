@@ -162,6 +162,7 @@ builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<WarehouseService>();
 builder.Services.AddScoped<InventoryService>();
 builder.Services.AddScoped<StockAlertService>();
+builder.Services.AddScoped<ProductBatchService>();
 
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -201,6 +202,10 @@ builder.Services.AddScoped<ICustomerAuthService, CustomerAuthService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IProductCollectionService, ProductCollectionService>();
 builder.Services.AddScoped<VNPayService>();
+
+// Order Fulfillment Service
+builder.Services.AddScoped<IOrderFulfillmentService, OrderFulfillmentService>();
+builder.Services.AddScoped<IOrderFulfillmentRepository, OrderFulfillmentRepository>();
 
 // Add CORS to allow frontend to call this API
 builder.Services.AddCors(options =>

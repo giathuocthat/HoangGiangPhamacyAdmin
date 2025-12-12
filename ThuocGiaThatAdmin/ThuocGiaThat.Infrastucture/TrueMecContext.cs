@@ -34,6 +34,7 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<Warehouse> Warehouses { get; set; }
         public DbSet<InventoryBatch> InventoryBatches { get; set; }
         public DbSet<InventoryTransaction> InventoryTransactions { get; set; }
+        public DbSet<ProductBatch> ProductBatches { get; set; }
         public DbSet<StockAlert> StockAlerts { get; set; }
         public DbSet<VariantLocationStock> VariantLocationStocks { get; set; }
         public DbSet<LocationStockMovement> LocationStockMovements { get; set; }
@@ -72,6 +73,7 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<VoucherUsageHistory> VoucherUsageHistories { get; set; }
         public DbSet<OrderVoucher> OrderVouchers { get; set; }
         public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
+        public DbSet<OrderItemFulfillment> OrderItemFulfillments { get; set; }
 
         // Banner/Campaign/Combo System
         public DbSet<Campaign> Campaigns { get; set; }
@@ -229,7 +231,30 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasIndex(e => e.ExpiryDate);
                 entity.HasIndex(e => e.Status);
             });
-
+            
+            // ============ ProductBatch Configuration ============
+            modelBuilder.Entity<ProductBatch>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.BatchNumber).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.CostPrice).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.PurchaseOrderNumber).HasMaxLength(100);
+                entity.Property(e => e.Supplier).HasMaxLength(255);
+                entity.Property(e => e.QRCodePath).HasMaxLength(500);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+                
+                entity.HasOne(e => e.ProductVariant)
+                    .WithMany(v => v.ProductBatches)
+                    .HasForeignKey(e => e.ProductVariantId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                
+                entity.HasIndex(e => e.BatchNumber).IsUnique();
+                entity.HasIndex(e => e.ExpiryDate);
+                entity.HasIndex(e => e.IsActive);
+                entity.HasIndex(e => e.ProductVariantId);
+            });
+            
             // ============ InventoryTransaction Configuration ============
             modelBuilder.Entity<InventoryTransaction>(entity =>
             {
@@ -507,6 +532,29 @@ namespace ThuocGiaThat.Infrastucture
 
                 entity.HasIndex(e => e.OrderItemId).IsUnique();
                 entity.HasIndex(e => e.ProductVariantId);
+            });
+            
+            // ============ OrderItemFulfillment Configuration ============
+            modelBuilder.Entity<OrderItemFulfillment>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+                entity.Property(e => e.Notes).HasMaxLength(500);
+                
+                entity.HasOne(e => e.OrderItem)
+                    .WithMany(oi => oi.Fulfillments)
+                    .HasForeignKey(e => e.OrderItemId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                entity.HasOne(e => e.InventoryBatch)
+                    .WithMany()
+                    .HasForeignKey(e => e.InventoryBatchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                
+                entity.HasIndex(e => e.OrderItemId);
+                entity.HasIndex(e => e.InventoryBatchId);
+                entity.HasIndex(e => e.FulfilledDate);
             });
 
             modelBuilder.Entity<ApplicationUser>(entity =>

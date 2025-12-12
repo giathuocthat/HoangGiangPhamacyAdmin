@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ThuocGiaThat.Infrastucture;
 
@@ -11,9 +12,11 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    partial class TrueMecContextModelSnapshot : ModelSnapshot
+    [Migration("20251212075935_AddFullfillment")]
+    partial class AddFullfillment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -302,191 +305,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Banner", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BackgroundColor")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("BannerCode")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("BannerType")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CampaignId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ClickCount")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ImageUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("LinkType")
-                        .HasColumnType("int");
-
-                    b.Property<string>("LinkUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("MobileImageUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Subtitle")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ValidFrom")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ValidTo")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ViewCount")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BannerCode")
-                        .IsUnique();
-
-                    b.HasIndex("CampaignId");
-
-                    b.HasIndex("DisplayOrder");
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("ValidFrom", "ValidTo");
-
-                    b.ToTable("Banners");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.BannerAnalytics", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BannerId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("CustomerId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("DeviceType")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("EventType")
-                        .HasColumnType("int");
-
-                    b.Property<string>("IpAddress")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserAgent")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BannerId");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("EventType");
-
-                    b.ToTable("BannerAnalytics");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.BannerSection", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BannerId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Content")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ImageUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SectionCode")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("SectionName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BannerId");
-
-                    b.HasIndex("DisplayOrder");
-
-                    b.ToTable("BannerSections");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Brand", b =>
                 {
                     b.Property<int>("Id")
@@ -555,57 +373,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.ToTable("BusinessTypes");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Campaign", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal?>("Budget")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("CampaignCode")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("CampaignName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CampaignCode")
-                        .IsUnique();
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("StartDate", "EndDate");
-
-                    b.ToTable("Campaigns");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -657,125 +424,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsUnique();
 
                     b.ToTable("Categories");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Combo", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("BannerId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ComboCode")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("ComboName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<decimal>("ComboPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("DiscountAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("DiscountPercentage")
-                        .HasColumnType("int");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ImageUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal>("OriginalPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ValidFrom")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ValidTo")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BannerId");
-
-                    b.HasIndex("ComboCode")
-                        .IsUnique();
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("ValidFrom", "ValidTo");
-
-                    b.ToTable("Combos");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ComboItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BadgeText")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("ComboId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsRequired")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("ProductVariantId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ComboId");
-
-                    b.HasIndex("DisplayOrder");
-
-                    b.HasIndex("ProductVariantId");
-
-                    b.ToTable("ComboItems");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Country", b =>
@@ -2713,9 +2361,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<int>("ApplicableType")
                         .HasColumnType("int");
 
-                    b.Property<int?>("BannerId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("CanStackWithOthers")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -2795,8 +2440,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("BannerId");
 
                     b.HasIndex("CanStackWithOthers");
 
@@ -3098,39 +2741,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Banner", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Campaign", "Campaign")
-                        .WithMany("Banners")
-                        .HasForeignKey("CampaignId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Campaign");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.BannerAnalytics", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Banner", "Banner")
-                        .WithMany("BannerAnalytics")
-                        .HasForeignKey("BannerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Banner");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.BannerSection", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Banner", "Banner")
-                        .WithMany("BannerSections")
-                        .HasForeignKey("BannerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Banner");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Category", b =>
                 {
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Category", "ParentCategory")
@@ -3139,35 +2749,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("ParentCategory");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Combo", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Banner", "Banner")
-                        .WithMany("Combos")
-                        .HasForeignKey("BannerId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Banner");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ComboItem", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Combo", "Combo")
-                        .WithMany("ComboItems")
-                        .HasForeignKey("ComboId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ProductVariant", "ProductVariant")
-                        .WithMany()
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Combo");
-
-                    b.Navigation("ProductVariant");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Customer", b =>
@@ -3661,13 +3242,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("ProductVariant");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Voucher", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Banner", null)
-                        .WithMany("Vouchers")
-                        .HasForeignKey("BannerId");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.VoucherCategory", b =>
                 {
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Category", "Category")
@@ -3742,25 +3316,9 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("Province");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Banner", b =>
-                {
-                    b.Navigation("BannerAnalytics");
-
-                    b.Navigation("BannerSections");
-
-                    b.Navigation("Combos");
-
-                    b.Navigation("Vouchers");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Brand", b =>
                 {
                     b.Navigation("Products");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Campaign", b =>
-                {
-                    b.Navigation("Banners");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Category", b =>
@@ -3768,11 +3326,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("ChildCategories");
 
                     b.Navigation("Products");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Combo", b =>
-                {
-                    b.Navigation("ComboItems");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Country", b =>
