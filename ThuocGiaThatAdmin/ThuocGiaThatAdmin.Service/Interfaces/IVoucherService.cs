@@ -40,5 +40,6 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
         Task<IEnumerable<VoucherResponseDto>> GetStackableVouchersAsync();
         Task<IEnumerable<VoucherUsageHistoryDto>> GetUsageHistoryAsync(int voucherId, int pageNumber = 1, int pageSize = 20);
         Task<IEnumerable<VoucherUsageHistoryDto>> GetUserUsageHistoryAsync(string userId, int pageNumber = 1, int pageSize = 20);
+        Task<(IEnumerable<Voucher>, int totalCount)> GetPagedVoucher(int pageNumber = 1, int pageSize = 20);
     }
 }

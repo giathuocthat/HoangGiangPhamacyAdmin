@@ -73,7 +73,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         public async Task<IEnumerable<Voucher>> GetActiveVouchersAsync()
         {
             var now = DateTime.UtcNow;
-            
+
             return await _dbSet
                 .Where(v => v.IsActive && v.StartDate <= now && v.EndDate >= now)
                 .Include(v => v.VoucherCategories)
@@ -92,8 +92,8 @@ namespace ThuocGiaThat.Infrastucture.Repositories
             var now = DateTime.UtcNow;
 
             return await _dbSet
-                .Where(v => v.IsActive 
-                    && v.StartDate <= now 
+                .Where(v => v.IsActive
+                    && v.StartDate <= now
                     && v.EndDate >= now
                     && (v.ApplicableType == VoucherApplicableType.All
                         || v.ApplicableType == VoucherApplicableType.Categories
@@ -116,8 +116,8 @@ namespace ThuocGiaThat.Infrastucture.Repositories
             var now = DateTime.UtcNow;
 
             return await _dbSet
-                .Where(v => v.IsActive 
-                    && v.StartDate <= now 
+                .Where(v => v.IsActive
+                    && v.StartDate <= now
                     && v.EndDate >= now
                     && (v.ApplicableType == VoucherApplicableType.All
                         || v.ApplicableType == VoucherApplicableType.ProductVariants
@@ -136,7 +136,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         {
             if (voucherId <= 0)
                 throw new ArgumentException("Voucher ID must be greater than 0", nameof(voucherId));
-            
+
             if (string.IsNullOrWhiteSpace(userId))
                 throw new ArgumentException("User ID cannot be null or empty", nameof(userId));
 
@@ -152,8 +152,8 @@ namespace ThuocGiaThat.Infrastucture.Repositories
             var now = DateTime.UtcNow;
 
             return await _dbSet
-                .Where(v => v.IsActive 
-                    && v.StartDate <= now 
+                .Where(v => v.IsActive
+                    && v.StartDate <= now
                     && v.EndDate >= now
                     && v.CanStackWithOthers)
                 .Include(v => v.VoucherCategories)
@@ -238,6 +238,27 @@ namespace ThuocGiaThat.Infrastucture.Repositories
                 voucher.CurrentUsageCount++;
                 _dbSet.Update(voucher);
             }
+        }
+
+        public async Task<(IEnumerable<Voucher>, int totalCount)> GetPagedVoucher(int pageNumber = 1, int pageSize = 20)
+        {
+
+            var query = _context.Set<Voucher>()
+                .Include(x => x.VoucherProductVariants)
+                .Include(x => x.OrderVouchers)
+                .Include(x => x.VoucherCategories)
+                .AsQueryable()
+                .AsNoTracking();
+
+            var totalCount = await query.CountAsync();
+
+            var vouchers = await query
+                .OrderByDescending(b => b.Id)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (vouchers, totalCount);
         }
     }
 }
