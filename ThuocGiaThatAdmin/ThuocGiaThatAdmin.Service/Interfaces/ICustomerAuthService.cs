@@ -16,5 +16,6 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
         (string token, string expiresAt) GenerateJwtTokenAndExpires(Customer customer);
         bool VerifyPassword(string password, string passwordHash);
         string HashPassword(string password);
+        Task<(bool success, Dictionary<string, string>)> VerifyRegister(string phone, string email);
     }
 }

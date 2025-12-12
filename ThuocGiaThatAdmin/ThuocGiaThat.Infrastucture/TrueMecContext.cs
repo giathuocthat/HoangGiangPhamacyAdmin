@@ -70,8 +70,7 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<VoucherUsageHistory> VoucherUsageHistories { get; set; }
         public DbSet<OrderVoucher> OrderVouchers { get; set; }
         public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
-
-
+        public DbSet<OtpCode> OtpCodes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -804,6 +803,11 @@ namespace ThuocGiaThat.Infrastucture
 
                 entity.Property(x => x.BankTranNo)
                        .HasMaxLength(50);
+            });
+
+            modelBuilder.Entity<OtpCode>(entity =>
+            {
+                entity.HasIndex(o => new { o.Phone, o.Code, o.IsUsed });
             });
         }
     }

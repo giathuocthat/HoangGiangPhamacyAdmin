@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -210,6 +210,20 @@ namespace ThuocGiaThatAdmin.Service.Services
             JwtSecurityToken token = BuildJwtToken(customer);
 
             return (new JwtSecurityTokenHandler().WriteToken(token), token.ValidTo.ToString("o"));
+        }
+
+        public async Task<(bool success, Dictionary<string, string>)> VerifyRegister(string phone, string email)
+        {
+            var isExistingPhone = await _context.Customers.AnyAsync(x => x.PhoneNumber == phone);
+            var isExistingEmail = await _context.Customers.AnyAsync(x => x.Email ==  email);
+
+            var dictionnary = new Dictionary<string, string>();
+            if (isExistingPhone) dictionnary.Add("phoneNumber", "Số điện thoại đã tồn tại");
+            if (isExistingEmail) dictionnary.Add("email", "Email đã tồn tại");
+
+            if (dictionnary.Keys.Any()) return (false, dictionnary);
+
+            return (true, dictionnary);
         }
     }
 }

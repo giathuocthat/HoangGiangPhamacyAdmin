@@ -517,7 +517,7 @@ namespace ThuocGiaThatAdmin.Service.Services
         {
             var order = new Order
             {
-                OrderNumber = OrderNumberGenerator.GenerateOrderNumber(),
+                OrderNumber = NumberGenerator.GenerateOrderNumber(),
                 CustomerId = orderDto.CustomerId,
                 Note = orderDto.Note,
                 OrderStatus = OrderStatus.Pending.ToStatusString(),

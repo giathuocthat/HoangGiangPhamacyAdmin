@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using ThuocGiaThatAdmin.Contract.DTOs;
+using ThuocGiaThatAdmin.Contract.Requests;
+using ThuocGiaThatAdmin.Server.Models;
 using ThuocGiaThatAdmin.Service.Interfaces;
 
 namespace ThuocGiaThatAdmin.Server.Controllers
@@ -14,12 +17,14 @@ namespace ThuocGiaThatAdmin.Server.Controllers
     public class CustomerAuthController : BaseApiController
     {
         private readonly ICustomerAuthService _customerAuthService;
+        private readonly IZaloService _zaloService;
 
         public CustomerAuthController(
             ICustomerAuthService customerAuthService,
-            ILogger<CustomerAuthController> logger) : base(logger)
+            ILogger<CustomerAuthController> logger, IZaloService zaloService) : base(logger)
         {
             _customerAuthService = customerAuthService;
+            _zaloService = zaloService;
         }
 
         /// <summary>
@@ -31,6 +36,19 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             return await ExecuteActionAsync(async () =>
             {
+                var verifyOtp = await _zaloService.VerifyOtpAsync(dto.PhoneNumber, dto.Otp);
+                if (!verifyOtp)
+                {
+                    return BadRequest(new ApiErrorResponse
+                    {
+                        Detail = "Mã otp không chính xác",
+                        Errors = new Dictionary<string, string>
+                        {
+                            ["otp"] = "Mã OTP không chính xác"
+                        }
+                    });
+                }
+
                 var (success, message, customer) = await _customerAuthService.RegisterAsync(dto);
 
                 if (!success)
@@ -165,6 +183,28 @@ namespace ThuocGiaThatAdmin.Server.Controllers
 
                 return Success<object>(null, "Profile updated successfully");
             });
+        }
+
+        [HttpPost("VerifyOtp")]
+        public async Task<IActionResult> VerifyOtpAsync(ZaloVerifyOtpRequest request)
+        {
+            return Ok();
+        }
+
+        [HttpPost("SendOtp")]
+        public async Task<IActionResult> SendOtpAsync([FromBody] string phone)
+        {
+            await _zaloService.SendOtpMessageAsync(phone);
+            return Ok();
+        }
+
+        [HttpPost("VerifyProfile")]
+        public async Task<IActionResult> VerifyPhoneAndEmail(string phone, string email)
+        {
+            (bool success, Dictionary<string, string> errors) = await _customerAuthService.VerifyRegister(phone, email);
+            if(success)
+                return Ok();
+            return BadRequest(new ApiErrorResponse { Detail = "", Errors = errors });
         }
     }
 }

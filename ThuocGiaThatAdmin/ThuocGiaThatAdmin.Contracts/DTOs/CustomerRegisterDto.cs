@@ -36,5 +36,8 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
 
         [Required(ErrorMessage = "Address is required")]
         public string Address { get; set; }
+
+        [Required(ErrorMessage = "Otp is required")]
+        public string Otp { get; set; }
     }
 }
