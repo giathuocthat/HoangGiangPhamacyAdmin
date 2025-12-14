@@ -206,5 +206,42 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 return Ok();
             return BadRequest(new ApiErrorResponse { Detail = "", Errors = errors });
         }
+
+        /// <summary>
+        /// POST: api/customer/auth/login
+        /// Customer login - returns JWT token
+        /// </summary>
+        [HttpPost("loginByOtp")]
+        [AllowAnonymous]
+        public async Task<IActionResult> LoginByOtpAsync([FromBody] CustomerLoginByOtpDto dto)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var (success, message, token, expiresAt, customer) = await _customerAuthService.LoginByOtpAsync(dto.PhoneNumber, dto.Otp);
+
+                if (!success)
+                {
+                    return UnauthorizedResponse(message);
+                }
+
+                var response = new
+                {
+                    accessToken = token,
+                    tokenType = "Bearer",
+                    expiresAt = expiresAt,
+                    customer = new
+                    {
+                        id = customer!.Id,
+                        fullName = customer.FullName,
+                        email = customer.Email,
+                        hasBusinessInfo = customer.BusinessTypeId.HasValue,
+                        businessTypeId = customer.BusinessTypeId,
+                        businessTypeName = customer.BusinessType?.Name
+                    }
+                };
+
+                return Success(response, "Login successful");
+            });
+        }
     }
 }

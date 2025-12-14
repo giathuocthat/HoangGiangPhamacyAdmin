@@ -807,7 +807,7 @@ namespace ThuocGiaThat.Infrastucture
 
             modelBuilder.Entity<OtpCode>(entity =>
             {
-                entity.HasIndex(o => new { o.Phone, o.Code, o.IsUsed });
+                entity.HasIndex(o => new { o.Phone, o.Code, o.IsUsed, o.Type });
             });
         }
     }

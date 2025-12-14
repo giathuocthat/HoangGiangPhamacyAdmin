@@ -14,5 +14,6 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public DateTime? ExpireTime { get; set; }
         public bool IsUsed { get; set; } = false;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public string Type { get; set; } = string.Empty;
     }
 }

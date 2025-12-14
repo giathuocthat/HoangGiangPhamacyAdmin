@@ -19,11 +19,13 @@ namespace ThuocGiaThatAdmin.Service.Services
     {
         private readonly TrueMecContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IZaloService _zaloService;
 
-        public CustomerAuthService(TrueMecContext context, IConfiguration configuration)
+        public CustomerAuthService(TrueMecContext context, IConfiguration configuration, IZaloService zaloService)
         {
             _context = context;
             _configuration = configuration;
+            _zaloService = zaloService;
         }
 
         public async Task<(bool Success, string Message, CustomerProfileTokenDto Customer)> RegisterAsync(CustomerRegisterDto dto)
@@ -47,7 +49,8 @@ namespace ThuocGiaThatAdmin.Service.Services
                 PhoneNumber = dto.PhoneNumber,
                 PasswordHash = HashPassword(dto.Password),
                 BusinessTypeId = dto.BusinessTypeId,
-                CreatedDate = DateTime.UtcNow
+                CreatedDate = DateTime.UtcNow,
+                Email = dto.Email,
             };
 
             customer.Addresses = new System.Collections.Generic.List<Address>
@@ -100,6 +103,24 @@ namespace ThuocGiaThatAdmin.Service.Services
             {
                 return (false, "Invalid email or password", null, null, null);
             }
+
+            var (token, expiresAt) = GenerateJwtTokenAndExpires(customer);
+            return (true, "Login successful", token, expiresAt, customer);
+        }
+
+        public async Task<(bool Success, string Message, string? Token, string? expiresAt, Customer? Customer)> LoginByOtpAsync(string phoneNumber, string otp)
+        {
+            var customer = await _context.Customers
+                .Include(c => c.BusinessType)
+                .FirstOrDefaultAsync(c => c.PhoneNumber == phoneNumber);
+
+            if (customer == null)
+            {
+                return (false, "Phone number does not exist", null, null, null);
+            }
+
+            var isSuccess = await _zaloService.VerifyOtpAsync(phoneNumber, otp);
+            if (!isSuccess) return (false, "Otp is not valid", null, null, null); ;
 
             var (token, expiresAt) = GenerateJwtTokenAndExpires(customer);
             return (true, "Login successful", token, expiresAt, customer);

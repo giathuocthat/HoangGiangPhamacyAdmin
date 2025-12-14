@@ -8,8 +8,8 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
         [StringLength(100, ErrorMessage = "Full name cannot exceed 100 characters")]
         public string FullName { get; set; } = string.Empty;
                 
-        //[EmailAddress(ErrorMessage = "Invalid email format")]
-        //[StringLength(255)]
+        [EmailAddress(ErrorMessage = "Invalid email format")]
+        [StringLength(255)]
         public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Phone number is required")]

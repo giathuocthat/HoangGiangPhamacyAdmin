@@ -36,6 +36,15 @@ namespace ThuocGiaThatAdmin.Service.Services
 
             if (string.IsNullOrEmpty(phone)) throw new ArgumentNullException("Phone number is required");
 
+            var otpCode = new OtpCode
+            {
+                Phone = phone,
+                Code = otp,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.OtpCodes.Add(otpCode);
+            await _context.SaveChangesAsync();
+
             var body = new ZaloZNSRequest
             {
                 OaId = _zaloSetting.OAId,
@@ -57,19 +66,10 @@ namespace ThuocGiaThatAdmin.Service.Services
             };
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("Authorization", $"Bearer {_zaloSetting.ApiKey}");
-            return true;
-            /*var response = await _httpClient.SendAsync(request);
+            
+            var response = await _httpClient.SendAsync(request);            
 
-            var otpCode = new OtpCode
-            {
-                Phone = phone,
-                Code = otp,
-                CreatedAt = DateTime.UtcNow
-            };
-            _context.OtpCodes.Add(otpCode);
-            await _context.SaveChangesAsync();
-
-            return response.StatusCode == System.Net.HttpStatusCode.OK;*/
+            return response.StatusCode == System.Net.HttpStatusCode.OK;
         }
 
         public async Task<bool> VerifyOtpAsync(string phone, string otp)

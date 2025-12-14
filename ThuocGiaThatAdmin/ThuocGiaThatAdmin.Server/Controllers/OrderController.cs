@@ -241,7 +241,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
 
 
         [HttpPost("vnpay-return")]
-        [AllowAnonymous] // Có th? c?n anonymous vì ???c g?i t? frontend
+        [AllowAnonymous]
         public async Task<IActionResult> VerifyVNPayReturn([FromBody] VNPayReturnDto vnpayDto)
         {
             try
@@ -255,7 +255,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 return StatusCode(500, new
                 {
                     success = false,
-                    message = "?ã có l?i x?y ra khi xác minh thanh toán"
+                    message = "Error verifying VNPay return"
                 });
             }
         }
