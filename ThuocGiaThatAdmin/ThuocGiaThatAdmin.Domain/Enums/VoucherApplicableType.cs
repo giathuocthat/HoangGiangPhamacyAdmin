@@ -18,7 +18,7 @@ namespace ThuocGiaThatAdmin.Domain.Enums
         Categories = 1,
 
         /// <summary>
-        /// Áp dụng cho biến thể sản phẩm cụ thể
+        /// Áp dụng cho biến thể sản phẩm cụ thể 
         /// </summary>
         ProductVariants = 2,
 

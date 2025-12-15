@@ -145,6 +145,15 @@ builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IProductCollectionRepository, ProductCollectionRepository>();
 builder.Services.AddScoped<IProductMaxOrderConfigRepository, ProductMaxOrderConfigRepository>();
 
+// Purchase Order Repositories
+builder.Services.AddScoped<ISupplierRepository, SupplierRepository>();
+builder.Services.AddScoped<ISupplierContactRepository, SupplierContactRepository>();
+builder.Services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();
+builder.Services.AddScoped<IPurchaseOrderItemRepository, PurchaseOrderItemRepository>();
+builder.Services.AddScoped<IPurchaseOrderHistoryRepository, PurchaseOrderHistoryRepository>();
+builder.Services.AddScoped<IGoodsReceiptRepository, GoodsReceiptRepository>();
+builder.Services.AddScoped<IGoodsReceiptItemRepository, GoodsReceiptItemRepository>();
+
 // Generic Repository
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
@@ -162,6 +171,7 @@ builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<WarehouseService>();
 builder.Services.AddScoped<InventoryService>();
 builder.Services.AddScoped<StockAlertService>();
+builder.Services.AddScoped<ProductBatchService>();
 
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -172,9 +182,27 @@ builder.Services.AddScoped<IVoucherService, VoucherService>();
 
 builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
 
+// Banner/Campaign/Combo Repositories
+builder.Services.AddScoped<ICampaignRepository, CampaignRepository>();
+builder.Services.AddScoped<IBannerRepository, BannerRepository>();
+builder.Services.AddScoped<IComboRepository, ComboRepository>();
+builder.Services.AddScoped<IBannerAnalyticsRepository, BannerAnalyticsRepository>();
+
+// Banner/Campaign/Combo Services
+builder.Services.AddScoped<ICampaignService, CampaignService>();
+builder.Services.AddScoped<IBannerService, BannerService>();
+builder.Services.AddScoped<IComboService, ComboService>();
+builder.Services.AddScoped<IBannerAnalyticsService, BannerAnalyticsService>();
+
 // Shopping Cart Service
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
+
+// Purchase Order Services
+builder.Services.AddScoped<ISupplierService, SupplierService>();
+builder.Services.AddScoped<ISupplierContactService, SupplierContactService>();
+builder.Services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
+builder.Services.AddScoped<IGoodsReceiptService, GoodsReceiptService>();
 
 // other
 builder.Services.AddScoped<IRoleClaimService, RoleClaimService>();
@@ -203,6 +231,10 @@ builder.Services.AddScoped<IProductCollectionService, ProductCollectionService>(
 builder.Services.AddScoped<VNPayService>();
 builder.Services.AddScoped<IZaloService, ZaloService>();
 builder.Services.AddScoped<HttpClient>();
+
+// Order Fulfillment Service
+builder.Services.AddScoped<IOrderFulfillmentService, OrderFulfillmentService>();
+builder.Services.AddScoped<IOrderFulfillmentRepository, OrderFulfillmentRepository>();
 
 // Add CORS to allow frontend to call this API
 builder.Services.AddCors(options =>
@@ -242,6 +274,7 @@ using (var scope = app.Services.CreateScope())
     BusinessTypeMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     CategoryMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     InventoryPermissionMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
+    CamPaignMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
 }
 
 // ============================================================

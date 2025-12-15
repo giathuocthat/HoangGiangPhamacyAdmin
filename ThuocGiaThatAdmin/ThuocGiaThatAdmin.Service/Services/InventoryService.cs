@@ -13,6 +13,7 @@ namespace ThuocGiaThatAdmin.Service.Services
         private readonly IInventoryBatchRepository _batchRepository;
         private readonly IInventoryTransactionRepository _transactionRepository;
         private readonly IStockAlertRepository _alertRepository;
+        private readonly IRepository<ProductBatch> _productBatchRepository;
 
         public InventoryService(
             IRepository<Inventory> inventoryRepository,
@@ -20,7 +21,8 @@ namespace ThuocGiaThatAdmin.Service.Services
             IWarehouseRepository warehouseRepository,
             IInventoryBatchRepository batchRepository,
             IInventoryTransactionRepository transactionRepository,
-            IStockAlertRepository alertRepository)
+            IStockAlertRepository alertRepository,
+            IRepository<ProductBatch> productBatchRepository)
         {
             _inventoryRepository = inventoryRepository;
             _productVariantRepository = productVariantRepository;
@@ -28,24 +30,12 @@ namespace ThuocGiaThatAdmin.Service.Services
             _batchRepository = batchRepository;
             _transactionRepository = transactionRepository;
             _alertRepository = alertRepository;
+            _productBatchRepository = productBatchRepository;
         }
 
         public async Task<PurchaseInventoryResponseDto> PurchaseInventoryAsync(PurchaseInventoryDto dto, string? userId = null)
         {
-            // 1. Validate expiry date
-            if (dto.ExpiryDate <= DateTime.Now)
-            {
-                throw new ArgumentException("Expiry date must be in the future");
-            }
-
-            // 2. Check if product variant exists
-            var productVariant = await _productVariantRepository.GetByIdAsync(dto.ProductVariantId);
-            if (productVariant == null)
-            {
-                throw new KeyNotFoundException($"Product variant with ID {dto.ProductVariantId} not found");
-            }
-
-            // 3. Check if warehouse exists and is active
+            // 1. Check if warehouse exists and is active
             var warehouse = await _warehouseRepository.GetByIdAsync(dto.WarehouseId);
             if (warehouse == null)
             {
@@ -57,67 +47,106 @@ namespace ThuocGiaThatAdmin.Service.Services
                 throw new InvalidOperationException($"Warehouse '{warehouse.Name}' is not active");
             }
 
+            // 2. Lookup ProductBatch
+            var productBatch = await _productBatchRepository.FirstOrDefaultAsync(b => b.BatchNumber == dto.BatchNumber);
+            if (productBatch == null)
+            {
+                throw new KeyNotFoundException($"Batch number '{dto.BatchNumber}' not found. Please create the batch first.");
+            }
+
+            // 3. Get Product Variant
+            var productVariant = await _productVariantRepository.GetByIdAsync(productBatch.ProductVariantId);
+            if (productVariant == null)
+            {
+                throw new KeyNotFoundException($"Product variant for batch '{dto.BatchNumber}' not found");
+            }
+
             // 4. Get or create inventory record
-            var inventories = await _inventoryRepository.GetAllAsync();
-            var inventory = inventories.FirstOrDefault(i => 
-                i.ProductVariantId == dto.ProductVariantId && 
+            var inventory = await _inventoryRepository.FirstOrDefaultAsync(i => 
+                i.ProductVariantId == productBatch.ProductVariantId && 
                 i.WarehouseId == dto.WarehouseId);
 
             if (inventory == null)
             {
                 inventory = new Inventory
                 {
-                    ProductVariantId = dto.ProductVariantId,
+                    ProductVariantId = productBatch.ProductVariantId,
                     WarehouseId = dto.WarehouseId,
                     QuantityOnHand = 0,
                     QuantityReserved = 0,
-                    Location = dto.Location
+                    // Default location logic or leave empty
                 };
                 await _inventoryRepository.AddAsync(inventory);
                 await _inventoryRepository.SaveChangesAsync();
             }
 
-            // 5. Create batch
-            var batch = new InventoryBatch
-            {
-                InventoryId = inventory.Id,
-                BatchNumber = dto.BatchNumber,
-                ManufactureDate = dto.ManufactureDate,
-                ExpiryDate = dto.ExpiryDate,
-                Quantity = dto.Quantity,
-                QuantitySold = 0,
-                CostPrice = dto.CostPrice,
-                Supplier = dto.Supplier,
-                PurchaseOrderNumber = dto.PurchaseOrderNumber,
-                Status = DetermineBatchStatus(dto.ExpiryDate),
-                Notes = dto.Notes
-            };
+            // 5. Get or create inventory batch (linking to physical location)
+            // Note: InventoryBatch tracks stock AT THIS WAREHOUSE, ProductBatch tracks master batch info
+            var inventoryBatch = await _batchRepository.FirstOrDefaultAsync(b => 
+                b.InventoryId == inventory.Id && 
+                b.BatchNumber == dto.BatchNumber);
 
-            await _batchRepository.AddAsync(batch);
+            bool isNewInventoryBatch = false;
+            if (inventoryBatch == null)
+            {
+                // Create new inventory batch
+                inventoryBatch = new InventoryBatch
+                {
+                    InventoryId = inventory.Id,
+                    BatchNumber = dto.BatchNumber,
+                    ManufactureDate = productBatch.ManufactureDate,
+                    ExpiryDate = productBatch.ExpiryDate,
+                    Quantity = dto.Quantity,
+                    QuantitySold = 0,
+                    CostPrice = productBatch.CostPrice,
+                    Supplier = productBatch.Supplier,
+                    PurchaseOrderNumber = productBatch.PurchaseOrderNumber,
+                    Status = DetermineBatchStatus(productBatch.ExpiryDate),
+                    Notes = dto.Notes
+                };
+                
+                await _batchRepository.AddAsync(inventoryBatch);
+                isNewInventoryBatch = true;
+            }
+            else
+            {
+                // Update existing batch - add more quantity
+                inventoryBatch.Quantity += dto.Quantity;
+                
+                // Update notes if provided
+                if (!string.IsNullOrEmpty(dto.Notes))
+                {
+                    inventoryBatch.Notes = string.IsNullOrEmpty(inventoryBatch.Notes) 
+                        ? dto.Notes 
+                        : $"{inventoryBatch.Notes}; {dto.Notes}";
+                }
+                
+                // Recalculate status just in case (e.g. if expiry changed in master - unlikely here but safe)
+                inventoryBatch.Status = DetermineBatchStatus(productBatch.ExpiryDate);
+                
+                _batchRepository.Update(inventoryBatch);
+            }
+            
             await _batchRepository.SaveChangesAsync();
 
             // 6. Update inventory quantity
             var quantityBefore = inventory.QuantityOnHand;
             inventory.QuantityOnHand += dto.Quantity;
-            if (!string.IsNullOrEmpty(dto.Location))
-            {
-                inventory.Location = dto.Location;
-            }
             _inventoryRepository.Update(inventory);
 
             // 7. Create transaction record
             var transaction = new InventoryTransaction
             {
-                ProductVariantId = dto.ProductVariantId,
+                ProductVariantId = productBatch.ProductVariantId,
                 WarehouseId = dto.WarehouseId,
-                BatchId = batch.Id,
+                BatchId = inventoryBatch.Id,
                 Type = TransactionType.Purchase,
                 Quantity = dto.Quantity,
                 QuantityBefore = quantityBefore,
                 QuantityAfter = inventory.QuantityOnHand,
-                UnitPrice = dto.CostPrice,
-                TotalValue = dto.CostPrice * dto.Quantity,
-                ReferenceNumber = dto.PurchaseOrderNumber,
+                UnitPrice = productBatch.CostPrice, // Use standard cost from master batch
+                TotalValue = productBatch.CostPrice * dto.Quantity,
+                ReferenceNumber = productBatch.PurchaseOrderNumber,
                 ReferenceType = "PurchaseOrder",
                 PerformedByUserId = userId,
                 Reason = "Purchase from supplier",
@@ -128,22 +157,25 @@ namespace ThuocGiaThatAdmin.Service.Services
             await _transactionRepository.SaveChangesAsync();
 
             // 8. Check and create alerts if needed
-            await CheckAndCreateAlertsAsync(inventory, batch);
+            await CheckAndCreateAlertsAsync(inventory, inventoryBatch);
 
             // 9. Return response
+            var message = isNewInventoryBatch 
+                ? $"Successfully added {dto.Quantity} units of batch '{dto.BatchNumber}' ({productVariant.SKU}) to inventory"
+                : $"Successfully updated batch '{dto.BatchNumber}' with {dto.Quantity} more units of {productVariant.SKU}";
+                
             return new PurchaseInventoryResponseDto
             {
                 Inventory = MapToInventoryDto(inventory, productVariant, warehouse),
-                Batch = MapToBatchDto(batch),
-                Transaction = MapToTransactionDto(transaction, productVariant, warehouse, batch),
-                Message = $"Successfully purchased {dto.Quantity} units of {productVariant.SKU}"
+                Batch = MapToBatchDto(inventoryBatch),
+                Transaction = MapToTransactionDto(transaction, productVariant, warehouse, inventoryBatch),
+                Message = message
             };
         }
 
         public async Task<IEnumerable<InventoryDto>> GetInventoryByWarehouseAsync(int warehouseId)
         {
-            var inventories = await _inventoryRepository.GetAllAsync();
-            var filtered = inventories.Where(i => i.WarehouseId == warehouseId).ToList();
+            var filtered = await _inventoryRepository.FindAsync(i => i.WarehouseId == warehouseId);
 
             var result = new List<InventoryDto>();
             foreach (var inv in filtered)
@@ -161,8 +193,7 @@ namespace ThuocGiaThatAdmin.Service.Services
 
         public async Task<IEnumerable<InventoryDto>> GetLowStockInventoriesAsync()
         {
-            var inventories = await _inventoryRepository.GetAllAsync();
-            var lowStock = inventories.Where(i => i.QuantityOnHand <= i.ReorderLevel).ToList();
+            var lowStock = await _inventoryRepository.FindAsync(i => i.QuantityOnHand <= i.ReorderLevel);
 
             var result = new List<InventoryDto>();
             foreach (var inv in lowStock)
@@ -176,6 +207,461 @@ namespace ThuocGiaThatAdmin.Service.Services
             }
 
             return result;
+        }
+
+        // ========== Sale Transaction ==========
+        
+        public async Task<InventoryTransactionResponseDto> SaleInventoryAsync(SaleInventoryDto dto, string? userId = null)
+        {
+            // 1. Validate and get entities
+            var (inventory, productVariant, warehouse) = await ValidateInventoryOperation(
+                dto.ProductVariantId, dto.WarehouseId);
+
+            // 2. Check if sufficient inventory available
+            if (inventory.QuantityOnHand < dto.Quantity)
+            {
+                throw new InvalidOperationException(
+                    $"Insufficient inventory. Available: {inventory.QuantityOnHand}, Requested: {dto.Quantity}");
+            }
+
+            // 3. Select batch (FEFO or manual)
+            InventoryBatch batch;
+            if (dto.BatchId.HasValue)
+            {
+                batch = await _batchRepository.GetByIdAsync(dto.BatchId.Value) 
+                    ?? throw new KeyNotFoundException($"Batch {dto.BatchId} not found");
+                
+                if (batch.InventoryId != inventory.Id)
+                {
+                    throw new InvalidOperationException("Batch does not belong to this inventory");
+                }
+            }
+            else
+            {
+                batch = await SelectBatchForOutbound(inventory.Id, dto.Quantity);
+            }
+
+            // 4. Update batch quantities
+            batch.QuantitySold += dto.Quantity;
+            _batchRepository.Update(batch);
+
+            // 5. Update inventory
+            var quantityBefore = inventory.QuantityOnHand;
+            inventory.QuantityOnHand -= dto.Quantity;
+            inventory.QuantityReserved -= Math.Min(inventory.QuantityReserved, dto.Quantity); // Decrease reserved
+            _inventoryRepository.Update(inventory);
+
+            // 6. Create transaction
+            var transaction = new InventoryTransaction
+            {
+                ProductVariantId = dto.ProductVariantId,
+                WarehouseId = dto.WarehouseId,
+                BatchId = batch.Id,
+                Type = TransactionType.Sale,
+                Quantity = dto.Quantity,
+                QuantityBefore = quantityBefore,
+                QuantityAfter = inventory.QuantityOnHand,
+                ReferenceNumber = dto.OrderId?.ToString(),
+                ReferenceType = dto.OrderId.HasValue ? "Order" : "DirectSale",
+                PerformedByUserId = userId,
+                Reason = "Sale",
+                Notes = dto.Notes
+            };
+
+            await _transactionRepository.AddAsync(transaction);
+            await _transactionRepository.SaveChangesAsync();
+
+            // 7. Check alerts
+            await CheckAndCreateAlertsAsync(inventory, batch);
+
+            return new InventoryTransactionResponseDto
+            {
+                Inventory = MapToInventoryDto(inventory, productVariant, warehouse),
+                Transaction = MapToTransactionDto(transaction, productVariant, warehouse, batch),
+                Message = $"Successfully sold {dto.Quantity} units of {productVariant.SKU}"
+            };
+        }
+
+        // ========== Return Transaction ==========
+        
+        public async Task<InventoryTransactionResponseDto> ReturnInventoryAsync(ReturnInventoryDto dto, string? userId = null)
+        {
+            // 1. Validate and get entities
+            var (inventory, productVariant, warehouse) = await ValidateInventoryOperation(
+                dto.ProductVariantId, dto.WarehouseId);
+
+            // 2. Get batch
+            var batch = await _batchRepository.GetByIdAsync(dto.BatchId) 
+                ?? throw new KeyNotFoundException($"Batch {dto.BatchId} not found");
+            
+            if (batch.InventoryId != inventory.Id)
+            {
+                throw new InvalidOperationException("Batch does not belong to this inventory");
+            }
+
+            // 3. Update batch quantities (return to original batch)
+            if (batch.QuantitySold < dto.Quantity)
+            {
+                throw new InvalidOperationException(
+                    $"Cannot return more than sold. Sold: {batch.QuantitySold}, Return: {dto.Quantity}");
+            }
+            
+            batch.QuantitySold -= dto.Quantity;
+            _batchRepository.Update(batch);
+
+            // 4. Update inventory
+            var quantityBefore = inventory.QuantityOnHand;
+            inventory.QuantityOnHand += dto.Quantity;
+            _inventoryRepository.Update(inventory);
+
+            // 5. Create transaction
+            var transaction = new InventoryTransaction
+            {
+                ProductVariantId = dto.ProductVariantId,
+                WarehouseId = dto.WarehouseId,
+                BatchId = batch.Id,
+                Type = TransactionType.Return,
+                Quantity = dto.Quantity,
+                QuantityBefore = quantityBefore,
+                QuantityAfter = inventory.QuantityOnHand,
+                ReferenceNumber = dto.OrderId?.ToString(),
+                ReferenceType = dto.OrderId.HasValue ? "Order" : "DirectReturn",
+                PerformedByUserId = userId,
+                Reason = dto.Reason,
+                Notes = dto.Notes
+            };
+
+            await _transactionRepository.AddAsync(transaction);
+            await _transactionRepository.SaveChangesAsync();
+
+            return new InventoryTransactionResponseDto
+            {
+                Inventory = MapToInventoryDto(inventory, productVariant, warehouse),
+                Transaction = MapToTransactionDto(transaction, productVariant, warehouse, batch),
+                Message = $"Successfully returned {dto.Quantity} units of {productVariant.SKU}"
+            };
+        }
+
+        // ========== Return to Supplier Transaction ==========
+        
+        public async Task<InventoryTransactionResponseDto> ReturnToSupplierAsync(ReturnToSupplierDto dto, string? userId = null)
+        {
+            // 1. Validate and get entities
+            var (inventory, productVariant, warehouse) = await ValidateInventoryOperation(
+                dto.ProductVariantId, dto.WarehouseId);
+
+            // 2. Get batch
+            var batch = await _batchRepository.GetByIdAsync(dto.BatchId) 
+                ?? throw new KeyNotFoundException($"Batch {dto.BatchId} not found");
+            
+            if (batch.InventoryId != inventory.Id)
+            {
+                throw new InvalidOperationException("Batch does not belong to this inventory");
+            }
+
+            // 3. Check sufficient quantity in batch
+            if (batch.QuantityRemaining < dto.Quantity)
+            {
+                throw new InvalidOperationException(
+                    $"Insufficient quantity in batch. Available: {batch.QuantityRemaining}, Requested: {dto.Quantity}");
+            }
+
+            // 4. Update batch - reduce total quantity
+            batch.Quantity -= dto.Quantity;
+            _batchRepository.Update(batch);
+
+            // 5. Update inventory
+            var quantityBefore = inventory.QuantityOnHand;
+            inventory.QuantityOnHand -= dto.Quantity;
+            _inventoryRepository.Update(inventory);
+
+            // 6. Create transaction
+            var transaction = new InventoryTransaction
+            {
+                ProductVariantId = dto.ProductVariantId,
+                WarehouseId = dto.WarehouseId,
+                BatchId = batch.Id,
+                Type = TransactionType.ReturnToSupplier,
+                Quantity = dto.Quantity,
+                QuantityBefore = quantityBefore,
+                QuantityAfter = inventory.QuantityOnHand,
+                ReferenceNumber = dto.SupplierName,
+                ReferenceType = "SupplierReturn",
+                PerformedByUserId = userId,
+                Reason = dto.Reason,
+                Notes = dto.Notes
+            };
+
+            await _transactionRepository.AddAsync(transaction);
+            await _transactionRepository.SaveChangesAsync();
+
+            return new InventoryTransactionResponseDto
+            {
+                Inventory = MapToInventoryDto(inventory, productVariant, warehouse),
+                Transaction = MapToTransactionDto(transaction, productVariant, warehouse, batch),
+                Message = $"Successfully returned {dto.Quantity} units to supplier"
+            };
+        }
+
+        // ========== Transfer Transaction ==========
+        
+        public async Task<TransferInventoryResponseDto> TransferInventoryAsync(TransferInventoryDto dto, string? userId = null)
+        {
+            // Generate unique reference for this transfer
+            var transferRef = $"TRF-{DateTime.Now:yyyyMMddHHmmss}";
+
+            // 1. Validate source warehouse and inventory
+            var (sourceInventory, productVariant, sourceWarehouse) = await ValidateInventoryOperation(
+                dto.ProductVariantId, dto.FromWarehouseId);
+
+            // 2. Validate destination warehouse
+            var destWarehouse = await _warehouseRepository.GetByIdAsync(dto.ToWarehouseId) 
+                ?? throw new KeyNotFoundException($"Destination warehouse {dto.ToWarehouseId} not found");
+            
+            if (!destWarehouse.IsActive)
+            {
+                throw new InvalidOperationException($"Destination warehouse '{destWarehouse.Name}' is not active");
+            }
+
+            // 3. Check sufficient quantity
+            if (sourceInventory.QuantityOnHand < dto.Quantity)
+            {
+                throw new InvalidOperationException(
+                    $"Insufficient inventory in source warehouse. Available: {sourceInventory.QuantityOnHand}");
+            }
+
+            // 4. Select batch (FEFO or manual)
+            InventoryBatch sourceBatch;
+            if (dto.BatchId.HasValue)
+            {
+                sourceBatch = await _batchRepository.GetByIdAsync(dto.BatchId.Value) 
+                    ?? throw new KeyNotFoundException($"Batch {dto.BatchId} not found");
+            }
+            else
+            {
+                sourceBatch = await SelectBatchForOutbound(sourceInventory.Id, dto.Quantity);
+            }
+
+            // 5. Get or create destination inventory
+            var destInventory = await _inventoryRepository.FirstOrDefaultAsync(i => 
+                i.ProductVariantId == dto.ProductVariantId && 
+                i.WarehouseId == dto.ToWarehouseId);
+
+            if (destInventory == null)
+            {
+                destInventory = new Inventory
+                {
+                    ProductVariantId = dto.ProductVariantId,
+                    WarehouseId = dto.ToWarehouseId,
+                    QuantityOnHand = 0,
+                    QuantityReserved = 0
+                };
+                await _inventoryRepository.AddAsync(destInventory);
+                await _inventoryRepository.SaveChangesAsync();
+            }
+
+            // 6. Create or update destination batch
+            var destBatch = await GetOrCreateTransferBatch(destInventory.Id, sourceBatch, dto.Quantity);
+
+            // 7. Update source batch and inventory
+            sourceBatch.Quantity -= dto.Quantity;
+            if (sourceBatch.Quantity == 0)
+            {
+                sourceBatch.Status = BatchStatus.OutOfStock;
+            }
+            _batchRepository.Update(sourceBatch);
+
+            var sourceQtyBefore = sourceInventory.QuantityOnHand;
+            sourceInventory.QuantityOnHand -= dto.Quantity;
+            _inventoryRepository.Update(sourceInventory);
+
+            // 8. Update destination inventory
+            var destQtyBefore = destInventory.QuantityOnHand;
+            destInventory.QuantityOnHand += dto.Quantity;
+            _inventoryRepository.Update(destInventory);
+
+            // 9. Create TransferOut transaction
+            var transferOutTransaction = new InventoryTransaction
+            {
+                ProductVariantId = dto.ProductVariantId,
+                WarehouseId = dto.FromWarehouseId,
+                BatchId = sourceBatch.Id,
+                Type = TransactionType.TransferOut,
+                Quantity = dto.Quantity,
+                QuantityBefore = sourceQtyBefore,
+                QuantityAfter = sourceInventory.QuantityOnHand,
+                ReferenceNumber = transferRef,
+                ReferenceType = "Transfer",
+                PerformedByUserId = userId,
+                Reason = dto.Reason ?? "Transfer to another warehouse",
+                Notes = dto.Notes
+            };
+
+            // 10. Create TransferIn transaction
+            var transferInTransaction = new InventoryTransaction
+            {
+                ProductVariantId = dto.ProductVariantId,
+                WarehouseId = dto.ToWarehouseId,
+                BatchId = destBatch.Id,
+                Type = TransactionType.TransferIn,
+                Quantity = dto.Quantity,
+                QuantityBefore = destQtyBefore,
+                QuantityAfter = destInventory.QuantityOnHand,
+                ReferenceNumber = transferRef,
+                ReferenceType = "Transfer",
+                PerformedByUserId = userId,
+                Reason = dto.Reason ?? "Transfer from another warehouse",
+                Notes = dto.Notes
+            };
+
+            await _transactionRepository.AddAsync(transferOutTransaction);
+            await _transactionRepository.AddAsync(transferInTransaction);
+            await _transactionRepository.SaveChangesAsync();
+
+            // 11. Check alerts
+            await CheckAndCreateAlertsAsync(sourceInventory, sourceBatch);
+
+            return new TransferInventoryResponseDto
+            {
+                TransferOutTransaction = MapToTransactionDto(transferOutTransaction, productVariant, sourceWarehouse, sourceBatch),
+                TransferInTransaction = MapToTransactionDto(transferInTransaction, productVariant, destWarehouse, destBatch),
+                SourceInventory = MapToInventoryDto(sourceInventory, productVariant, sourceWarehouse),
+                DestinationInventory = MapToInventoryDto(destInventory, productVariant, destWarehouse),
+                Message = $"Successfully transferred {dto.Quantity} units from {sourceWarehouse.Name} to {destWarehouse.Name}"
+            };
+        }
+
+        // ========== Adjustment Transaction ==========
+        
+        public async Task<InventoryTransactionResponseDto> AdjustInventoryAsync(AdjustmentInventoryDto dto, string? userId = null)
+        {
+            // 1. Validate and get entities
+            var (inventory, productVariant, warehouse) = await ValidateInventoryOperation(
+                dto.ProductVariantId, dto.WarehouseId);
+
+            // 2. Calculate difference
+            var quantityBefore = inventory.QuantityOnHand;
+            var difference = dto.ActualQuantity - quantityBefore;
+
+            if (difference == 0)
+            {
+                throw new InvalidOperationException("No adjustment needed. Actual quantity matches system quantity");
+            }
+
+            // 3. Update inventory
+            inventory.QuantityOnHand = dto.ActualQuantity;
+            _inventoryRepository.Update(inventory);
+
+            // 4. Create transaction
+            var transaction = new InventoryTransaction
+            {
+                ProductVariantId = dto.ProductVariantId,
+                WarehouseId = dto.WarehouseId,
+                BatchId = null, // Adjustment typically doesn't involve specific batch
+                Type = TransactionType.Adjustment,
+                Quantity = Math.Abs(difference), // Always positive
+                QuantityBefore = quantityBefore,
+                QuantityAfter = inventory.QuantityOnHand,
+                ReferenceNumber = $"ADJ-{DateTime.Now:yyyyMMddHHmmss}",
+                ReferenceType = "Adjustment",
+                PerformedByUserId = userId,
+                Reason = $"{dto.Reason} (Difference: {(difference > 0 ? "+" : "")}{difference})",
+                Notes = dto.Notes
+            };
+
+            await _transactionRepository.AddAsync(transaction);
+            await _transactionRepository.SaveChangesAsync();
+
+            return new InventoryTransactionResponseDto
+            {
+                Inventory = MapToInventoryDto(inventory, productVariant, warehouse),
+                Transaction = MapToTransactionDto(transaction, productVariant, warehouse, null),
+                Message = $"Inventory adjusted by {(difference > 0 ? "+" : "")}{difference} units"
+            };
+        }
+
+        // ========== Helper Methods ==========
+
+        private async Task<(Inventory inventory, ProductVariant variant, Warehouse warehouse)> ValidateInventoryOperation(
+            int productVariantId, int warehouseId)
+        {
+            var productVariant = await _productVariantRepository.GetByIdAsync(productVariantId) 
+                ?? throw new KeyNotFoundException($"Product variant {productVariantId} not found");
+
+            var warehouse = await _warehouseRepository.GetByIdAsync(warehouseId) 
+                ?? throw new KeyNotFoundException($"Warehouse {warehouseId} not found");
+
+            if (!warehouse.IsActive)
+            {
+                throw new InvalidOperationException($"Warehouse '{warehouse.Name}' is not active");
+            }
+
+            var inventory = await _inventoryRepository.FirstOrDefaultAsync(i => 
+                i.ProductVariantId == productVariantId && 
+                i.WarehouseId == warehouseId);
+
+            if (inventory == null)
+            {
+                throw new KeyNotFoundException(
+                    $"Inventory not found for variant {productVariantId} in warehouse {warehouseId}");
+            }
+
+            return (inventory, productVariant, warehouse);
+        }
+
+        private async Task<InventoryBatch> SelectBatchForOutbound(int inventoryId, int quantity)
+        {
+            var batches = await _batchRepository.FindAsync(b => 
+                b.InventoryId == inventoryId && b.QuantityRemaining >= quantity);
+            
+            var availableBatch = batches
+                .OrderBy(b => b.ExpiryDate) // FEFO: First Expired First Out
+                .FirstOrDefault();
+
+            if (availableBatch == null)
+            {
+                throw new InvalidOperationException(
+                    $"No batch with sufficient quantity ({quantity}) found. Consider breaking into multiple shipments.");
+            }
+
+            return availableBatch;
+        }
+
+        private async Task<InventoryBatch> GetOrCreateTransferBatch(
+            int destInventoryId, InventoryBatch sourceBatch, int quantity)
+        {
+            var existingBatch = await _batchRepository.FirstOrDefaultAsync(b => 
+                b.InventoryId == destInventoryId && 
+                b.BatchNumber == sourceBatch.BatchNumber);
+
+            if (existingBatch != null)
+            {
+                // Add to existing batch
+                existingBatch.Quantity += quantity;
+                _batchRepository.Update(existingBatch);
+                return existingBatch;
+            }
+            else
+            {
+                // Create new batch in destination
+                var newBatch = new InventoryBatch
+                {
+                    InventoryId = destInventoryId,
+                    BatchNumber = sourceBatch.BatchNumber,
+                    ManufactureDate = sourceBatch.ManufactureDate,
+                    ExpiryDate = sourceBatch.ExpiryDate,
+                    Quantity = quantity,
+                    QuantitySold = 0,
+                    CostPrice = sourceBatch.CostPrice,
+                    Supplier = sourceBatch.Supplier,
+                    Status = DetermineBatchStatus(sourceBatch.ExpiryDate),
+                    Notes = $"Transferred from batch {sourceBatch.Id}"
+                };
+                
+                await _batchRepository.AddAsync(newBatch);
+                await _batchRepository.SaveChangesAsync();
+                return newBatch;
+            }
         }
 
         private BatchStatus DetermineBatchStatus(DateTime expiryDate)

@@ -45,8 +45,6 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         // Location Codes
         public int? WardId { get; set; }
         public int? ProvinceId { get; set; }
-        public int? CountryId { get; set; }
-
         public string? Note { get; set; }
     }
 

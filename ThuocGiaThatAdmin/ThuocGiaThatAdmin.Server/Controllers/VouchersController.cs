@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -5,7 +6,9 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using ThuocGiaThatAdmin.Contracts.DTOs;
+using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Service.Interfaces;
+using ThuocGiaThatAdmin.Service.Services;
 
 namespace ThuocGiaThatAdmin.Server.Controllers
 {
@@ -25,6 +28,62 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             var result = await _voucherService.GetAllAsync();
             return Ok(result);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pageNumber"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        [HttpGet("getPagedVouchers")]
+        public async Task<ActionResult<dynamic>> GetPagedProducts([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var (vouchers, totalCount) = await _voucherService.GetPagedVoucher(pageIndex, pageSize);
+
+                var response = new
+                {
+                    Data = vouchers.Select(voucher => new
+                    {
+                        voucher.Id,
+                        voucher.Name,
+                        voucher.Code,
+                        voucher.CreatedBy,
+                        voucher.CreatedDate,
+                        voucher.Description,
+                        voucher.DiscountType,
+                        voucher.DiscountValue,
+                        voucher.StartDate,
+                        voucher.EndDate,
+                        voucher.MaxDiscountAmount,
+                        voucher.MinimumOrderValue,
+                        voucher.MinimumQuantityType,
+                        voucher.MinimumQuantityValue,
+                        voucher.UsagePerUserLimit,
+                        voucher.IsActive,
+                        DiscountTypeName = voucher.DiscountType.ToString(),
+                    }),
+                    Pagination = new
+                    {
+                        PageNumber = pageIndex,
+                        PageSize = pageSize,
+                        TotalCount = totalCount,
+                        TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+                    }
+                };
+                return Ok(response);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error getting paged products");
+                return StatusCode(500, new { message = "An error occurred while retrieving paged products", error = ex.Message });
+            }
         }
 
         /// <summary>
@@ -78,12 +137,10 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateVoucher([FromBody] CreateVoucherDto dto)
         {
-            return await ExecuteActionAsync(async () =>
-            {
-                var createdBy = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "System";
-                var voucher = await _voucherService.CreateAsync(dto, createdBy);
-                return Created(voucher, "Voucher created successfully");
-            }, "Create Voucher");
+            var createdBy = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "System";
+            var voucher = await _voucherService.CreateAsync(dto, createdBy);
+
+            return Ok(voucher);
         }
 
         /// <summary>
@@ -92,12 +149,9 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateVoucher(int id, [FromBody] UpdateVoucherDto dto)
         {
-            return await ExecuteActionAsync(async () =>
-            {
-                var updatedBy = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "System";
-                var voucher = await _voucherService.UpdateAsync(id, dto, updatedBy);
-                return Success(voucher, "Voucher updated successfully");
-            }, "Update Voucher");
+            var updatedBy = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "System";
+            var voucher = await _voucherService.UpdateAsync(id, dto, updatedBy);
+            return Ok(voucher);
         }
 
         /// <summary>

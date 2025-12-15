@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace ThuocGiaThatAdmin.Domain.Entities
 {
@@ -12,8 +13,19 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal TotalLineAmount { get; set; }
+        
+        /// <summary>
+        /// Số lượng đã được fulfill (book hàng từ kho)
+        /// </summary>
+        public int QuantityFulfilled { get; set; } = 0;
+        
+        /// <summary>
+        /// Số lượng còn chưa fulfill = Quantity - QuantityFulfilled
+        /// </summary>
+        public int QuantityPending => Quantity - QuantityFulfilled;
 
         public Order Order { get; set; } = null!;
         public ProductVariant ProductVariant { get; set; } = null!;
+        public ICollection<OrderItemFulfillment> Fulfillments { get; set; } = new List<OrderItemFulfillment>();
     }
 }
