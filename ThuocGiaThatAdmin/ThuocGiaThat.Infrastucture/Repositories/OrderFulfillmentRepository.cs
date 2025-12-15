@@ -46,7 +46,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
                 .Where(b => b.Inventory.ProductVariantId == productVariantId
                          && b.Inventory.WarehouseId == warehouseId
                          && (b.Status == BatchStatus.Active || b.Status == BatchStatus.NearExpiry)
-                         && b.QuantityRemaining > 0)
+                         && b.Quantity - b.QuantitySold > 0)
                 .OrderBy(b => b.ExpiryDate) // FEFO: Ưu tiên lô hết hạn sớm nhất
                 .ThenBy(b => b.CreatedDate) // Nếu cùng ExpiryDate, ưu tiên lô cũ hơn
                 .ToListAsync();

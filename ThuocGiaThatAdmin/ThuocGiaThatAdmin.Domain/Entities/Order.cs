@@ -43,6 +43,14 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         // Sales Information
         public int? SaleUserId { get; set; }
 
+        // Fulfillment Information
+        /// <summary>
+        /// Indicates whether all order items have been fully fulfilled.
+        /// True when all OrderItems have QuantityPending == 0.
+        /// Null for orders that haven't been processed yet.
+        /// </summary>
+        public bool? IsFulfilled { get; set; }
+
         public Customer? Customer { get; set; }
         public Ward? Ward { get; set; }
         public Province? Province { get; set; }
