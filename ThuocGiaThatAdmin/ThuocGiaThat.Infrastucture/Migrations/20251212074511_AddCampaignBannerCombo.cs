@@ -17,13 +17,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                 type: "int",
                 nullable: true);
 
-            migrationBuilder.AddColumn<string>(
-                name: "BatchNumber",
-                table: "LocationStockMovements",
-                type: "nvarchar(100)",
-                maxLength: 100,
-                nullable: false,
-                defaultValue: "");
+            
 
             migrationBuilder.AlterColumn<decimal>(
                 name: "CostPrice",
@@ -213,17 +207,13 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                 table: "Vouchers",
                 column: "BannerId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_LocationStockMovements_BatchNumber",
-                table: "LocationStockMovements",
-                column: "BatchNumber");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_LocationStockMovements_BatchNumber_WarehouseId_ToLocationCode",
-                table: "LocationStockMovements",
-                columns: new[] { "BatchNumber", "WarehouseId", "ToLocationCode" },
-                unique: true,
-                filter: "[ToLocationCode] IS NOT NULL");
+           // migrationBuilder.CreateIndex(
+             //   name: "IX_LocationStockMovements_BatchNumber_WarehouseId_ToLocationCode",
+              //  table: "LocationStockMovements",
+              //  columns: new[] { "BatchNumber", "WarehouseId", "ToLocationCode" },
+             //   unique: true,
+            //    filter: "[ToLocationCode] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BannerAnalytics_BannerId",
