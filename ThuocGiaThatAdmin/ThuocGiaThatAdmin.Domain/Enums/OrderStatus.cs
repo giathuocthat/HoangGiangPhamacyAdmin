@@ -10,23 +10,25 @@ namespace ThuocGiaThatAdmin.Domain.Enums
     public enum OrderStatus
     {
         [Description("Chờ xác nhận")]
-        Pending = 0,
+        Pending,
         [Description("Đã xác nhận")]
         Confirmed = 1,
         [Description("Đang xử lý")]
         Processing = 2,
+        [Description("Đã chuẩn bị hàng")]
+        ReadyToShip = 3,
         [Description("Đang trung chuyển")]
-        InTransit = 3,      // Đang trung chuyển
+        InTransit = 4,      // Đang trung chuyển
         [Description("Đang giao hàng")]
-        Shipping = 4,
+        Shipping = 5,
         [Description("Đã giao")]
-        Delivered = 5,
+        Delivered = 6,
         [Description("Đã hoàn tất")]
-        Completed = 6,
+        Completed = 7,
         [Description("Đang xử lý hủy")]
-        Cancelling = 7,
+        Cancelling = 8,
         [Description("Đã hủy")]
-        Cancelled = 8,
+        Cancelled = 9,
     }
 
     /// <summary>
