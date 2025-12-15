@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ThuocGiaThat.Infrastucture;
 
@@ -11,9 +12,11 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    partial class TrueMecContextModelSnapshot : ModelSnapshot
+    [Migration("20251212041130_allowNullable")]
+    partial class allowNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -302,191 +305,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Banner", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BackgroundColor")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("BannerCode")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("BannerType")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CampaignId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ClickCount")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ImageUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("LinkType")
-                        .HasColumnType("int");
-
-                    b.Property<string>("LinkUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("MobileImageUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Subtitle")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ValidFrom")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ValidTo")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ViewCount")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BannerCode")
-                        .IsUnique();
-
-                    b.HasIndex("CampaignId");
-
-                    b.HasIndex("DisplayOrder");
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("ValidFrom", "ValidTo");
-
-                    b.ToTable("Banners");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.BannerAnalytics", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BannerId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("CustomerId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("DeviceType")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("EventType")
-                        .HasColumnType("int");
-
-                    b.Property<string>("IpAddress")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserAgent")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BannerId");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("EventType");
-
-                    b.ToTable("BannerAnalytics");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.BannerSection", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BannerId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Content")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ImageUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SectionCode")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("SectionName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BannerId");
-
-                    b.HasIndex("DisplayOrder");
-
-                    b.ToTable("BannerSections");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Brand", b =>
                 {
                     b.Property<int>("Id")
@@ -555,57 +373,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.ToTable("BusinessTypes");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Campaign", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal?>("Budget")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("CampaignCode")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("CampaignName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CampaignCode")
-                        .IsUnique();
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("StartDate", "EndDate");
-
-                    b.ToTable("Campaigns");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -657,125 +424,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsUnique();
 
                     b.ToTable("Categories");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Combo", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("BannerId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ComboCode")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("ComboName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<decimal>("ComboPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("DiscountAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("DiscountPercentage")
-                        .HasColumnType("int");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ImageUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal>("OriginalPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ValidFrom")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ValidTo")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BannerId");
-
-                    b.HasIndex("ComboCode")
-                        .IsUnique();
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("ValidFrom", "ValidTo");
-
-                    b.ToTable("Combos");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ComboItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BadgeText")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("ComboId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsRequired")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("ProductVariantId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ComboId");
-
-                    b.HasIndex("DisplayOrder");
-
-                    b.HasIndex("ProductVariantId");
-
-                    b.ToTable("ComboItems");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Country", b =>
@@ -999,9 +647,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ProvinceId")
-                        .HasColumnType("int");
-
                     b.Property<string>("RejectionReason")
                         .HasColumnType("nvarchar(max)");
 
@@ -1159,163 +804,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.ToTable("CustomerVerifications");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.GoodsReceipt", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime?>("CompletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<int?>("InspectedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<int>("PurchaseOrderId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ReceiptNumber")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int?>("ReceivedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("ReceivedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("RejectionReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime?>("ScheduledDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ShippingCarrier")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TrackingNumber")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("VehicleNumber")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("WarehouseId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PurchaseOrderId");
-
-                    b.HasIndex("ReceiptNumber")
-                        .IsUnique();
-
-                    b.HasIndex("ReceivedDate");
-
-                    b.HasIndex("Status");
-
-                    b.HasIndex("WarehouseId");
-
-                    b.ToTable("GoodsReceipts");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.GoodsReceiptItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AcceptedQuantity")
-                        .HasColumnType("int");
-
-                    b.Property<string>("BatchNumber")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<DateTime?>("ExpiryDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("GoodsReceiptId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("InspectionNotes")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("LocationCode")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("ManufactureDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<int>("OrderedQuantity")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PurchaseOrderItemId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("QualityStatus")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ReceivedQuantity")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RejectedQuantity")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ShelfNumber")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BatchNumber");
-
-                    b.HasIndex("ExpiryDate");
-
-                    b.HasIndex("GoodsReceiptId");
-
-                    b.HasIndex("PurchaseOrderItemId");
-
-                    b.ToTable("GoodsReceiptItems");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Inventory", b =>
                 {
                     b.Property<int>("Id")
@@ -1384,7 +872,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<decimal?>("CostPrice")
+                    b.Property<decimal>("CostPrice")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedDate")
@@ -1511,80 +999,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.ToTable("InventoryTransactions");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.LocationStockMovement", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BatchNumber")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("FromLocationCode")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int?>("MovedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("MovementDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ProductVariantId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Reason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("ToLocationCode")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("VariantLocationStockId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("WarehouseId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BatchNumber");
-
-                    b.HasIndex("FromLocationCode");
-
-                    b.HasIndex("MovementDate");
-
-                    b.HasIndex("ProductVariantId");
-
-                    b.HasIndex("ToLocationCode");
-
-                    b.HasIndex("VariantLocationStockId");
-
-                    b.HasIndex("WarehouseId");
-
-                    b.HasIndex("BatchNumber", "WarehouseId", "ToLocationCode")
-                        .IsUnique()
-                        .HasFilter("[ToLocationCode] IS NOT NULL");
-
-                    b.ToTable("LocationStockMovements");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Order", b =>
                 {
                     b.Property<int>("Id")
@@ -1613,9 +1027,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.Property<decimal>("DiscountAmount")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<bool?>("IsFulfilled")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");
@@ -1713,9 +1124,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<int>("QuantityFulfilled")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("TotalLineAmount")
                         .HasColumnType("decimal(18,2)");
 
@@ -1729,52 +1137,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("ProductVariantId");
 
                     b.ToTable("OrderItems");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.OrderItemFulfillment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<Guid>("FulfilledByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("FulfilledDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("InventoryBatchId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int>("OrderItemId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("QuantityFulfilled")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FulfilledDate");
-
-                    b.HasIndex("InventoryBatchId");
-
-                    b.HasIndex("OrderItemId");
-
-                    b.ToTable("OrderItemFulfillments");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.OrderItemSnapshot", b =>
@@ -1939,16 +1301,15 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Phone", "Code", "IsUsed", "Type");
+                    b.HasIndex("Phone")
+                        .IsUnique();
+
+                    b.HasIndex("Phone", "Code", "IsUsed");
 
                     b.ToTable("OtpCodes");
                 });
@@ -2152,74 +1513,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsUnique();
 
                     b.ToTable("Products");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductBatch", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BatchNumber")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<decimal>("CostPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("CreatedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<DateTime>("ExpiryDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("ManufactureDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ProductVariantId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PurchaseOrderNumber")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("QRCodePath")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime>("ReceivedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Supplier")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BatchNumber")
-                        .IsUnique();
-
-                    b.HasIndex("ExpiryDate");
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("ProductVariantId");
-
-                    b.ToTable("ProductBatches");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductCollection", b =>
@@ -2553,227 +1846,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.ToTable("Provinces", (string)null);
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.PurchaseOrder", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("ApprovedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("ApprovedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("CompletedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("CreatedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<decimal>("DiscountAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("ExpectedDeliveryDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<DateTime>("OrderDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("OrderNumber")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<decimal>("ShippingFee")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("SubTotal")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("SupplierContactId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SupplierId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TaxAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Terms")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("WarehouseId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderDate");
-
-                    b.HasIndex("OrderNumber")
-                        .IsUnique();
-
-                    b.HasIndex("Status");
-
-                    b.HasIndex("SupplierContactId");
-
-                    b.HasIndex("SupplierId");
-
-                    b.HasIndex("WarehouseId");
-
-                    b.ToTable("PurchaseOrders");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.PurchaseOrderHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("ChangeDetails")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<int>("ChangedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("ChangedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("FromStatus")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<int>("PurchaseOrderId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Reason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("ToStatus")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Action");
-
-                    b.HasIndex("ChangedDate");
-
-                    b.HasIndex("PurchaseOrderId");
-
-                    b.ToTable("PurchaseOrderHistories");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.PurchaseOrderItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<decimal>("DiscountAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<int>("OrderedQuantity")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ProductName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<int>("ProductVariantId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PurchaseOrderId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ReceivedQuantity")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SKU")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<decimal>("TaxRate")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("VariantOptions")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductVariantId");
-
-                    b.HasIndex("PurchaseOrderId");
-
-                    b.ToTable("PurchaseOrderItems");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ShoppingCart", b =>
                 {
                     b.Property<int>("Id")
@@ -2972,162 +2044,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.ToTable("StockAlerts");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Supplier", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Address")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("BankAccount")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("BankName")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<decimal?>("CreditLimit")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<int>("PaymentTerms")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Phone")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<int?>("ProvinceId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TaxCode")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("WardId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("ProvinceId");
-
-                    b.HasIndex("TaxCode");
-
-                    b.HasIndex("WardId");
-
-                    b.ToTable("Suppliers");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.SupplierContact", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ContactType")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("Department")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsPrimary")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Mobile")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("Phone")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Position")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("SupplierId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("SupplierId");
-
-                    b.HasIndex("SupplierId", "IsPrimary");
-
-                    b.ToTable("SupplierContacts");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.UploadedFile", b =>
                 {
                     b.Property<int>("Id")
@@ -3200,78 +2116,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.ToTable("UploadedFiles");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.VariantLocationStock", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BinName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<bool>("IsPrimaryLocation")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LocationCode")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int>("ProductVariantId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<int>("QuantityReserved")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RackName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("ShelfName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("WarehouseId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ZoneName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IsPrimaryLocation");
-
-                    b.HasIndex("LocationCode");
-
-                    b.HasIndex("ProductVariantId");
-
-                    b.HasIndex("WarehouseId");
-
-                    b.HasIndex("ProductVariantId", "WarehouseId", "LocationCode")
-                        .IsUnique();
-
-                    b.ToTable("VariantLocationStocks");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.VariantOptionValue", b =>
                 {
                     b.Property<int>("Id")
@@ -3305,9 +2149,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ApplicableType")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("BannerId")
                         .HasColumnType("int");
 
                     b.Property<bool>("CanStackWithOthers")
@@ -3389,8 +2230,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("BannerId");
 
                     b.HasIndex("CanStackWithOthers");
 
@@ -3692,39 +2531,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Banner", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Campaign", "Campaign")
-                        .WithMany("Banners")
-                        .HasForeignKey("CampaignId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Campaign");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.BannerAnalytics", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Banner", "Banner")
-                        .WithMany("BannerAnalytics")
-                        .HasForeignKey("BannerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Banner");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.BannerSection", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Banner", "Banner")
-                        .WithMany("BannerSections")
-                        .HasForeignKey("BannerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Banner");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Category", b =>
                 {
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Category", "ParentCategory")
@@ -3733,35 +2539,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("ParentCategory");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Combo", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Banner", "Banner")
-                        .WithMany("Combos")
-                        .HasForeignKey("BannerId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Banner");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ComboItem", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Combo", "Combo")
-                        .WithMany("ComboItems")
-                        .HasForeignKey("ComboId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ProductVariant", "ProductVariant")
-                        .WithMany()
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Combo");
-
-                    b.Navigation("ProductVariant");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Customer", b =>
@@ -3836,44 +2613,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("ProcessedByUser");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.GoodsReceipt", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.PurchaseOrder", "PurchaseOrder")
-                        .WithMany("GoodsReceipts")
-                        .HasForeignKey("PurchaseOrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Warehouse", "Warehouse")
-                        .WithMany()
-                        .HasForeignKey("WarehouseId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("PurchaseOrder");
-
-                    b.Navigation("Warehouse");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.GoodsReceiptItem", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.GoodsReceipt", "GoodsReceipt")
-                        .WithMany("GoodsReceiptItems")
-                        .HasForeignKey("GoodsReceiptId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.PurchaseOrderItem", "PurchaseOrderItem")
-                        .WithMany("GoodsReceiptItems")
-                        .HasForeignKey("PurchaseOrderItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("GoodsReceipt");
-
-                    b.Navigation("PurchaseOrderItem");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Inventory", b =>
                 {
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ProductVariant", "ProductVariant")
@@ -3930,29 +2669,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("Warehouse");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.LocationStockMovement", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ProductVariant", "ProductVariant")
-                        .WithMany()
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.VariantLocationStock", null)
-                        .WithMany("Movements")
-                        .HasForeignKey("VariantLocationStockId");
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Warehouse", "Warehouse")
-                        .WithMany()
-                        .HasForeignKey("WarehouseId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ProductVariant");
-
-                    b.Navigation("Warehouse");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Order", b =>
                 {
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Customer", "Customer")
@@ -3994,25 +2710,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("Order");
 
                     b.Navigation("ProductVariant");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.OrderItemFulfillment", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.InventoryBatch", "InventoryBatch")
-                        .WithMany()
-                        .HasForeignKey("InventoryBatchId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.OrderItem", "OrderItem")
-                        .WithMany("Fulfillments")
-                        .HasForeignKey("OrderItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("InventoryBatch");
-
-                    b.Navigation("OrderItem");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.OrderItemSnapshot", b =>
@@ -4083,17 +2780,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("Brand");
 
                     b.Navigation("Category");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductBatch", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ProductVariant", "ProductVariant")
-                        .WithMany("ProductBatches")
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ProductVariant");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductCollectionItem", b =>
@@ -4192,62 +2878,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("Country");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.PurchaseOrder", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.SupplierContact", "SupplierContact")
-                        .WithMany()
-                        .HasForeignKey("SupplierContactId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Supplier", "Supplier")
-                        .WithMany("PurchaseOrders")
-                        .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Warehouse", "Warehouse")
-                        .WithMany()
-                        .HasForeignKey("WarehouseId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Supplier");
-
-                    b.Navigation("SupplierContact");
-
-                    b.Navigation("Warehouse");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.PurchaseOrderHistory", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.PurchaseOrder", "PurchaseOrder")
-                        .WithMany("PurchaseOrderHistories")
-                        .HasForeignKey("PurchaseOrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PurchaseOrder");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.PurchaseOrderItem", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ProductVariant", "ProductVariant")
-                        .WithMany()
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.PurchaseOrder", "PurchaseOrder")
-                        .WithMany("PurchaseOrderItems")
-                        .HasForeignKey("PurchaseOrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ProductVariant");
-
-                    b.Navigation("PurchaseOrder");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ShoppingCart", b =>
                 {
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Customer", "Customer")
@@ -4311,53 +2941,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("Warehouse");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Supplier", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Province", "Province")
-                        .WithMany()
-                        .HasForeignKey("ProvinceId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Ward", "Ward")
-                        .WithMany()
-                        .HasForeignKey("WardId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Province");
-
-                    b.Navigation("Ward");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.SupplierContact", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Supplier", "Supplier")
-                        .WithMany("SupplierContacts")
-                        .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Supplier");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.VariantLocationStock", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ProductVariant", "ProductVariant")
-                        .WithMany()
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Warehouse", "Warehouse")
-                        .WithMany("VariantLocationStocks")
-                        .HasForeignKey("WarehouseId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ProductVariant");
-
-                    b.Navigation("Warehouse");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.VariantOptionValue", b =>
                 {
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ProductOptionValue", "ProductOptionValue")
@@ -4375,13 +2958,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("ProductOptionValue");
 
                     b.Navigation("ProductVariant");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Voucher", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Banner", null)
-                        .WithMany("Vouchers")
-                        .HasForeignKey("BannerId");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.VoucherCategory", b =>
@@ -4458,25 +3034,9 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("Province");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Banner", b =>
-                {
-                    b.Navigation("BannerAnalytics");
-
-                    b.Navigation("BannerSections");
-
-                    b.Navigation("Combos");
-
-                    b.Navigation("Vouchers");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Brand", b =>
                 {
                     b.Navigation("Products");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Campaign", b =>
-                {
-                    b.Navigation("Banners");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Category", b =>
@@ -4484,11 +3044,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("ChildCategories");
 
                     b.Navigation("Products");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Combo", b =>
-                {
-                    b.Navigation("ComboItems");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Country", b =>
@@ -4509,11 +3064,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("VerificationHistory");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.GoodsReceipt", b =>
-                {
-                    b.Navigation("GoodsReceiptItems");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Inventory", b =>
                 {
                     b.Navigation("Batches");
@@ -4524,11 +3074,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("OrderItems");
 
                     b.Navigation("PaymentTransactions");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.OrderItem", b =>
-                {
-                    b.Navigation("Fulfillments");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Product", b =>
@@ -4567,8 +3112,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.Navigation("PriceHistories");
 
-                    b.Navigation("ProductBatches");
-
                     b.Navigation("VariantOptionValues");
                 });
 
@@ -4577,35 +3120,9 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("Wards");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.PurchaseOrder", b =>
-                {
-                    b.Navigation("GoodsReceipts");
-
-                    b.Navigation("PurchaseOrderHistories");
-
-                    b.Navigation("PurchaseOrderItems");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.PurchaseOrderItem", b =>
-                {
-                    b.Navigation("GoodsReceiptItems");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ShoppingCart", b =>
                 {
                     b.Navigation("CartItems");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Supplier", b =>
-                {
-                    b.Navigation("PurchaseOrders");
-
-                    b.Navigation("SupplierContacts");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.VariantLocationStock", b =>
-                {
-                    b.Navigation("Movements");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Voucher", b =>
@@ -4624,8 +3141,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("Inventories");
 
                     b.Navigation("Transactions");
-
-                    b.Navigation("VariantLocationStocks");
                 });
 #pragma warning restore 612, 618
         }
