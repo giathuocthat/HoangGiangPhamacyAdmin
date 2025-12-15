@@ -1,7 +1,10 @@
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ThuocGiaThatAdmin.Contract.Requests;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
+using ThuocGiaThatAdmin.Service.Interfaces;
 using ThuocGiaThatAdmin.Service.Services;
 
 namespace ThuocGiaThatAdmin.Server.Controllers
@@ -9,12 +12,15 @@ namespace ThuocGiaThatAdmin.Server.Controllers
     public class FileUploadController : BaseApiController
     {
         private readonly FileUploadService _fileUploadService;
+        private readonly ICustomerService _customerService;
         
         public FileUploadController(
             FileUploadService fileUploadService,
+            ICustomerService customerService,
             ILogger<FileUploadController> logger) : base(logger)
         {
             _fileUploadService = fileUploadService;
+            _customerService = customerService;
         }
         
         /// <summary>
@@ -118,6 +124,59 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 await _fileUploadService.PermanentDeleteFileAsync(id);
                 return Success("File permanently deleted");
             }, "Permanent Delete File");
+        }
+
+        [HttpPost("updateLicenses")]
+        [Authorize]
+        public async Task<IActionResult> UpdateLicenses([FromForm] List<LicenseInputModel> licenses)
+        {
+            // 1. Validation: Kiểm tra số lượng giấy phép có file
+            if (licenses == null || licenses.Count < 1)
+            {
+                return BadRequest(new { message = "Vui lòng cung cấp ít nhất 2 loại giấy tờ." });
+            }
+
+            var customerId = int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
+
+            IList<CustomerDocumentDto> customerDocuments = new List<CustomerDocumentDto>();
+
+            foreach (var license in licenses)
+            {
+                var uploadedFile = await _fileUploadService.UploadFileAsync(
+                    license.File,
+                    UploadSource.Customer,
+                    null,
+                    customerId,
+                    description: null,
+                    uploadedByUserId: customerId.ToString()
+                );
+                customerDocuments.Add(new CustomerDocumentDto
+                {
+                    DocumentNumber = license.Number,
+                    CustomerId = customerId,
+                    DocumentType = license.Type,
+                    UploadedFileId = uploadedFile.Id,
+                    IssueDate = license.IssueDate,
+                    ProvinceId = license.IssuePlace,
+                });
+            }
+
+            await _customerService.UpdateLicenses(customerDocuments);
+
+            var response = await _customerService.GetLicenses(customerId);
+
+            return Success(response);
+
+        }
+
+        [HttpGet("getLicenses")]
+        [Authorize]
+        public async Task<IActionResult> GetLicenses([FromForm] List<LicenseInputModel> licenses)
+        {
+            var customerId = int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
+            var response = await _customerService.GetLicenses(customerId);
+
+            return Ok(response);
         }
     }
 }

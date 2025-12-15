@@ -25,6 +25,8 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public DateTime? ExpiryDate { get; set; }
         public string? IssuingAuthority { get; set; }
         public string? Notes { get; set; }
+
+        public int? ProvinceId { get; set; }
         
         // Verification status
         public bool? IsVerified { get; set; }
