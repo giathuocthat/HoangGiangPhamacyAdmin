@@ -83,6 +83,15 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<ComboItem> ComboItems { get; set; }
         public DbSet<BannerAnalytics> BannerAnalytics { get; set; }
 
+        // Purchase Order System
+        public DbSet<Supplier> Suppliers { get; set; }
+        public DbSet<SupplierContact> SupplierContacts { get; set; }
+        public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
+        public DbSet<PurchaseOrderItem> PurchaseOrderItems { get; set; }
+        public DbSet<PurchaseOrderHistory> PurchaseOrderHistories { get; set; }
+        public DbSet<GoodsReceipt> GoodsReceipts { get; set; }
+        public DbSet<GoodsReceiptItem> GoodsReceiptItems { get; set; }
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -231,7 +240,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasIndex(e => e.ExpiryDate);
                 entity.HasIndex(e => e.Status);
             });
-            
+
             // ============ ProductBatch Configuration ============
             modelBuilder.Entity<ProductBatch>(entity =>
             {
@@ -243,18 +252,18 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.QRCodePath).HasMaxLength(500);
                 entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
                 entity.Property(e => e.UpdatedDate);
-                
+
                 entity.HasOne(e => e.ProductVariant)
                     .WithMany(v => v.ProductBatches)
                     .HasForeignKey(e => e.ProductVariantId)
                     .OnDelete(DeleteBehavior.Cascade);
-                
+
                 entity.HasIndex(e => e.BatchNumber).IsUnique();
                 entity.HasIndex(e => e.ExpiryDate);
                 entity.HasIndex(e => e.IsActive);
                 entity.HasIndex(e => e.ProductVariantId);
             });
-            
+
             // ============ InventoryTransaction Configuration ============
             modelBuilder.Entity<InventoryTransaction>(entity =>
             {
@@ -533,7 +542,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasIndex(e => e.OrderItemId).IsUnique();
                 entity.HasIndex(e => e.ProductVariantId);
             });
-            
+
             // ============ OrderItemFulfillment Configuration ============
             modelBuilder.Entity<OrderItemFulfillment>(entity =>
             {
@@ -541,17 +550,17 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
                 entity.Property(e => e.UpdatedDate);
                 entity.Property(e => e.Notes).HasMaxLength(500);
-                
+
                 entity.HasOne(e => e.OrderItem)
                     .WithMany(oi => oi.Fulfillments)
                     .HasForeignKey(e => e.OrderItemId)
                     .OnDelete(DeleteBehavior.Cascade);
-                    
+
                 entity.HasOne(e => e.InventoryBatch)
                     .WithMany()
                     .HasForeignKey(e => e.InventoryBatchId)
                     .OnDelete(DeleteBehavior.Restrict);
-                
+
                 entity.HasIndex(e => e.OrderItemId);
                 entity.HasIndex(e => e.InventoryBatchId);
                 entity.HasIndex(e => e.FulfilledDate);
@@ -1047,6 +1056,215 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasIndex(e => e.BannerId);
                 entity.HasIndex(e => e.CustomerId);
                 entity.HasIndex(e => e.EventType);
+            });
+
+            // ============ Purchase Order System Configuration ============
+
+            // ============ Supplier Configuration ============
+            modelBuilder.Entity<Supplier>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Code).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.Email).HasMaxLength(255);
+                entity.Property(e => e.Phone).HasMaxLength(20);
+                entity.Property(e => e.Address).HasMaxLength(500);
+                entity.Property(e => e.TaxCode).HasMaxLength(50);
+                entity.Property(e => e.BankAccount).HasMaxLength(50);
+                entity.Property(e => e.BankName).HasMaxLength(255);
+                entity.Property(e => e.CreditLimit).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.Notes).HasMaxLength(1000);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+
+                entity.HasOne(e => e.Ward)
+                    .WithMany()
+                    .HasForeignKey(e => e.WardId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(e => e.Province)
+                    .WithMany()
+                    .HasForeignKey(e => e.ProvinceId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasIndex(e => e.Code).IsUnique();
+                entity.HasIndex(e => e.IsActive);
+                entity.HasIndex(e => e.TaxCode);
+            });
+
+            // ============ SupplierContact Configuration ============
+            modelBuilder.Entity<SupplierContact>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.FullName).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.Position).HasMaxLength(100);
+                entity.Property(e => e.Department).HasMaxLength(100);
+                entity.Property(e => e.Email).HasMaxLength(255);
+                entity.Property(e => e.Phone).HasMaxLength(20);
+                entity.Property(e => e.Mobile).HasMaxLength(20);
+                entity.Property(e => e.ContactType).HasConversion<int>();
+                entity.Property(e => e.Notes).HasMaxLength(1000);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+
+                entity.HasOne(e => e.Supplier)
+                    .WithMany(s => s.SupplierContacts)
+                    .HasForeignKey(e => e.SupplierId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.SupplierId);
+                entity.HasIndex(e => new { e.SupplierId, e.IsPrimary });
+                entity.HasIndex(e => e.IsActive);
+            });
+
+            // ============ PurchaseOrder Configuration ============
+            modelBuilder.Entity<PurchaseOrder>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.OrderNumber).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Status).HasConversion<int>();
+                entity.Property(e => e.SubTotal).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.TaxAmount).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.DiscountAmount).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.ShippingFee).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.TotalAmount).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.Notes).HasMaxLength(1000);
+                entity.Property(e => e.Terms).HasMaxLength(2000);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+
+                entity.HasOne(e => e.Supplier)
+                    .WithMany(s => s.PurchaseOrders)
+                    .HasForeignKey(e => e.SupplierId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.SupplierContact)
+                    .WithMany()
+                    .HasForeignKey(e => e.SupplierContactId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(e => e.Warehouse)
+                    .WithMany()
+                    .HasForeignKey(e => e.WarehouseId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(e => e.OrderNumber).IsUnique();
+                entity.HasIndex(e => e.SupplierId);
+                entity.HasIndex(e => e.WarehouseId);
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.OrderDate);
+            });
+
+            // ============ PurchaseOrderItem Configuration ============
+            modelBuilder.Entity<PurchaseOrderItem>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.TaxRate).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.DiscountAmount).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.TotalAmount).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.ProductName).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.SKU).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.VariantOptions).HasMaxLength(1000);
+                entity.Property(e => e.Notes).HasMaxLength(1000);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+
+                entity.HasOne(e => e.PurchaseOrder)
+                    .WithMany(po => po.PurchaseOrderItems)
+                    .HasForeignKey(e => e.PurchaseOrderId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.ProductVariant)
+                    .WithMany()
+                    .HasForeignKey(e => e.ProductVariantId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(e => e.PurchaseOrderId);
+                entity.HasIndex(e => e.ProductVariantId);
+            });
+
+            // ============ PurchaseOrderHistory Configuration ============
+            modelBuilder.Entity<PurchaseOrderHistory>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.FromStatus).HasMaxLength(50);
+                entity.Property(e => e.ToStatus).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Action).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.ChangeDetails).HasMaxLength(2000);
+                entity.Property(e => e.Reason).HasMaxLength(500);
+                entity.Property(e => e.Notes).HasMaxLength(1000);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+
+                entity.HasOne(e => e.PurchaseOrder)
+                    .WithMany(po => po.PurchaseOrderHistories)
+                    .HasForeignKey(e => e.PurchaseOrderId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.PurchaseOrderId);
+                entity.HasIndex(e => e.ChangedDate);
+                entity.HasIndex(e => e.Action);
+            });
+
+            // ============ GoodsReceipt Configuration ============
+            modelBuilder.Entity<GoodsReceipt>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.ReceiptNumber).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Status).HasConversion<int>();
+                entity.Property(e => e.ShippingCarrier).HasMaxLength(255);
+                entity.Property(e => e.TrackingNumber).HasMaxLength(100);
+                entity.Property(e => e.VehicleNumber).HasMaxLength(50);
+                entity.Property(e => e.Notes).HasMaxLength(1000);
+                entity.Property(e => e.RejectionReason).HasMaxLength(500);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+
+                entity.HasOne(e => e.PurchaseOrder)
+                    .WithMany(po => po.GoodsReceipts)
+                    .HasForeignKey(e => e.PurchaseOrderId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Warehouse)
+                    .WithMany()
+                    .HasForeignKey(e => e.WarehouseId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(e => e.ReceiptNumber).IsUnique();
+                entity.HasIndex(e => e.PurchaseOrderId);
+                entity.HasIndex(e => e.WarehouseId);
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.ReceivedDate);
+            });
+
+            // ============ GoodsReceiptItem Configuration ============
+            modelBuilder.Entity<GoodsReceiptItem>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.QualityStatus).HasConversion<int>();
+                entity.Property(e => e.BatchNumber).HasMaxLength(100);
+                entity.Property(e => e.LocationCode).HasMaxLength(100);
+                entity.Property(e => e.ShelfNumber).HasMaxLength(50);
+                entity.Property(e => e.Notes).HasMaxLength(1000);
+                entity.Property(e => e.InspectionNotes).HasMaxLength(1000);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+
+                entity.HasOne(e => e.GoodsReceipt)
+                    .WithMany(gr => gr.GoodsReceiptItems)
+                    .HasForeignKey(e => e.GoodsReceiptId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.PurchaseOrderItem)
+                    .WithMany(poi => poi.GoodsReceiptItems)
+                    .HasForeignKey(e => e.PurchaseOrderItemId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(e => e.GoodsReceiptId);
+                entity.HasIndex(e => e.PurchaseOrderItemId);
+                entity.HasIndex(e => e.BatchNumber);
+                entity.HasIndex(e => e.ExpiryDate);
             });
         }
     }
