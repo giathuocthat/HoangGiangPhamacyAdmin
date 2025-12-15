@@ -74,6 +74,7 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<OrderVoucher> OrderVouchers { get; set; }
         public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
         public DbSet<OrderItemFulfillment> OrderItemFulfillments { get; set; }
+        public DbSet<OtpCode> OtpCodes { get; set; }
 
         // Banner/Campaign/Combo System
         public DbSet<Campaign> Campaigns { get; set; }
@@ -1272,6 +1273,11 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasIndex(e => e.PurchaseOrderItemId);
                 entity.HasIndex(e => e.BatchNumber);
                 entity.HasIndex(e => e.ExpiryDate);
+            });
+
+            modelBuilder.Entity<OtpCode>(entity =>
+            {
+                entity.HasIndex(o => new { o.Phone, o.Code, o.IsUsed, o.Type });
             });
         }
     }

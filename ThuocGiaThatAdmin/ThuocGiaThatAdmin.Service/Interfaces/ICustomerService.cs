@@ -1,6 +1,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ThuocGiaThatAdmin.Contract.DTOs;
+using ThuocGiaThatAdmin.Contract.Requests;
+using ThuocGiaThatAdmin.Contract.Responses;
+using ThuocGiaThatAdmin.Contracts.DTOs;
+using ThuocGiaThatAdmin.Domain.Entities;
 
 namespace ThuocGiaThatAdmin.Service.Interfaces
 {
@@ -30,5 +34,19 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
         /// Search customers by phone number
         /// </summary>
         Task<IEnumerable<CustomerResponseDto>> SearchByPhoneAsync(string phoneNumber);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="documents"></param>
+        /// <returns></returns>
+        Task UpdateLicenses(IList<CustomerDocumentDto> documents);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <returns></returns>
+        Task<IList<CustomerLicenseResponse>> GetLicenses(int customerId);
     }
 }
