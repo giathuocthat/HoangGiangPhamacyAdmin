@@ -145,6 +145,15 @@ builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IProductCollectionRepository, ProductCollectionRepository>();
 builder.Services.AddScoped<IProductMaxOrderConfigRepository, ProductMaxOrderConfigRepository>();
 
+// Purchase Order Repositories
+builder.Services.AddScoped<ISupplierRepository, SupplierRepository>();
+builder.Services.AddScoped<ISupplierContactRepository, SupplierContactRepository>();
+builder.Services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();
+builder.Services.AddScoped<IPurchaseOrderItemRepository, PurchaseOrderItemRepository>();
+builder.Services.AddScoped<IPurchaseOrderHistoryRepository, PurchaseOrderHistoryRepository>();
+builder.Services.AddScoped<IGoodsReceiptRepository, GoodsReceiptRepository>();
+builder.Services.AddScoped<IGoodsReceiptItemRepository, GoodsReceiptItemRepository>();
+
 // Generic Repository
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
@@ -188,6 +197,12 @@ builder.Services.AddScoped<IBannerAnalyticsService, BannerAnalyticsService>();
 // Shopping Cart Service
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
+
+// Purchase Order Services
+builder.Services.AddScoped<ISupplierService, SupplierService>();
+builder.Services.AddScoped<ISupplierContactService, SupplierContactService>();
+builder.Services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
+builder.Services.AddScoped<IGoodsReceiptService, GoodsReceiptService>();
 
 // other
 builder.Services.AddScoped<IRoleClaimService, RoleClaimService>();
