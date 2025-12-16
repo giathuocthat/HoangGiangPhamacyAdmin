@@ -229,6 +229,8 @@ builder.Services.AddScoped<ICustomerAuthService, CustomerAuthService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IProductCollectionService, ProductCollectionService>();
 builder.Services.AddScoped<VNPayService>();
+builder.Services.AddScoped<IZaloService, ZaloService>();
+builder.Services.AddScoped<HttpClient>();
 
 // Order Fulfillment Service
 builder.Services.AddScoped<IOrderFulfillmentService, OrderFulfillmentService>();
@@ -247,6 +249,8 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.Configure<VNPaySetting>(builder.Configuration.GetSection("VNPAY"));
+builder.Services.Configure<ZaloSetting>(builder.Configuration.GetSection("Zalo"));
+
 
 //builder.WebHost.UseUrls("https://0.0.0.0:5000");
 

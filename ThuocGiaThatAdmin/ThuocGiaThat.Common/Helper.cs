@@ -7,20 +7,26 @@ using System.Threading.Tasks;
 
 namespace ThuocGiaThatAdmin.Common
 {
-    public static class OrderNumberGenerator
+    public static class NumberGenerator
     {
         private const string Prefix = "HGSG-";
 
         public static string GenerateOrderNumber()
         {
-            var sb = new StringBuilder(10);
+            var sb = GenernateNumbersString(10);
 
-            // Tạo 10 chữ số random (0-9)
+            return Prefix + sb.ToString();
+        }
+
+        public static string GenernateNumbersString(int numberOfNumbers)
+        {
+            var sb = new StringBuilder(numberOfNumbers);
+
             using (var rng = RandomNumberGenerator.Create())
             {
                 byte[] data = new byte[4];
 
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < numberOfNumbers; i++)
                 {
                     rng.GetBytes(data);
                     int digit = (int)(BitConverter.ToUInt32(data, 0) % 10);
@@ -28,7 +34,7 @@ namespace ThuocGiaThatAdmin.Common
                 }
             }
 
-            return Prefix + sb.ToString();
-        }
+            return sb.ToString();
+        }  
     }
 }

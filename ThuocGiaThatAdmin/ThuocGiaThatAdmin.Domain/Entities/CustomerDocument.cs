@@ -100,5 +100,10 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         /// Nhân viên xác minh
         /// </summary>
         public ApplicationUser? VerifiedByUser { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public int? ProvinceId { get; set; }
     }
 }

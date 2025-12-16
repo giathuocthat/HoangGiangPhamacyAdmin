@@ -36,7 +36,7 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<InventoryTransaction> InventoryTransactions { get; set; }
         public DbSet<ProductBatch> ProductBatches { get; set; }
         public DbSet<StockAlert> StockAlerts { get; set; }
-        public DbSet<VariantLocationStock> VariantLocationStocks { get; set; }
+        public DbSet<BatchLocationStock> BatchLocationStocks { get; set; }
         public DbSet<LocationStockMovement> LocationStockMovements { get; set; }
 
         public virtual DbSet<Customer> Customers { get; set; }
@@ -74,6 +74,7 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<OrderVoucher> OrderVouchers { get; set; }
         public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
         public DbSet<OrderItemFulfillment> OrderItemFulfillments { get; set; }
+        public DbSet<OtpCode> OtpCodes { get; set; }
 
         // Banner/Campaign/Combo System
         public DbSet<Campaign> Campaigns { get; set; }
@@ -334,8 +335,8 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasOne(e => e.ProductVariant).WithMany(e => e.PriceHistories).HasForeignKey(e => e.ProductVariantId).OnDelete(DeleteBehavior.Cascade);
             });
 
-            // ============ VariantLocationStock Configuration ============
-            modelBuilder.Entity<VariantLocationStock>(entity =>
+            // ============ BatchLocationStock Configuration ============
+            modelBuilder.Entity<BatchLocationStock>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.LocationCode).IsRequired().HasMaxLength(100);
@@ -347,23 +348,30 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
                 entity.Property(e => e.UpdatedDate);
 
+                // Relationship with InventoryBatch
+                entity.HasOne(e => e.InventoryBatch)
+                    .WithMany()
+                    .HasForeignKey(e => e.InventoryBatchId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
                 entity.HasOne(e => e.ProductVariant)
                     .WithMany()
                     .HasForeignKey(e => e.ProductVariantId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .OnDelete(DeleteBehavior.Restrict);  // Changed from Cascade to Restrict to avoid multiple cascade paths
 
                 entity.HasOne(e => e.Warehouse)
-                    .WithMany(e => e.VariantLocationStocks)
+                    .WithMany(e => e.BatchLocationStocks)
                     .HasForeignKey(e => e.WarehouseId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                // Composite unique constraint: Mỗi variant chỉ có 1 record tại mỗi location code trong 1 warehouse
-                entity.HasIndex(e => new { e.ProductVariantId, e.WarehouseId, e.LocationCode }).IsUnique();
+                // Composite unique constraint: Mỗi batch chỉ có 1 record tại mỗi location code trong 1 warehouse
+                entity.HasIndex(e => new { e.InventoryBatchId, e.WarehouseId, e.LocationCode }).IsUnique();
 
-                // Index cho LocationCode để tìm kiếm nhanh
+                // Indexes for queries
                 entity.HasIndex(e => e.LocationCode);
                 entity.HasIndex(e => e.WarehouseId);
                 entity.HasIndex(e => e.ProductVariantId);
+                entity.HasIndex(e => e.InventoryBatchId);
                 entity.HasIndex(e => e.IsPrimaryLocation);
             });
 
@@ -1265,6 +1273,11 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasIndex(e => e.PurchaseOrderItemId);
                 entity.HasIndex(e => e.BatchNumber);
                 entity.HasIndex(e => e.ExpiryDate);
+            });
+
+            modelBuilder.Entity<OtpCode>(entity =>
+            {
+                entity.HasIndex(o => new { o.Phone, o.Code, o.IsUsed, o.Type });
             });
         }
     }

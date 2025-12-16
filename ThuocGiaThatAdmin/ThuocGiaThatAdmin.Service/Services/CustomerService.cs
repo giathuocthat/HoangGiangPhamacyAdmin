@@ -1,9 +1,15 @@
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using ThuocGiaThat.Infrastucture;
 using ThuocGiaThat.Infrastucture.Repositories;
+using ThuocGiaThatAdmin.Common;
 using ThuocGiaThatAdmin.Contract.DTOs;
+using ThuocGiaThatAdmin.Contract.Requests;
+using ThuocGiaThatAdmin.Contract.Responses;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Service.Interfaces;
@@ -13,10 +19,12 @@ namespace ThuocGiaThatAdmin.Service.Services
     public class CustomerService : ICustomerService
     {
         private readonly ICustomerRepository _customerRepository;
+        private readonly TrueMecContext _context;
 
-        public CustomerService(ICustomerRepository customerRepository)
+        public CustomerService(ICustomerRepository customerRepository, TrueMecContext context)
         {
             _customerRepository = customerRepository;
+            _context = context;
         }
 
         /// <summary>
@@ -219,6 +227,62 @@ namespace ThuocGiaThatAdmin.Service.Services
                 CreatedDate = customer.CreatedDate,
                 UpdatedDate = customer.UpdatedDate
             };
+        }
+
+        public async Task UpdateLicenses(IList<CustomerDocumentDto> documents)
+        {
+            var customerIds = documents.Select(x => x.CustomerId).Distinct().ToList();
+            var existingDocs = await _context.CustomerDocuments.Where(x =>  customerIds.Contains(x.CustomerId) && !x.IsDeleted).ToListAsync();
+
+            var existingDict = existingDocs.ToLookup(x => new { x.CustomerId, x.DocumentType });
+
+            var newDocuments = new List<CustomerDocument>();
+            var existingDocuments = new List<CustomerDocument>();
+            
+            foreach (var document in documents) 
+            {
+                var key = new { document.CustomerId, document.DocumentType };
+                var existingItem = existingDict[key].FirstOrDefault();
+                if (existingItem != null)
+                {
+                    existingItem.UpdatedDate = DateTime.UtcNow;
+                    existingItem.IsDeleted = true;
+                    existingDocuments.Add(existingItem);
+                }
+
+                newDocuments.Add(new CustomerDocument
+                {
+                    IssueDate = document.IssueDate,
+                    UploadedFileId = document.UploadedFileId,
+                    CustomerId = document.CustomerId,
+                    DocumentNumber = document.DocumentNumber,
+                    CreatedDate = DateTime.UtcNow,
+                    ProvinceId = document.ProvinceId,
+                    DocumentType = document.DocumentType,
+                });
+
+            }
+
+            if (newDocuments.Any())
+            {
+                await _context.CustomerDocuments.AddRangeAsync(newDocuments);
+            }
+
+            await _context.SaveChangesAsync();
+
+        }
+
+        public async Task<IList<CustomerLicenseResponse>> GetLicenses(int customerId)
+        {
+            return await _context.CustomerDocuments.Where(x => x.CustomerId == customerId && !x.IsDeleted).Select(x => new CustomerLicenseResponse
+            {
+                Id = x.Id,
+                Number = x.DocumentNumber,
+                IssueDate = x.IssueDate,
+                Type = (int)x.DocumentType,
+                FilePath = x.UploadedFile.FileUrl,
+                IssuePlace = x.ProvinceId
+            }).ToListAsync();
         }
     }
 }

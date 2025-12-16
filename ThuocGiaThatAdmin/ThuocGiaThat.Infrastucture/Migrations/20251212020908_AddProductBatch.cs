@@ -11,13 +11,13 @@ namespace ThuocGiaThat.Infrastucture.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            //migrationBuilder.AddColumn<string>(
-            //    name: "BatchNumber",
-            //    table: "LocationStockMovements",
-            //    type: "nvarchar(100)",
-            //    maxLength: 100,
-            //    nullable: false,
-            //    defaultValue: "");
+            migrationBuilder.AddColumn<string>(
+                name: "BatchNumber",
+                table: "LocationStockMovements",
+                type: "nvarchar(100)",
+                maxLength: 100,
+                nullable: false,
+                defaultValue: "");
 
             migrationBuilder.AlterColumn<decimal>(
                 name: "CostPrice",
