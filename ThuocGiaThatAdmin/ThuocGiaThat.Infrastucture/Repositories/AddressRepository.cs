@@ -54,7 +54,9 @@ namespace ThuocGiaThat.Infrastucture.Repositories
                     WardName = x.Ward != null ? x.Ward.Name : null,
                     ProvinceName = x.Province != null ? x.Province.Name : null,
                     IsDefault = x.IsDefault,
-                    AddressType = x.AddressType
+                    AddressType = x.AddressType,
+                    ProvinceId = x.ProvinceId,
+                    WardId = x.WardId
                 })
                 .ToListAsync();
         }

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
@@ -41,11 +42,13 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// <summary>
         /// Get all addresses by customer ID
         /// </summary>
-        [HttpGet("customer/{customerId}")]
+        [HttpGet("customer")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetByCustomerId(int customerId)
         {
             return await ExecuteActionAsync(async () =>
             {
+                var customerId = int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
                 var addresses = await _addressService.GetByCustomerIdAsync(customerId);
                 return Success(addresses);
             }, "Get Addresses By Customer Id");
@@ -75,6 +78,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             return await ExecuteActionAsync(async () =>
             {
+                var customerId = int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
+                dto.CustomerId = customerId;
                 var address = await _addressService.CreateAsync(dto);
                 return Success(address, "Address created successfully");
             }, "Create Address");
@@ -97,10 +102,11 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// Set address as default for customer
         /// </summary>
         [HttpPut("{id}/set-default")]
-        public async Task<IActionResult> SetDefault(int id, [FromQuery] int customerId)
+        public async Task<IActionResult> SetDefault(int id)
         {
             return await ExecuteActionAsync(async () =>
             {
+                var customerId = int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
                 await _addressService.SetDefaultAsync(id, customerId);
                 return Success(new { id, customerId }, "Address set as default successfully");
             }, "Set Default Address");

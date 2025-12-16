@@ -281,7 +281,8 @@ namespace ThuocGiaThatAdmin.Service.Services
                 IssueDate = x.IssueDate,
                 Type = (int)x.DocumentType,
                 FilePath = x.UploadedFile.FileUrl,
-                IssuePlace = x.ProvinceId
+                IssuePlace = x.ProvinceId,
+                FileName = x.UploadedFile.OriginalFileName
             }).ToListAsync();
         }
     }

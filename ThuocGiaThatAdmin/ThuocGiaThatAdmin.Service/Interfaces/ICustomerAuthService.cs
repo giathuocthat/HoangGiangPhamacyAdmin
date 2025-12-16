@@ -18,5 +18,6 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
         string HashPassword(string password);
         Task<(bool success, Dictionary<string, string>)> VerifyRegister(string phone, string email);
         Task<(bool Success, string Message, string? Token, string? expiresAt, Customer? Customer)> LoginByOtpAsync(string phoneNumber, string otp);
+        Task<(bool success, string message)> ChangePasswordAsync(int customerId, UpdateCustomerPasswordDto dto);
     }
 }
