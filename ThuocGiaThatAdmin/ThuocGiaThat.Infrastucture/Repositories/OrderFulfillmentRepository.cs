@@ -66,6 +66,29 @@ namespace ThuocGiaThat.Infrastucture.Repositories
             await _context.OrderItemFulfillments.AddAsync(fulfillment);
         }
 
+        public async Task<Order?> GetOrderFulfillmentDetailsAsync(int orderId)
+        {
+            return await _context.Orders
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.ProductVariant)
+                        .ThenInclude(pv => pv.Product)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Fulfillments)
+                        .ThenInclude(f => f.InventoryBatch)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+        }
+
+        public async Task<List<BatchLocationStock>> GetBatchLocationsAsync(int inventoryBatchId, int warehouseId)
+        {
+            return await _context.BatchLocationStocks
+                .Where(bl => bl.InventoryBatchId == inventoryBatchId 
+                          && bl.WarehouseId == warehouseId
+                          && bl.Quantity > 0)
+                .OrderByDescending(bl => bl.IsPrimaryLocation)
+                .ThenByDescending(bl => bl.Quantity)
+                .ToListAsync();
+        }
+
         public async Task<int> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync();
