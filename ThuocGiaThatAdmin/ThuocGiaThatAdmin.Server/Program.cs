@@ -236,6 +236,10 @@ builder.Services.AddScoped<HttpClient>();
 builder.Services.AddScoped<IOrderFulfillmentService, OrderFulfillmentService>();
 builder.Services.AddScoped<IOrderFulfillmentRepository, OrderFulfillmentRepository>();
 
+// Warehouse Picking Service
+builder.Services.AddScoped<IWarehousePickingService, WarehousePickingService>();
+builder.Services.AddScoped<IWarehousePickingRepository, WarehousePickingRepository>();
+
 // Add CORS to allow frontend to call this API
 builder.Services.AddCors(options =>
 {
