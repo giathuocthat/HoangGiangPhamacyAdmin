@@ -71,6 +71,6 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         // Navigation properties
         public ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
         public ICollection<InventoryTransaction> Transactions { get; set; } = new List<InventoryTransaction>();
-        public ICollection<VariantLocationStock> VariantLocationStocks { get; set; } = new List<VariantLocationStock>();
+        public ICollection<BatchLocationStock> BatchLocationStocks { get; set; } = new List<BatchLocationStock>();
     }
 }

@@ -187,6 +187,9 @@ namespace ThuocGiaThatAdmin.Service.Services
                 orderDetail.Items.Add(itemDto);
             }
 
+            // Update IsFulfilled flag based on whether all items are fully fulfilled
+            order.IsFulfilled = order.OrderItems.All(item => item.QuantityPending == 0);
+
             return orderDetail;
         }
     }

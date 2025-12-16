@@ -78,7 +78,6 @@ namespace ThuocGiaThatAdmin.Service.Services
                 shippingPhone: dto.ShippingPhone,
                 wardId: dto.WardId,
                 provinceId: dto.ProvinceId,
-                countryId: dto.CountryId,
                 note: dto.Note,
                 orderStatus: "Pending", // Always Pending for customer orders
                 paymentStatus: "Pending" // Always Pending for customer orders
@@ -133,7 +132,6 @@ namespace ThuocGiaThatAdmin.Service.Services
                 shippingPhone: dto.ShippingPhone,
                 wardId: dto.WardId,
                 provinceId: dto.ProvinceId,
-                countryId: dto.CountryId,
                 note: dto.Note,
                 orderStatus: orderStatus,
                 paymentStatus: paymentStatus
@@ -156,7 +154,6 @@ namespace ThuocGiaThatAdmin.Service.Services
             string shippingPhone,
             int? wardId,
             int? provinceId,
-            int? countryId,
             string? note,
             string orderStatus,
             string paymentStatus)
@@ -187,13 +184,6 @@ namespace ThuocGiaThatAdmin.Service.Services
                 var provinceExists = await _context.Provinces.AnyAsync(p => p.Id == provinceId.Value);
                 if (!provinceExists)
                     throw new ArgumentException($"Province with ID {provinceId.Value} not found");
-            }
-
-            if (countryId.HasValue)
-            {
-                var countryExists = await _context.Countries.AnyAsync(c => c.Id == countryId.Value);
-                if (!countryExists)
-                    throw new ArgumentException($"Country with ID {countryId.Value} not found");
             }
 
             // Create order
@@ -262,9 +252,6 @@ namespace ThuocGiaThatAdmin.Service.Services
             
             if (provinceId.HasValue)
                 province = await _context.Provinces.FindAsync(provinceId.Value);
-            
-            if (countryId.HasValue)
-                country = await _context.Countries.FindAsync(countryId.Value);
 
             // Map to response DTO
             return MapToResponseDto(createdOrder!, ward, province, country);
@@ -517,7 +504,7 @@ namespace ThuocGiaThatAdmin.Service.Services
         {
             var order = new Order
             {
-                OrderNumber = OrderNumberGenerator.GenerateOrderNumber(),
+                OrderNumber = NumberGenerator.GenerateOrderNumber(),
                 CustomerId = orderDto.CustomerId,
                 Note = orderDto.Note,
                 OrderStatus = OrderStatus.Pending.ToStatusString(),

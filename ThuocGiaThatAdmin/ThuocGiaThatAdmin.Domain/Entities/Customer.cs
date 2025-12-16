@@ -48,6 +48,11 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public string? BusinessAddress { get; set; }            // Địa chỉ kinh doanh
         public string? BusinessPhone { get; set; }              // SĐT công ty
         public string? BusinessEmail { get; set; }              // Email công ty
+
+        public string? Otp { get; set; }
+        public bool IsVerified { get; set; } = false;
+        public bool IsActive { get; set; } = true;
+        public bool IsVerifiedBusiness { get; set; } = false;
         
         // ========== Sales Information ==========
         public int? SaleUserId { get; set; }                 // Nhân viên sale phụ trách

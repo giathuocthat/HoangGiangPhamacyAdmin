@@ -46,10 +46,26 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         /// Giấy ủy quyền (nếu có)
         /// </summary>
         PowerOfAttorney = 7,
-        
+
+        /// <summary>
+        /// Giấy chứng nhận đạt thực hành tốt (GDP, GSP, GMP, hoặc GPP)
+        /// </summary>
+        GppCertificate = 8,
+
+        /// <summary>
+        /// CCCD
+        /// </summary>
+        IdentifyCard = 9,
+
+        /// <summary>
+        /// Giấy phép hoạt động khám chữa bệnh
+        /// </summary>
+        Medical_Examination = 10,
+
         /// <summary>
         /// Giấy tờ khác
         /// </summary>
         Other = 99
+
     }
 }
