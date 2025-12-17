@@ -63,6 +63,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public ICollection<Address> Addresses { get; set; } = new List<Address>();
         public ICollection<Order> Orders { get; set; } = new List<Order>();
         public ICollection<CustomerPaymentAccount> PaymentAccounts { get; set; } = new List<CustomerPaymentAccount>();
+        public ICollection<CustomerInvoiceInfo> InvoiceInfos { get; set; } = new List<CustomerInvoiceInfo>();
         public ICollection<CustomerDocument> Documents { get; set; } = new List<CustomerDocument>();
         public ICollection<CustomerVerification> VerificationHistory { get; set; } = new List<CustomerVerification>();
         public ApplicationUser? ApprovedByUser { get; set; }

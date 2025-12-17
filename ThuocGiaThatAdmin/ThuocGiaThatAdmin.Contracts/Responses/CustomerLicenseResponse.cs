@@ -14,5 +14,6 @@ namespace ThuocGiaThatAdmin.Contract.Responses
         public DateTime? IssueDate { get; set; }
         public string? FilePath { get; set; }
         public int? IssuePlace { get; set; }
+        public string FileName { get; set; }
     }
 }

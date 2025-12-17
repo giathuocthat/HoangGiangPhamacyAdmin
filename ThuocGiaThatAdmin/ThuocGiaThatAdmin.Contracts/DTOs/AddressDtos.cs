@@ -75,5 +75,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public DateTime? UpdatedDate { get; set; }
         public string ProvinceType { get; set; }
         public string WardType { get; set; }
+        public int? ProvinceId { get; set; }
+        public int? WardId { get; set; }
     }
 }
