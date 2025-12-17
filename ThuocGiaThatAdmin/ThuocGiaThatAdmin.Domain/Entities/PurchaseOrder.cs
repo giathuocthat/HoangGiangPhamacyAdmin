@@ -102,7 +102,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public string? Terms { get; set; }
 
         // Navigation properties
-        public Supplier Supplier { get; set; } = null!;
+        public virtual Supplier Supplier { get; set; } = null!;
         public SupplierContact? SupplierContact { get; set; }
         public Warehouse Warehouse { get; set; } = null!;
         public ICollection<PurchaseOrderItem> PurchaseOrderItems { get; set; } = new List<PurchaseOrderItem>();

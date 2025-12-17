@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThuocGiaThat.Infrastucture.Repositories;
+using ThuocGiaThatAdmin.Contract.Responses;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Service.Interfaces;
@@ -23,7 +24,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             _customerRepository = customerRepository ?? throw new ArgumentNullException(nameof(customerRepository));
         }
 
-        public async Task<AddressDto?> GetByIdAsync(int id)
+        public async Task<AddressDetailResponse?> GetByIdAsync(int id)
         {
             return await _addressRepository.GetByIdAsync(id);
         }
@@ -33,12 +34,12 @@ namespace ThuocGiaThatAdmin.Service.Services
             return await _addressRepository.GetByCustomerIdAsync(customerId);
         }
 
-        public async Task<AddressDto?> GetDefaultAddress(int customerId)
+        public async Task<AddressListItemDto?> GetDefaultAddress(int customerId)
         {
             return await _addressRepository.GetDefaultByCustomerIdAsync(customerId);
         }
 
-        public async Task<AddressDto> CreateAsync(CreateAddressDto dto)
+        public async Task<AddressDetailResponse> CreateAsync(CreateAddressDto dto)
         {
             // Validate customer exists
             var customer = await _customerRepository.GetByIdAsync(dto.CustomerId);
@@ -73,7 +74,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 ?? throw new InvalidOperationException("Failed to retrieve created address");
         }
 
-        public async Task<AddressDto> UpdateAsync(int id, UpdateAddressDto dto)
+        public async Task<AddressDetailResponse> UpdateAsync(int id, UpdateAddressDto dto)
         {
             var existingAddress = await _addressRepository.GetByIdAsync(id);
             if (existingAddress == null)

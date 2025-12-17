@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using ThuocGiaThat.Infrastucture.Repositories;
+using ThuocGiaThatAdmin.Contract.Responses;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Domain.Enums;
@@ -33,43 +34,43 @@ namespace ThuocGiaThatAdmin.Service.Services
             _productVariantRepository = productVariantRepository ?? throw new ArgumentNullException(nameof(productVariantRepository));
         }
 
-        public async Task<IEnumerable<PurchaseOrderDto>> GetAllAsync()
+        public async Task<IEnumerable<PurchaseOrderResponse>> GetAllAsync()
         {
-            var orders = await _purchaseOrderRepository.GetAllAsync();
+            var orders = await _purchaseOrderRepository.GetAllAsync(x => x.Supplier);
             return orders.Select(MapToDto);
         }
 
-        public async Task<PurchaseOrderDto?> GetByIdAsync(int id)
+        public async Task<PurchaseOrderResponse?> GetByIdAsync(int id)
         {
             var order = await _purchaseOrderRepository.GetByIdAsync(id);
             return order != null ? MapToDto(order) : null;
         }
 
-        public async Task<PurchaseOrderDto?> GetByOrderNumberAsync(string orderNumber)
+        public async Task<PurchaseOrderResponse?> GetByOrderNumberAsync(string orderNumber)
         {
             var order = await _purchaseOrderRepository.GetByOrderNumberAsync(orderNumber);
             return order != null ? MapToDto(order) : null;
         }
 
-        public async Task<PurchaseOrderDto?> GetWithDetailsAsync(int id)
+        public async Task<PurchaseOrderResponse?> GetWithDetailsAsync(int id)
         {
             var order = await _purchaseOrderRepository.GetWithDetailsAsync(id);
             return order != null ? MapToDto(order) : null;
         }
 
-        public async Task<IEnumerable<PurchaseOrderDto>> GetBySupplierIdAsync(int supplierId)
+        public async Task<IEnumerable<PurchaseOrderResponse>> GetBySupplierIdAsync(int supplierId)
         {
             var orders = await _purchaseOrderRepository.GetBySupplierIdAsync(supplierId);
             return orders.Select(MapToDto);
         }
 
-        public async Task<IEnumerable<PurchaseOrderDto>> GetByWarehouseIdAsync(int warehouseId)
+        public async Task<IEnumerable<PurchaseOrderResponse>> GetByWarehouseIdAsync(int warehouseId)
         {
             var orders = await _purchaseOrderRepository.GetByWarehouseIdAsync(warehouseId);
             return orders.Select(MapToDto);
         }
 
-        public async Task<IEnumerable<PurchaseOrderDto>> GetByStatusAsync(PurchaseOrderStatus status)
+        public async Task<IEnumerable<PurchaseOrderResponse>> GetByStatusAsync(PurchaseOrderStatus status)
         {
             var orders = await _purchaseOrderRepository.GetByStatusAsync(status);
             return orders.Select(MapToDto);
@@ -106,7 +107,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             return (dtos, totalCount);
         }
 
-        public async Task<PurchaseOrderDto> CreateAsync(CreatePurchaseOrderDto dto, int createdByUserId)
+        public async Task<PurchaseOrderResponse> CreateAsync(CreatePurchaseOrderDto dto, int createdByUserId)
         {
             if (dto == null)
                 throw new ArgumentNullException(nameof(dto));
@@ -179,7 +180,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             return MapToDto(order);
         }
 
-        public async Task<PurchaseOrderDto> UpdateAsync(int id, UpdatePurchaseOrderDto dto)
+        public async Task<PurchaseOrderResponse> UpdateAsync(int id, UpdatePurchaseOrderDto dto)
         {
             if (dto == null)
                 throw new ArgumentNullException(nameof(dto));
@@ -222,7 +223,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             return MapToDto(order);
         }
 
-        public async Task<PurchaseOrderDto> ApproveAsync(int id, int approvedByUserId, ApprovePurchaseOrderDto dto)
+        public async Task<PurchaseOrderResponse> ApproveAsync(int id, int approvedByUserId, ApprovePurchaseOrderDto dto)
         {
             var order = await _purchaseOrderRepository.GetByIdAsync(id);
             if (order == null)
@@ -245,7 +246,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             return MapToDto(order);
         }
 
-        public async Task<PurchaseOrderDto> CancelAsync(int id, int cancelledByUserId, CancelPurchaseOrderDto dto)
+        public async Task<PurchaseOrderResponse> CancelAsync(int id, int cancelledByUserId, CancelPurchaseOrderDto dto)
         {
             var order = await _purchaseOrderRepository.GetByIdAsync(id);
             if (order == null)
@@ -313,9 +314,9 @@ namespace ThuocGiaThatAdmin.Service.Services
             return totalOrdered > 0 ? (decimal)totalReceived / totalOrdered * 100 : 0;
         }
 
-        private PurchaseOrderDto MapToDto(PurchaseOrder order)
+        private PurchaseOrderResponse MapToDto(PurchaseOrder order)
         {
-            return new PurchaseOrderDto
+            return new PurchaseOrderResponse
             {
                 Id = order.Id,
                 OrderNumber = order.OrderNumber,
@@ -326,6 +327,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 WarehouseId = order.WarehouseId,
                 WarehouseName = order.Warehouse?.Name ?? string.Empty,
                 Status = order.Status,
+                StatusName = order.Status.ToString(),
                 SubTotal = order.SubTotal,
                 TaxAmount = order.TaxAmount,
                 DiscountAmount = order.DiscountAmount,
@@ -341,7 +343,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 Terms = order.Terms,
                 CreatedDate = order.CreatedDate,
                 UpdatedDate = order.UpdatedDate,
-                Items = order.PurchaseOrderItems?.Select(i => new PurchaseOrderItemDto
+                Items = order.PurchaseOrderItems?.Select(i => new PurchaseOrderItemResponse
                 {
                     Id = i.Id,
                     PurchaseOrderId = i.PurchaseOrderId,
@@ -358,15 +360,15 @@ namespace ThuocGiaThatAdmin.Service.Services
                     Notes = i.Notes,
                     RemainingQuantity = i.OrderedQuantity - i.ReceivedQuantity,
                     ReceivedPercentage = i.OrderedQuantity > 0 ? (decimal)i.ReceivedQuantity / i.OrderedQuantity * 100 : 0
-                }).ToList() ?? new List<PurchaseOrderItemDto>(),
-                GoodsReceipts = order.GoodsReceipts?.Select(gr => new GoodsReceiptDto
+                }).ToList() ?? new List<PurchaseOrderItemResponse>(),
+                GoodsReceipts = order.GoodsReceipts?.Select(gr => new GoodReceiptResponse
                 {
                     Id = gr.Id,
                     ReceiptNumber = gr.ReceiptNumber,
                     Status = gr.Status,
                     ScheduledDate = gr.ScheduledDate,
                     ReceivedDate = gr.ReceivedDate
-                }).ToList() ?? new List<GoodsReceiptDto>()
+                }).ToList() ?? new List<GoodReceiptResponse>()
             };
         }
     }
