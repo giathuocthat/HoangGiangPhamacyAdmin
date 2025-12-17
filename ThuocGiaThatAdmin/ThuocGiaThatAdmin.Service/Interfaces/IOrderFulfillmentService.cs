@@ -12,5 +12,14 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
         /// <param name="userId">ID của user thực hiện fulfill</param>
         /// <returns>Response chứa kết quả fulfill</returns>
         Task<FulfillOrderResponseDto> FulfillOrdersAsync(FulfillOrderRequestDto request, Guid userId);
+        
+        /// <summary>
+        /// Lấy order fulfillment details cho warehouse picking
+        /// Bao gồm thông tin batches đã fulfill và suggested locations
+        /// </summary>
+        /// <param name="orderId">ID của Order</param>
+        /// <param name="warehouseId">ID của Warehouse</param>
+        /// <returns>Order fulfillment details với suggested locations</returns>
+        Task<OrderFulfillmentDetailsResponseDto> GetOrderFulfillmentDetailsAsync(int orderId, int warehouseId);
     }
 }

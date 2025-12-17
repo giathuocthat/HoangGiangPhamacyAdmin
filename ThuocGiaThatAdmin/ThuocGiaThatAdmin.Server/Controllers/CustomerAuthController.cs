@@ -243,5 +243,18 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 return Success(response, "Login successful");
             });
         }
+
+        [HttpPost("changePassword")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> ChangePassword(UpdateCustomerPasswordDto dto)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var customerId = int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
+                var result = await _customerAuthService.ChangePasswordAsync(customerId, dto);
+
+                return result.success ? Success("") : BadRequest(result.message);
+            });
+        }
     }
 }

@@ -192,5 +192,77 @@ namespace ThuocGiaThatAdmin.Service.Services
 
             return orderDetail;
         }
+
+        public async Task<OrderFulfillmentDetailsResponseDto> GetOrderFulfillmentDetailsAsync(int orderId, int warehouseId)
+        {
+            try
+            {
+                // Lấy order với fulfillments
+                var order = await _fulfillmentRepository.GetOrderFulfillmentDetailsAsync(orderId);
+
+                if (order == null)
+                {
+                    throw new Exception($"Order {orderId} not found");
+                }
+
+                var response = new OrderFulfillmentDetailsResponseDto
+                {
+                    OrderId = order.Id,
+                    OrderNumber = order.OrderNumber
+                };
+
+                // Xử lý từng order item
+                foreach (var orderItem in order.OrderItems)
+                {
+                    var itemDto = new OrderItemWithFulfillmentDto
+                    {
+                        OrderItemId = orderItem.Id,
+                        ProductVariantId = orderItem.ProductVariantId,
+                        SKU = orderItem.ProductVariant?.SKU ?? "",
+                        ProductName = orderItem.ProductVariant?.Product?.Name ?? "",
+                        QuantityOrdered = orderItem.Quantity
+                    };
+
+                    // Xử lý từng fulfillment
+                    foreach (var fulfillment in orderItem.Fulfillments)
+                    {
+                        // Lấy tất cả locations có batch này (sorted by primary, then quantity)
+                        var batchLocations = await _fulfillmentRepository.GetBatchLocationsAsync(
+                            fulfillment.InventoryBatchId, 
+                            warehouseId);
+
+                        // Suggested location: Primary first, then highest quantity
+                        var suggestedLocation = batchLocations.FirstOrDefault();
+
+                        var fulfillmentDto = new OrderItemFulfillmentDetailDto
+                        {
+                            FulfillmentId = fulfillment.Id,
+                            InventoryBatchId = fulfillment.InventoryBatchId,
+                            BatchNumber = fulfillment.InventoryBatch?.BatchNumber ?? "",
+                            QuantityFulfilled = fulfillment.QuantityFulfilled,
+                            ExpiryDate = fulfillment.InventoryBatch?.ExpiryDate ?? DateTime.MinValue,
+                            SuggestedLocation = suggestedLocation?.LocationCode ?? "",
+                            AvailableLocations = batchLocations.Select(bl => new BatchLocationDto
+                            {
+                                LocationCode = bl.LocationCode,
+                                Quantity = bl.Quantity,
+                                IsPrimary = bl.IsPrimaryLocation
+                            }).ToList()
+                        };
+
+                        itemDto.Fulfillments.Add(fulfillmentDto);
+                    }
+
+                    response.Items.Add(itemDto);
+                }
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting order fulfillment details for order {orderId}");
+                throw;
+            }
+        }
     }
 }

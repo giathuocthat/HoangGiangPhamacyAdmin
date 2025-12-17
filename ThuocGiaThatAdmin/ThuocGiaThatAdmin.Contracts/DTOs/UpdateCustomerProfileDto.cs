@@ -6,10 +6,11 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
     {
         [Required]
         [StringLength(100)]
-        public string FullName { get; set; } = string.Empty;
+        public string FullName { get; set; }
 
-        [Phone]
+
+        [EmailAddress]
         [StringLength(20)]
-        public string? PhoneNumber { get; set; }
+        public string Email { get; set; }
     }
 }

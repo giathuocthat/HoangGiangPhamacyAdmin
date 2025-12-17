@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ThuocGiaThat.Infrastucture;
 
@@ -11,9 +12,11 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    partial class TrueMecContextModelSnapshot : ModelSnapshot
+    [Migration("20251216080050_AddCustomerInvoice")]
+    partial class AddCustomerInvoice
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -332,42 +335,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("Users", (string)null);
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Bank", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BankCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("BankName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
-
-                    b.Property<string>("FullName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Bank");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Banner", b =>
@@ -1245,9 +1212,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<int?>("BankId")
-                        .HasColumnType("int");
-
                     b.Property<string>("BankName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -1279,8 +1243,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("BankId");
 
                     b.HasIndex("CustomerId");
 
@@ -4000,17 +3962,11 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.CustomerPaymentAccount", b =>
                 {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Bank", "Bank")
-                        .WithMany()
-                        .HasForeignKey("BankId");
-
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Customer", "Customer")
                         .WithMany("PaymentAccounts")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Bank");
 
                     b.Navigation("Customer");
                 });

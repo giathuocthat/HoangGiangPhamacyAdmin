@@ -146,7 +146,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             if (customer == null) return false;
 
             customer.FullName = dto.FullName;
-            customer.PhoneNumber = dto.PhoneNumber;
+            customer.Email = dto.Email;
             customer.UpdatedDate = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
@@ -245,6 +245,20 @@ namespace ThuocGiaThatAdmin.Service.Services
             if (dictionnary.Keys.Any()) return (false, dictionnary);
 
             return (true, dictionnary);
+        }
+
+        public async Task<(bool success, string message)> ChangePasswordAsync(int customerId, UpdateCustomerPasswordDto dto)
+        {
+            var customer = await _context.Customers.FirstOrDefaultAsync(x => x.Id == customerId);
+            if (customer == null) return (false, "User không tồn tại, vui lòng reload và thử lại.");
+
+            if (!VerifyPassword(dto.OldPassword, customer.PasswordHash)) return (false, "Mật khẩu cũ không đúng");
+
+            customer.PasswordHash = HashPassword(dto.NewPassword);
+
+            await _context.SaveChangesAsync();
+
+            return (true, "");
         }
     }
 }

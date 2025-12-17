@@ -23,7 +23,7 @@ namespace ThuocGiaThat.Infrastucture.Data
             using var scope = serviceProvider.CreateScope();
             var services = scope.ServiceProvider;
 
-            var logger = services.GetRequiredService<ILoggerFactory>().CreateLogger("RoleClaimsMigration");
+            var logger = services.GetRequiredService<ILoggerFactory>().CreateLogger("CamPaignMigration");
             var campaignRepository = services.GetRequiredService<ICampaignRepository>();
 
             var hasData = await campaignRepository.AnyAsync(c => c.Id > 0);
@@ -32,7 +32,7 @@ namespace ThuocGiaThat.Infrastucture.Data
             {
                 if (hasData)
                 {
-                    logger.LogInformation("Ward data already exists. Skipping Ward.sql seed.");
+                    logger.LogInformation("Campaign data already exists. Skipping campaign.sql seed.");
                     return;
                 }
 

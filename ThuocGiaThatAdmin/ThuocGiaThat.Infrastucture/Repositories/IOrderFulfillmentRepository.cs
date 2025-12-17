@@ -34,6 +34,23 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         Task AddFulfillmentAsync(OrderItemFulfillment fulfillment);
         
         /// <summary>
+        /// Lấy order fulfillment details cho warehouse picking
+        /// Bao gồm thông tin batches đã fulfill và locations available
+        /// </summary>
+        /// <param name="orderId">ID của Order</param>
+        /// <returns>Order với OrderItems và Fulfillments details</returns>
+        Task<Order?> GetOrderFulfillmentDetailsAsync(int orderId);
+        
+        /// <summary>
+        /// Lấy danh sách locations có batch này trong warehouse
+        /// Sắp xếp theo IsPrimaryLocation desc, then Quantity desc
+        /// </summary>
+        /// <param name="inventoryBatchId">ID của InventoryBatch</param>
+        /// <param name="warehouseId">ID của Warehouse</param>
+        /// <returns>Danh sách BatchLocationStock</returns>
+        Task<List<BatchLocationStock>> GetBatchLocationsAsync(int inventoryBatchId, int warehouseId);
+        
+        /// <summary>
         /// Lưu thay đổi vào database
         /// </summary>
         Task<int> SaveChangesAsync();

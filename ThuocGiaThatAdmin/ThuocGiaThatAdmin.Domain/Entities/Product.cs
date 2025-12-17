@@ -42,6 +42,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public ICollection<ProductVariant> ProductVariants { get; set; } = new List<ProductVariant>();
         public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
         public ICollection<ProductCollectionItem> CollectionItems { get; set; } = new List<ProductCollectionItem>();
+        public ICollection<ProductActiveIngredient> ProductActiveIngredients { get; set; } = new List<ProductActiveIngredient>();
         public ProductMaxOrderConfig? MaxOrderConfig { get; set; }
     }
 }

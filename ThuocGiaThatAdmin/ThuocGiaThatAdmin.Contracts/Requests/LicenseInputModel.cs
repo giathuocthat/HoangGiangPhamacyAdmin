@@ -11,7 +11,7 @@ namespace ThuocGiaThatAdmin.Contract.Requests
     public class LicenseInputModel
     {
         public string Id { get; set; }
-        public string Number { get; set; }
+        public string? Number { get; set; }
         public DateTime? IssueDate { get; set; }
         public int? IssuePlace { get; set; }
         public IFormFile File { get; set; }

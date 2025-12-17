@@ -50,5 +50,35 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 return Success(result, "Order fulfillment completed");
             }, "Fulfill Orders");
         }
+
+        /// <summary>
+        /// Lấy order fulfillment details cho warehouse picking
+        /// Bao gồm thông tin batches đã fulfill và suggested locations
+        /// </summary>
+        /// <param name="orderId">ID của Order</param>
+        /// <param name="warehouseId">ID của Warehouse</param>
+        /// <returns>Order fulfillment details với suggested locations</returns>
+        [HttpGet("order/{orderId}")]
+        public async Task<IActionResult> GetOrderFulfillmentDetails(int orderId, [FromQuery] int warehouseId)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                if (orderId <= 0)
+                {
+                    return BadRequestResponse("Invalid order ID");
+                }
+
+                if (warehouseId <= 0)
+                {
+                    return BadRequestResponse("Invalid warehouse ID");
+                }
+
+                Logger.LogInformation($"Getting fulfillment details for order {orderId} in warehouse {warehouseId}");
+
+                var result = await _fulfillmentService.GetOrderFulfillmentDetailsAsync(orderId, warehouseId);
+
+                return Success(result, "Order fulfillment details retrieved successfully");
+            }, "Get Order Fulfillment Details");
+        }
     }
 }
