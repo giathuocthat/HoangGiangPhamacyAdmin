@@ -41,16 +41,22 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 // In a real app, get generic user id from User.Identity
                 // For now, hardcode or leave as 0 if user context not fully set up in this context
                 int userId = 0; 
-                // Try to parse from claim if available, otherwise 0
-                if (User.Identity.IsAuthenticated)
-                {
-                     // Implementation depends on how BaseApiController or Claim parsing is set up
-                     // Assuming basic handling for now
-                }
 
                 var createdBatch = await _productBatchService.CreateBatchAsync(dto, userId);
                 return Created(createdBatch, "Batch created successfully");
             }, "Create Batch");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetProductBatches([FromQuery] GetProductBatchesRequestDto request)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var result = await _productBatchService.GetProductBatchesAsync(request);
+                return Ok(result);
+            }, "Get Product Batches");
+        }
+
+        
     }
 }
