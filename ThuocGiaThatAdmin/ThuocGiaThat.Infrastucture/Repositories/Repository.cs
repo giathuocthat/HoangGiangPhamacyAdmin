@@ -115,7 +115,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         /// </summary>
         public virtual async Task<T?> GetByIdAsync(int id)
         {
-            return await _dbSet.FindAsync(id);
+           return await _dbSet.FindAsync(id);
         }
 
         /// <summary>
@@ -162,6 +162,49 @@ namespace ThuocGiaThat.Infrastucture.Repositories
                 throw new ArgumentNullException(nameof(predicate));
 
             return await _dbSet.AnyAsync(predicate);
+        }
+
+        public virtual async Task<ThuocGiaThat.Infrastucture.Common.PagedResult<T>> GetPagedAsync(
+            int pageNumber,
+            int pageSize,
+            Expression<Func<T, bool>> predicate = null,
+            string sortField = null,
+            string sortOrder = "asc",
+            params Expression<Func<T, object>>[] includes)
+        {
+            IQueryable<T> query = _dbSet;
+
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
+            }
+
+            if (predicate != null)
+            {
+                query = query.Where(predicate);
+            }
+
+            // Sorting
+            if (!string.IsNullOrEmpty(sortField))
+            {
+                // Using System.Linq.Dynamic.Core
+                // Ensure proper casing or just pass as is if package handles it (it usually does)
+                // Defaulting to "asc" if sortOrder is null or empty
+                string order = string.IsNullOrEmpty(sortOrder) ? "asc" : sortOrder;
+                query = System.Linq.Dynamic.Core.DynamicQueryableExtensions.OrderBy(query, $"{sortField} {order}");
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new ThuocGiaThat.Infrastucture.Common.PagedResult<T>(items, totalCount, pageNumber, pageSize);
         }
 
         #endregion

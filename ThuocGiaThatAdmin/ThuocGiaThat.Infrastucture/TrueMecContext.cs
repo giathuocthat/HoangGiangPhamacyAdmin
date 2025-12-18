@@ -20,6 +20,7 @@ namespace ThuocGiaThat.Infrastucture
 
         public DbSet<Category> Categories { get; set; }
         public DbSet<Brand> Brands { get; set; }
+        public DbSet<Bank> Banks { get; set; }
         // ProductType removed
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }

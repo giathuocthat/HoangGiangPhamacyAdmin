@@ -17,9 +17,8 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs.ProductBatch
         [Required(ErrorMessage = "Expiry date is required")]
         public DateTime ExpiryDate { get; set; }
 
-        [Required(ErrorMessage = "Cost price is required")]
         [Range(0, double.MaxValue, ErrorMessage = "Cost price must be greater than or equal to 0")]
-        public decimal CostPrice { get; set; }
+        public decimal CostPrice { get; set; } = 0;
 
         public string? PurchaseOrderNumber { get; set; }
         public string? Supplier { get; set; }

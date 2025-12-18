@@ -37,6 +37,11 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public PurchaseOrderStatus Status { get; set; } = PurchaseOrderStatus.Draft;
 
         /// <summary>
+        /// Trạng thái thanh toán
+        /// </summary>
+        public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Unpaid;
+
+        /// <summary>
         /// Tổng tiền hàng (chưa thuế, chưa phí)
         /// </summary>
         public decimal SubTotal { get; set; }

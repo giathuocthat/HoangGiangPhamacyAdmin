@@ -96,6 +96,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 SupplierName = po.Supplier?.Name ?? string.Empty,
                 WarehouseName = po.Warehouse?.Name ?? string.Empty,
                 Status = po.Status,
+                PaymentStatus = po.PaymentStatus,
                 TotalAmount = po.TotalAmount,
                 OrderDate = po.OrderDate,
                 ExpectedDeliveryDate = po.ExpectedDeliveryDate,
@@ -199,6 +200,12 @@ namespace ThuocGiaThatAdmin.Service.Services
             order.DiscountAmount = dto.DiscountAmount;
             order.Notes = dto.Notes;
             order.Terms = dto.Terms;
+
+            // Update payment status if provided
+            if (dto.PaymentStatus.HasValue)
+            {
+                order.PaymentStatus = dto.PaymentStatus.Value;
+            }
 
             // Recalculate totals
             decimal subTotal = 0;
@@ -328,6 +335,8 @@ namespace ThuocGiaThatAdmin.Service.Services
                 WarehouseName = order.Warehouse?.Name ?? string.Empty,
                 Status = order.Status,
                 StatusName = order.Status.ToString(),
+                PaymentStatus = order.PaymentStatus,
+                PaymentStatusName = order.PaymentStatus.ToString(),
                 SubTotal = order.SubTotal,
                 TaxAmount = order.TaxAmount,
                 DiscountAmount = order.DiscountAmount,

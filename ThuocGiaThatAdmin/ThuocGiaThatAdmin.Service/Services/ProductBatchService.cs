@@ -96,5 +96,93 @@ namespace ThuocGiaThatAdmin.Service.Services
 
             return await GetBatchByNumberAsync(batch.BatchNumber);
         }
+
+        public async Task<ThuocGiaThat.Infrastucture.Common.PagedResult<ProductBatchResponseDto>> GetProductBatchesAsync(GetProductBatchesRequestDto request)
+        {
+            // We need to include ProductVariant and its Product to get the names
+            // However, the generic repository GetPagedAsync includes uses simple includes.
+            // Complex includes (ThenInclude) might not be directly supported by the simple params array if not using string paths.
+            // But let's try using string paths if the generic repository supported it, but our new GetPagedAsync takes Expression<Func<T, object>>[].
+            // This is good for direct properties. For nested, we might need a different approach or update repository to accept string includes, 
+            // OR just map it afterwards if the data set is small page size.
+            
+            // To support ThenInclude correctly via params Expression, we'd need a specific specification pattern or custom repository method.
+            // Given the limited scope, I will fetch paged batches first, then enrich the data.
+            // OR, since ProductBatch -> ProductVariant, we can include ProductVariant.
+            // But getting ProductVariant -> Product (Name) requires ThenInclude.
+            
+            // Let's modify the generic repository to support ThenInclude or just use string includes?
+            // "params Expression<Func<T, object>>[] includes" supports "x => x.ProductVariant".
+            // It does NOT easily support "x => x.ProductVariant.Product".
+            
+            // Alternative: Fetch batches with basic generic paging, then fetch variants for those batch IDs.
+            
+            var pagedResult = await _productBatchRepository.GetPagedAsync(
+                request.PageNumber,
+                request.PageSize,
+                null, // No filter for now, or maybe IsActive
+                request.SortField,
+                request.SortOrder,
+                b => b.ProductVariant.Product
+            );
+
+            // Map to DTO
+            var dtos = new System.Collections.Generic.List<ProductBatchResponseDto>();
+            
+            foreach (var batch in pagedResult.Items)
+            {
+                string productName = "Unknown Product";
+                string variantSKU = "Unknown SKU";
+
+                if (batch.ProductVariant != null)
+                {
+                    variantSKU = batch.ProductVariant.SKU;
+                    
+                    // Optimization: We could have pre-loaded products, but for pageSize=10 doing N+1 is manageable strictly for this task,
+                    // BUT better to avoid it.
+                    // Since I cannot change Repository easily to generic ThenInclude without more work, 
+                    // I will check if ProductVariant has Product loaded.
+                    // The generic include `b => b.ProductVariant` only loads the variant.
+                    
+                    // To get Product Name efficiently without changing Repository logic too much:
+                    // We can use the IProductVariantRepository to get details if needed, OR just accept N+1 for now as per instructions "implement service".
+                    // Let's try to get the product info via the existing _productVariantRepository helper if useful, or load it here.
+                    
+                    // Actually, let's just create the response. If Product is null, we might need to fetch it.
+                    // Users usually want to see Product Name.
+                    
+                    // Hack/Optimization: Load all ProductVariants with Products for the batch list.
+                    var variantWithProduct = await _productVariantRepository.GetVariantWithProduct(batch.ProductVariantId);
+                    if (variantWithProduct != null && variantWithProduct.Product != null)
+                    {
+                        productName = variantWithProduct.Product.Name;
+                    }
+                }
+
+                dtos.Add(new ProductBatchResponseDto
+                {
+                    Id = batch.Id,
+                    BatchNumber = batch.BatchNumber,
+                    ProductVariantId = batch.ProductVariantId,
+                    ProductName = productName,
+                    VariantSKU = variantSKU,
+                    ManufactureDate = batch.ManufactureDate,
+                    ExpiryDate = batch.ExpiryDate,
+                    CostPrice = batch.CostPrice,
+                    QRCodePath = batch.QRCodePath,
+                    PurchaseOrderNumber = batch.PurchaseOrderNumber,
+                    Supplier = batch.Supplier,
+                    IsActive = batch.IsActive,
+                    CreatedDate = batch.CreatedDate
+                });
+            }
+
+            return new ThuocGiaThat.Infrastucture.Common.PagedResult<ProductBatchResponseDto>(
+                dtos,
+                pagedResult.TotalCount,
+                pagedResult.PageNumber,
+                pagedResult.PageSize
+            );
+        }
     }
 }

@@ -20,6 +20,8 @@ namespace ThuocGiaThatAdmin.Contract.Responses
         public string WarehouseName { get; set; } = string.Empty;
         public PurchaseOrderStatus Status { get; set; }
         public string StatusName { get; set; }
+        public PaymentStatus PaymentStatus { get; set; }
+        public string PaymentStatusName { get; set; } = string.Empty;
         public decimal SubTotal { get; set; }
         public decimal TaxAmount { get; set; }
         public decimal DiscountAmount { get; set; }
@@ -42,5 +44,5 @@ namespace ThuocGiaThatAdmin.Contract.Responses
         public List<GoodReceiptResponse> GoodsReceipts { get; set; } = new List<GoodReceiptResponse>();
     }
 
-   
+
 }

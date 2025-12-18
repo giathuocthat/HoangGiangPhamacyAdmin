@@ -17,6 +17,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public int WarehouseId { get; set; }
         public string WarehouseName { get; set; } = string.Empty;
         public PurchaseOrderStatus Status { get; set; }
+        public PaymentStatus PaymentStatus { get; set; }
         public decimal SubTotal { get; set; }
         public decimal TaxAmount { get; set; }
         public decimal DiscountAmount { get; set; }
@@ -59,6 +60,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public DateTime? ExpectedDeliveryDate { get; set; }
         public decimal ShippingFee { get; set; }
         public decimal DiscountAmount { get; set; }
+        public PaymentStatus? PaymentStatus { get; set; }
         public string? Notes { get; set; }
         public string? Terms { get; set; }
 
@@ -72,6 +74,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public string SupplierName { get; set; } = string.Empty;
         public string WarehouseName { get; set; } = string.Empty;
         public PurchaseOrderStatus Status { get; set; }
+        public PaymentStatus PaymentStatus { get; set; }
         public decimal TotalAmount { get; set; }
         public DateTime OrderDate { get; set; }
         public DateTime? ExpectedDeliveryDate { get; set; }

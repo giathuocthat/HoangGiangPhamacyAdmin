@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using ThuocGiaThatAdmin.Domain.Entities;
 
 namespace ThuocGiaThat.Infrastucture.Repositories
 {
@@ -30,6 +31,15 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate);
         Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
         Task<bool> AnyAsync(Expression<Func<T, bool>> predicate);
+
+        // Paging operations
+        Task<ThuocGiaThat.Infrastucture.Common.PagedResult<T>> GetPagedAsync(
+            int pageNumber,
+            int pageSize,
+            Expression<Func<T, bool>> predicate = null,
+            string sortField = null,
+            string sortOrder = "asc",
+            params Expression<Func<T, object>>[] includes);
 
         // Save changes
         Task<int> SaveChangesAsync();
