@@ -20,7 +20,9 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public string? ProvinceName { get; set; }
         public string? TaxCode { get; set; }
         public string? BankAccount { get; set; }
-        public string? BankName { get; set; }
+        public int? BankId { get; set; }
+        public string? BankName { get; set; } // From Bank navigation
+        public string? ImageUrl { get; set; }
         public int PaymentTerms { get; set; }
         public decimal? CreditLimit { get; set; }
         public bool IsActive { get; set; }
@@ -43,7 +45,8 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public int? ProvinceId { get; set; }
         public string? TaxCode { get; set; }
         public string? BankAccount { get; set; }
-        public string? BankName { get; set; }
+        public int? BankId { get; set; }
+        public string? ImageUrl { get; set; }
         public int PaymentTerms { get; set; } = 30;
         public decimal? CreditLimit { get; set; }
         public int? Rating { get; set; }
@@ -60,7 +63,8 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public int? ProvinceId { get; set; }
         public string? TaxCode { get; set; }
         public string? BankAccount { get; set; }
-        public string? BankName { get; set; }
+        public int? BankId { get; set; }
+        public string? ImageUrl { get; set; }
         public int PaymentTerms { get; set; }
         public decimal? CreditLimit { get; set; }
         public bool IsActive { get; set; }

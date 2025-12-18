@@ -8,8 +8,10 @@ using System.Text;
 using ThuocGiaThat.Infrastucture.Data;
 using ThuocGiaThat.Infrastucture.Interfaces;
 using ThuocGiaThat.Infrastucture.Repositories;
+using ThuocGiaThat.Infrastucture.Utils;
 using ThuocGiaThatAdmin.Commands;
 using ThuocGiaThatAdmin.Common.Interfaces;
+using ThuocGiaThatAdmin.Contract.Models;
 using ThuocGiaThatAdmin.Contracts.Models;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Queries;
@@ -17,11 +19,6 @@ using ThuocGiaThatAdmin.Server.Extensions;
 using ThuocGiaThatAdmin.Service;
 using ThuocGiaThatAdmin.Service.Interfaces;
 using ThuocGiaThatAdmin.Service.Services;
-
-using ThuocGiaThatAdmin.Common.Interfaces;
-using ThuocGiaThatAdmin.Queries;
-using ThuocGiaThatAdmin.Commands;
-using ThuocGiaThatAdmin.Contract.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -142,6 +139,7 @@ builder.Services.AddScoped<IShoppingCartItemRepository, ShoppingCartItemReposito
 
 // Customer Management Repository
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<ICustomerPaymentAccountRepository, CustomerPaymentAccountRepository>();
 builder.Services.AddScoped<IProductCollectionRepository, ProductCollectionRepository>();
 builder.Services.AddScoped<IProductMaxOrderConfigRepository, ProductMaxOrderConfigRepository>();
 
@@ -198,6 +196,7 @@ builder.Services.AddScoped<IBannerAnalyticsService, BannerAnalyticsService>();
 // Shopping Cart Service
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
+builder.Services.AddScoped<ICustomerPaymentAccountService, CustomerPaymentAccountService>();
 
 // Purchase Order Services
 builder.Services.AddScoped<ISupplierService, SupplierService>();
@@ -208,6 +207,7 @@ builder.Services.AddScoped<IBankService, BankService>();
 
 // other
 builder.Services.AddScoped<IRoleClaimService, RoleClaimService>();
+builder.Services.AddScoped<DynamicFilterService>();
 
 // ============================================================
 // Register CQRS - Dispatchers
@@ -233,6 +233,8 @@ builder.Services.AddScoped<IProductCollectionService, ProductCollectionService>(
 builder.Services.AddScoped<VNPayService>();
 builder.Services.AddScoped<IZaloService, ZaloService>();
 builder.Services.AddScoped<HttpClient>();
+
+
 
 // Order Fulfillment Service
 builder.Services.AddScoped<IOrderFulfillmentService, OrderFulfillmentService>();

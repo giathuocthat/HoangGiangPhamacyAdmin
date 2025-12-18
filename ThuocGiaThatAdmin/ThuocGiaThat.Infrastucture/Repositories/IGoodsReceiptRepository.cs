@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ThuocGiaThatAdmin.Contract.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Domain.Enums;
 
@@ -57,6 +58,8 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         /// Check if receipt number exists
         /// </summary>
         Task<bool> ReceiptNumberExistsAsync(string receiptNumber);
+
+        Task<(IList<GoodsReceipt> receipts, int totalCount)> GetFilteredGoodsReceiptsAsync(FilterRequest request);
     }
 
     /// <summary>

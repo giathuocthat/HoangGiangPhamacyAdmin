@@ -101,7 +101,8 @@ namespace ThuocGiaThatAdmin.Service.Services
                 ProvinceId = dto.ProvinceId,
                 TaxCode = dto.TaxCode,
                 BankAccount = dto.BankAccount,
-                BankName = dto.BankName,
+                BankId = dto.BankId,
+                ImageUrl = dto.ImageUrl,
                 PaymentTerms = dto.PaymentTerms,
                 CreditLimit = dto.CreditLimit,
                 IsActive = true,
@@ -133,7 +134,8 @@ namespace ThuocGiaThatAdmin.Service.Services
             supplier.ProvinceId = dto.ProvinceId;
             supplier.TaxCode = dto.TaxCode;
             supplier.BankAccount = dto.BankAccount;
-            supplier.BankName = dto.BankName;
+            supplier.BankId = dto.BankId;
+            supplier.ImageUrl = dto.ImageUrl;
             supplier.PaymentTerms = dto.PaymentTerms;
             supplier.CreditLimit = dto.CreditLimit;
             supplier.IsActive = dto.IsActive;
@@ -172,7 +174,9 @@ namespace ThuocGiaThatAdmin.Service.Services
                 ProvinceName = supplier.Province?.Name,
                 TaxCode = supplier.TaxCode,
                 BankAccount = supplier.BankAccount,
-                BankName = supplier.BankName,
+                BankId = supplier.BankId,
+                BankName = supplier.Bank?.BankName,
+                ImageUrl = supplier.ImageUrl,
                 PaymentTerms = supplier.PaymentTerms,
                 CreditLimit = supplier.CreditLimit,
                 IsActive = supplier.IsActive,

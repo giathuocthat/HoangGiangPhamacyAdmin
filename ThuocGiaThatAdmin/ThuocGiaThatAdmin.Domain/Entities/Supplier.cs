@@ -56,9 +56,14 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public string? BankAccount { get; set; }
 
         /// <summary>
-        /// Tên ngân hàng
+        /// Ngân hàng ID (Foreign Key)
         /// </summary>
-        public string? BankName { get; set; }
+        public int? BankId { get; set; }
+
+        /// <summary>
+        /// URL hình ảnh nhà cung cấp
+        /// </summary>
+        public string? ImageUrl { get; set; }
 
         /// <summary>
         /// Điều khoản thanh toán (số ngày)
@@ -88,6 +93,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         // Navigation properties
         public Ward? Ward { get; set; }
         public Province? Province { get; set; }
+        public Bank? Bank { get; set; }
         public ICollection<SupplierContact> SupplierContacts { get; set; } = new List<SupplierContact>();
         public ICollection<PurchaseOrder> PurchaseOrders { get; set; } = new List<PurchaseOrder>();
     }

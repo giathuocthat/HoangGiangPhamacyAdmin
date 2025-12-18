@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Net.NetworkInformation;
 using System.Threading.Tasks;
+using ThuocGiaThatAdmin.Contract.DTOs;
 using ThuocGiaThatAdmin.Contracts.DTOs;
+using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Domain.Enums;
 using ThuocGiaThatAdmin.Service.Interfaces;
 
@@ -121,6 +124,32 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 var receipts = await _goodsReceiptService.GetByStatusAsync(status);
                 return Success(receipts);
             }, "Get Goods Receipts By Status");
+        }
+
+        /// <summary>
+        /// Get paged goods receipts
+        /// </summary>
+        [HttpPost("filtered")]
+        public async Task<IActionResult> GetFilterdProducts([FromBody] FilterRequest request)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var (receipts, totalCount) = await _goodsReceiptService.GetFilteredGoodsReceiptsAsync(request);
+
+                var response = new
+                {
+                    Data = receipts,
+                    Pagination = new
+                    {
+                        request.PageNumber,
+                        request.PageSize,
+                        TotalCount = totalCount,
+                        TotalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize)
+                    }
+                };
+
+                return Success(response);
+            }, "Get Paged Goods Receipts");
         }
 
         /// <summary>
