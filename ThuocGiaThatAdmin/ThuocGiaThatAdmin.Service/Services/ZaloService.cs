@@ -10,6 +10,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using ThuocGiaThat.Infrastucture;
 using ThuocGiaThatAdmin.Common;
+using ThuocGiaThatAdmin.Contract.Enums;
 using ThuocGiaThatAdmin.Contract.Models;
 using ThuocGiaThatAdmin.Contract.Requests;
 using ThuocGiaThatAdmin.Domain.Entities;
@@ -30,25 +31,26 @@ namespace ThuocGiaThatAdmin.Service.Services
             _context = context;
         }
 
-        public async Task<bool> SendOtpMessageAsync(string phone)
+        public async Task<bool> SendOtpMessageAsync(OtpRequest otpRequest)
         {
             var otp = NumberGenerator.GenernateNumbersString(4);
 
-            if (string.IsNullOrEmpty(phone)) throw new ArgumentNullException("Phone number is required");
+            if (string.IsNullOrEmpty(otpRequest.PhoneNumber)) throw new ArgumentNullException("Phone number is required");
 
             var otpCode = new OtpCode
             {
-                Phone = phone,
+                Phone = otpRequest.PhoneNumber,
                 Code = otp,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                Type = otpRequest.Type.ToString()
             };
             _context.OtpCodes.Add(otpCode);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(); return true;
 
             var body = new ZaloZNSRequest
             {
                 OaId = _zaloSetting.OAId,
-                Phone = phone,
+                Phone = otpRequest.PhoneNumber,
                 SendingMode = "default",
                 TemplateData = new TemplateData
                 {
@@ -72,9 +74,11 @@ namespace ThuocGiaThatAdmin.Service.Services
             return response.StatusCode == System.Net.HttpStatusCode.OK;
         }
 
-        public async Task<bool> VerifyOtpAsync(string phone, string otp)
+        public async Task<bool> VerifyOtpAsync(string phone, OtpCodeTypeEnum type, string? otp)
         {
-            var optCode = await _context.OtpCodes.FirstOrDefaultAsync(x => x.Phone == phone && x.Code == otp && !x.IsUsed);
+            if (string.IsNullOrEmpty(otp)) return false;
+
+            var optCode = await _context.OtpCodes.FirstOrDefaultAsync(x => x.Phone == phone && x.Code == otp && !x.IsUsed && x.Type == type.ToString());
 
             if (optCode == null) return false;
 

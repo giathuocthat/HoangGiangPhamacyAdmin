@@ -3,6 +3,7 @@ using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using ThuocGiaThatAdmin.Contracts.DTOs;
+using ThuocGiaThatAdmin.Server.Extensions;
 using ThuocGiaThatAdmin.Service.Interfaces;
 
 namespace ThuocGiaThatAdmin.Server.Controllers
@@ -67,8 +68,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             return await ExecuteActionAsync(async () =>
             {
-                var customerId = GetCustomerId();
-                var cart = await _cartService.AddToCartAsync(dto, customerId);
+                var cart = await _cartService.AddToCartAsync(dto, User.GetCustomerId());
                 return Success(cart, "Item added to cart successfully");
             }, "Add to Cart");
         }
@@ -106,6 +106,20 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         }
 
         /// <summary>
+        /// Remove item from cart
+        /// </summary>
+        [HttpDelete("multi-items")]
+        public async Task<IActionResult> RemoveCartItems(HashSet<int> ids, [FromQuery] string? sessionId)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var customerId = GetCustomerId();
+                await _cartService.RemoveCartItemsAsync(ids, customerId, sessionId);
+                return Success("Item removed from cart successfully");
+            }, "Remove Cart Item");
+        }
+
+        /// <summary>
         /// Clear entire cart
         /// </summary>
         [HttpDelete("clear")]
@@ -123,12 +137,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
 
         private int? GetCustomerId()
         {
-            var customerIdClaim = User.FindFirst("CustomerId")?.Value;
-            if (int.TryParse(customerIdClaim, out int customerId))
-            {
-                return customerId;
-            }
-            return null;
+            return User.GetCustomerId();
         }
 
         #endregion

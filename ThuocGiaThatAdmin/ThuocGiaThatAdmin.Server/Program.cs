@@ -20,6 +20,12 @@ using ThuocGiaThatAdmin.Service;
 using ThuocGiaThatAdmin.Service.Interfaces;
 using ThuocGiaThatAdmin.Service.Services;
 
+using ThuocGiaThatAdmin.Common.Interfaces;
+using ThuocGiaThatAdmin.Queries;
+using ThuocGiaThatAdmin.Commands;
+using ThuocGiaThatAdmin.Contract.Models;
+using System.Threading.RateLimiting;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -103,6 +109,7 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtAudience,
         IssuerSigningKey = signingKey
     };
+    options.MapInboundClaims = false;
 });
 
 builder.Services.AddResponseCompression(options =>
@@ -259,6 +266,26 @@ builder.Services.AddCors(options =>
 builder.Services.Configure<VNPaySetting>(builder.Configuration.GetSection("VNPAY"));
 builder.Services.Configure<ZaloSetting>(builder.Configuration.GetSection("Zalo"));
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy("SendOtpPolicy", context =>
+    {
+        var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unkndown";
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: ip,
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 2,
+                Window = TimeSpan.FromMinutes(3),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0                 
+            });
+    });
+});
+
 
 //builder.WebHost.UseUrls("https://0.0.0.0:5000");
 
@@ -311,5 +338,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseRateLimiter();
 
 app.Run();
