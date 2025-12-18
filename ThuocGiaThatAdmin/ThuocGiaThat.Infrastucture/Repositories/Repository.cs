@@ -121,9 +121,14 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         /// <summary>
         /// Get all entities
         /// </summary>
-        public virtual async Task<IEnumerable<T>> GetAllAsync()
+        public virtual async Task<IEnumerable<T>> GetAllAsync(params Expression<Func<T, object>>[] includes)
         {
-            return await _dbSet.ToListAsync();
+            var query = _dbSet.AsQueryable();
+            foreach (var navigation in includes)
+            {
+                query = query.Include(navigation);
+            }
+            return query.ToList();
         }
 
         /// <summary>

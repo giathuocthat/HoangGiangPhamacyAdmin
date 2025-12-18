@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ThuocGiaThatAdmin.Contract.Responses;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Enums;
 
@@ -12,18 +13,18 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
     public interface IPurchaseOrderService
     {
         // CRUD Operations
-        Task<IEnumerable<PurchaseOrderDto>> GetAllAsync();
-        Task<PurchaseOrderDto?> GetByIdAsync(int id);
-        Task<PurchaseOrderDto?> GetByOrderNumberAsync(string orderNumber);
-        Task<PurchaseOrderDto> CreateAsync(CreatePurchaseOrderDto dto, int createdByUserId);
-        Task<PurchaseOrderDto> UpdateAsync(int id, UpdatePurchaseOrderDto dto);
+        Task<IEnumerable<PurchaseOrderResponse>> GetAllAsync();
+        Task<PurchaseOrderResponse?> GetByIdAsync(int id);
+        Task<PurchaseOrderResponse?> GetByOrderNumberAsync(string orderNumber);
+        Task<PurchaseOrderResponse> CreateAsync(CreatePurchaseOrderDto dto, int createdByUserId);
+        Task<PurchaseOrderResponse> UpdateAsync(int id, UpdatePurchaseOrderDto dto);
         Task DeleteAsync(int id);
 
         // Query
-        Task<PurchaseOrderDto?> GetWithDetailsAsync(int id);
-        Task<IEnumerable<PurchaseOrderDto>> GetBySupplierIdAsync(int supplierId);
-        Task<IEnumerable<PurchaseOrderDto>> GetByWarehouseIdAsync(int warehouseId);
-        Task<IEnumerable<PurchaseOrderDto>> GetByStatusAsync(PurchaseOrderStatus status);
+        Task<PurchaseOrderResponse?> GetWithDetailsAsync(int id);
+        Task<IEnumerable<PurchaseOrderResponse>> GetBySupplierIdAsync(int supplierId);
+        Task<IEnumerable<PurchaseOrderResponse>> GetByWarehouseIdAsync(int warehouseId);
+        Task<IEnumerable<PurchaseOrderResponse>> GetByStatusAsync(PurchaseOrderStatus status);
         Task<(IEnumerable<PurchaseOrderListItemDto>, int totalCount)> GetPagedPurchaseOrdersAsync(
             int pageNumber = 1,
             int pageSize = 20,
@@ -35,8 +36,8 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
             DateTime? toDate = null);
 
         // Business Operations
-        Task<PurchaseOrderDto> ApproveAsync(int id, int approvedByUserId, ApprovePurchaseOrderDto dto);
-        Task<PurchaseOrderDto> CancelAsync(int id, int cancelledByUserId, CancelPurchaseOrderDto dto);
+        Task<PurchaseOrderResponse> ApproveAsync(int id, int approvedByUserId, ApprovePurchaseOrderDto dto);
+        Task<PurchaseOrderResponse> CancelAsync(int id, int cancelledByUserId, CancelPurchaseOrderDto dto);
         Task<string> GenerateOrderNumberAsync();
     }
 }
