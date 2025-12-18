@@ -115,7 +115,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         /// </summary>
         public virtual async Task<T?> GetByIdAsync(int id)
         {
-            return await _dbSet.FindAsync(id);
+           return await _dbSet.FindAsync(id);
         }
 
         /// <summary>
