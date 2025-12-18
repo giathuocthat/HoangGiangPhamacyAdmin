@@ -32,6 +32,15 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
         Task<bool> AnyAsync(Expression<Func<T, bool>> predicate);
 
+        // Paging operations
+        Task<ThuocGiaThat.Infrastucture.Common.PagedResult<T>> GetPagedAsync(
+            int pageNumber,
+            int pageSize,
+            Expression<Func<T, bool>> predicate = null,
+            string sortField = null,
+            string sortOrder = "asc",
+            params Expression<Func<T, object>>[] includes);
+
         // Save changes
         Task<int> SaveChangesAsync();
     }
