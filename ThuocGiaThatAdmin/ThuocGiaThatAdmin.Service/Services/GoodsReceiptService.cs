@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using ThuocGiaThat.Infrastucture.Repositories;
+using ThuocGiaThatAdmin.Contract.DTOs;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Domain.Enums;
@@ -34,7 +36,7 @@ namespace ThuocGiaThatAdmin.Service.Services
 
         public async Task<IEnumerable<GoodsReceiptDto>> GetAllAsync()
         {
-            var receipts = await _goodsReceiptRepository.GetAllAsync();
+            var receipts = await _goodsReceiptRepository.GetAllAsync( x => x.PurchaseOrder, x=> x.Warehouse);
             return receipts.Select(MapToDto);
         }
 
@@ -72,6 +74,27 @@ namespace ThuocGiaThatAdmin.Service.Services
         {
             var receipts = await _goodsReceiptRepository.GetByStatusAsync(status);
             return receipts.Select(MapToDto);
+        }
+
+        public async Task<(IEnumerable<GoodsReceiptListItemDto> receipts, int totalCount)> GetFilteredGoodsReceiptsAsync(FilterRequest request)
+        {
+            var (receipts, totalCount) = await _goodsReceiptRepository.GetFilteredGoodsReceiptsAsync(request);
+
+            var dtos = receipts.Select(gr => new GoodsReceiptListItemDto
+            {
+                Id = gr.Id,
+                ReceiptNumber = gr.ReceiptNumber,
+                PurchaseOrderNumber = gr.PurchaseOrder?.OrderNumber ?? string.Empty,
+                WarehouseName = gr.Warehouse?.Name ?? string.Empty,
+                Status = gr.Status,
+                ScheduledDate = gr.ScheduledDate,
+                ReceivedDate = gr.ReceivedDate,
+                TotalItems = gr.GoodsReceiptItems?.Count ?? 0,
+                AcceptedItems = gr.GoodsReceiptItems?.Count(i => i.QualityStatus == QualityStatus.Good) ?? 0,
+                RejectedItems = gr.GoodsReceiptItems?.Count(i => i.RejectedQuantity > 0) ?? 0
+            });
+
+            return (dtos, totalCount);
         }
 
         public async Task<(IEnumerable<GoodsReceiptListItemDto>, int totalCount)> GetPagedGoodsReceiptsAsync(

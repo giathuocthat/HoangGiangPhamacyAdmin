@@ -165,6 +165,37 @@ namespace ThuocGiaThatAdmin.Service.Services
             return MapToDto(cart);
         }
 
+        public async Task RemoveCartItemsAsync(HashSet<int> cartItemIds, int? customerId, string? sessionId)
+        {
+            var cart = await GetCartAsync(customerId, sessionId);
+            if (cart == null)
+                throw new InvalidOperationException("Cart not found");
+
+            if (cart.CartItems.All(x => cartItemIds.Contains(x.Id)))
+            {
+                await ClearCartAsync(customerId, sessionId);
+                return;
+            }
+
+            var items = cart.CartItems.Where(i => cartItemIds.Contains(i.Id)).ToList();
+            if (items == null || !items.Any())
+                throw new InvalidOperationException("Cart item not found");
+
+            foreach(var item in items)
+            {
+                cart.CartItems.Remove(item);
+                _cartItemRepository.Delete(item);
+            }            
+
+            // Recalculate totals
+            RecalculateCartTotals(cart);
+            _cartRepository.Update(cart);
+
+            await _cartRepository.SaveChangesAsync();
+
+            return;
+        }
+
         public async Task ClearCartAsync(int? customerId, string? sessionId)
         {
             var cart = await GetCartAsync(customerId, sessionId);
@@ -345,7 +376,9 @@ namespace ThuocGiaThatAdmin.Service.Services
                     CurrentStockQuantity = i.CurrentStockQuantity,
                     PriceChanged = i.PriceChanged,
                     CreatedDate = i.CreatedDate,
-                    UpdatedDate = i.UpdatedDate
+                    UpdatedDate = i.UpdatedDate,
+                    BrandId = i.Product?.BrandId,
+                    BrandName = i.Product?.Brand?.Name
                 }).ToList()
             };
         }

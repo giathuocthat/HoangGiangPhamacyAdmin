@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using ThuocGiaThatAdmin.Contract.DTOs;
+using ThuocGiaThatAdmin.Contract.Enums;
 using ThuocGiaThatAdmin.Contract.Requests;
 using ThuocGiaThatAdmin.Server.Models;
 using ThuocGiaThatAdmin.Service.Interfaces;
@@ -36,7 +38,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             return await ExecuteActionAsync(async () =>
             {
-                var verifyOtp = await _zaloService.VerifyOtpAsync(dto.PhoneNumber, dto.Otp);
+                var verifyOtp = await _zaloService.VerifyOtpAsync(dto.PhoneNumber, OtpCodeTypeEnum.Register, dto.Otp);
                 if (!verifyOtp)
                 {
                     return BadRequest(new ApiErrorResponse
@@ -68,7 +70,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                         email = customer.Email,
                         businessTypeId = customer.BusinessTypeId,
                         businessTypeName = customer.BusinessTypeName,
-                        phoneNumber = customer.PhoneNumber
+                        phoneNumber = customer.PhoneNumber,
+                        isVerified = customer.IsVerified
                     }
                 };
 
@@ -105,7 +108,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                         email = customer.Email,
                         hasBusinessInfo = customer.BusinessTypeId.HasValue,
                         businessTypeId = customer.BusinessTypeId,
-                        businessTypeName = customer.BusinessType?.Name
+                        businessTypeName = customer.BusinessType?.Name,
+                        isVerified = customer.IsVerified
                     }
                 };
 
@@ -192,9 +196,10 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         }
 
         [HttpPost("SendOtp")]
-        public async Task<IActionResult> SendOtpAsync([FromBody] string phone)
+        [EnableRateLimiting("SendOtpPolicy")]
+        public async Task<IActionResult> SendOtpAsync([FromBody] OtpRequest request)
         {
-            await _zaloService.SendOtpMessageAsync(phone);
+            await _zaloService.SendOtpMessageAsync(request);
             return Ok();
         }
 
@@ -217,11 +222,18 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             return await ExecuteActionAsync(async () =>
             {
-                var (success, message, token, expiresAt, customer) = await _customerAuthService.LoginByOtpAsync(dto.PhoneNumber, dto.Otp);
+                var (success, message, token, expiresAt, customer) = await _customerAuthService.LoginByOtpAsync(dto.PhoneNumber, OtpCodeTypeEnum.Login ,dto.Otp);        
 
                 if (!success)
                 {
-                    return UnauthorizedResponse(message);
+                    return BadRequest(new ApiErrorResponse
+                    {
+                        Detail = "Mã otp không chính xác",
+                        Errors = new Dictionary<string, string>
+                        {
+                            ["otp"] = "Mã OTP không chính xác"
+                        }
+                    });
                 }
 
                 var response = new
@@ -255,6 +267,18 @@ namespace ThuocGiaThatAdmin.Server.Controllers
 
                 return result.success ? Success("") : BadRequest(result.message);
             });
+        }
+
+        /// <summary>
+        /// POST: api/customer/auth/register
+        /// Register a new customer with basic information
+        /// </summary>
+        [HttpPost("checkExisting")]
+        public async Task<IActionResult> CheckExisting([FromBody] CheckCustomerExistsRequest request)
+        {
+            var result = await _customerAuthService.CheckExisting(request);
+            return Ok(result);
+            
         }
     }
 }

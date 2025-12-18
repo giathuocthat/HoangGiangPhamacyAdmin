@@ -35,5 +35,14 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
         /// Clear entire cart
         /// </summary>
         Task ClearCartAsync(int? customerId, string? sessionId);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cartItemIds"></param>
+        /// <param name="customerId"></param>
+        /// <param name="sessionId"></param>
+        /// <returns></returns>
+        Task RemoveCartItemsAsync(HashSet<int> cartItemIds, int? customerId, string? sessionId);
     }
 }

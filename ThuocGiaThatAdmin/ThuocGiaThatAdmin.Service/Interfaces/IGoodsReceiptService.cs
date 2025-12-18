@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ThuocGiaThatAdmin.Contract.DTOs;
 using ThuocGiaThatAdmin.Contracts.DTOs;
+using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Domain.Enums;
 
 namespace ThuocGiaThatAdmin.Service.Interfaces
@@ -39,5 +41,7 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
         Task<GoodsReceiptDto> CompleteAsync(int id, CompleteGoodsReceiptDto dto);
         Task<GoodsReceiptDto> RejectAsync(int id, RejectGoodsReceiptDto dto);
         Task<string> GenerateReceiptNumberAsync();
+
+        Task<(IEnumerable<GoodsReceiptListItemDto> receipts, int totalCount)> GetFilteredGoodsReceiptsAsync(FilterRequest request);
     }
 }

@@ -42,13 +42,11 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// <summary>
         /// Get all addresses by customer ID
         /// </summary>
-        [HttpGet("customer")]
-        [Authorize(Roles = "Customer")]
-        public async Task<IActionResult> GetByCustomerId(int customerId)
+        [HttpGet("customer/{customerId}")]
+        public async Task<IActionResult> GetByCustomerId([FromRoute] int customerId)
         {
             return await ExecuteActionAsync(async () =>
             {
-                var customerId = int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
                 var addresses = await _addressService.GetByCustomerIdAsync(customerId);
                 return Success(addresses);
             }, "Get Addresses By Customer Id");

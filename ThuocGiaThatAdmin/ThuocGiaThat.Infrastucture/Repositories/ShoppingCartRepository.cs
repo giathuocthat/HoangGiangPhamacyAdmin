@@ -46,7 +46,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         {
             return await _context.ShoppingCarts
                 .Include(c => c.CartItems)
-                    .ThenInclude(i => i.Product)
+                    .ThenInclude(i => i.Product).ThenInclude(x => x.Brand)
                 .Include(c => c.CartItems)
                     .ThenInclude(i => i.ProductVariant)
                 .FirstOrDefaultAsync(c => c.CustomerId == customerId);

@@ -8,8 +8,10 @@ using System.Text;
 using ThuocGiaThat.Infrastucture.Data;
 using ThuocGiaThat.Infrastucture.Interfaces;
 using ThuocGiaThat.Infrastucture.Repositories;
+using ThuocGiaThat.Infrastucture.Utils;
 using ThuocGiaThatAdmin.Commands;
 using ThuocGiaThatAdmin.Common.Interfaces;
+using ThuocGiaThatAdmin.Contract.Models;
 using ThuocGiaThatAdmin.Contracts.Models;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Queries;
@@ -22,6 +24,7 @@ using ThuocGiaThatAdmin.Common.Interfaces;
 using ThuocGiaThatAdmin.Queries;
 using ThuocGiaThatAdmin.Commands;
 using ThuocGiaThatAdmin.Contract.Models;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -106,6 +109,7 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtAudience,
         IssuerSigningKey = signingKey
     };
+    options.MapInboundClaims = false;
 });
 
 builder.Services.AddResponseCompression(options =>
@@ -142,6 +146,7 @@ builder.Services.AddScoped<IShoppingCartItemRepository, ShoppingCartItemReposito
 
 // Customer Management Repository
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<ICustomerPaymentAccountRepository, CustomerPaymentAccountRepository>();
 builder.Services.AddScoped<IProductCollectionRepository, ProductCollectionRepository>();
 builder.Services.AddScoped<IProductMaxOrderConfigRepository, ProductMaxOrderConfigRepository>();
 
@@ -153,6 +158,7 @@ builder.Services.AddScoped<IPurchaseOrderItemRepository, PurchaseOrderItemReposi
 builder.Services.AddScoped<IPurchaseOrderHistoryRepository, PurchaseOrderHistoryRepository>();
 builder.Services.AddScoped<IGoodsReceiptRepository, GoodsReceiptRepository>();
 builder.Services.AddScoped<IGoodsReceiptItemRepository, GoodsReceiptItemRepository>();
+builder.Services.AddScoped<IBankRepository, BankRepository>();
 
 // Generic Repository
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -197,15 +203,18 @@ builder.Services.AddScoped<IBannerAnalyticsService, BannerAnalyticsService>();
 // Shopping Cart Service
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
+builder.Services.AddScoped<ICustomerPaymentAccountService, CustomerPaymentAccountService>();
 
 // Purchase Order Services
 builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<ISupplierContactService, SupplierContactService>();
 builder.Services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
 builder.Services.AddScoped<IGoodsReceiptService, GoodsReceiptService>();
+builder.Services.AddScoped<IBankService, BankService>();
 
 // other
 builder.Services.AddScoped<IRoleClaimService, RoleClaimService>();
+builder.Services.AddScoped<DynamicFilterService>();
 
 // ============================================================
 // Register CQRS - Dispatchers
@@ -232,6 +241,8 @@ builder.Services.AddScoped<VNPayService>();
 builder.Services.AddScoped<IZaloService, ZaloService>();
 builder.Services.AddScoped<HttpClient>();
 
+
+
 // Order Fulfillment Service
 builder.Services.AddScoped<IOrderFulfillmentService, OrderFulfillmentService>();
 builder.Services.AddScoped<IOrderFulfillmentRepository, OrderFulfillmentRepository>();
@@ -254,6 +265,26 @@ builder.Services.AddCors(options =>
 
 builder.Services.Configure<VNPaySetting>(builder.Configuration.GetSection("VNPAY"));
 builder.Services.Configure<ZaloSetting>(builder.Configuration.GetSection("Zalo"));
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy("SendOtpPolicy", context =>
+    {
+        var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unkndown";
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: ip,
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 2,
+                Window = TimeSpan.FromMinutes(3),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0                 
+            });
+    });
+});
 
 
 //builder.WebHost.UseUrls("https://0.0.0.0:5000");
@@ -279,6 +310,7 @@ using (var scope = app.Services.CreateScope())
     CategoryMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     InventoryPermissionMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     CamPaignMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
+    BankMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
 }
 
 // ============================================================
@@ -306,5 +338,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseRateLimiter();
 
 app.Run();

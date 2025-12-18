@@ -1,5 +1,8 @@
 using System.Threading.Tasks;
 using ThuocGiaThatAdmin.Contract.DTOs;
+using ThuocGiaThatAdmin.Contract.Enums;
+using ThuocGiaThatAdmin.Contract.Requests;
+using ThuocGiaThatAdmin.Contract.Responses;
 using ThuocGiaThatAdmin.Domain.Entities;
 
 namespace ThuocGiaThatAdmin.Service.Interfaces
@@ -17,7 +20,8 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
         bool VerifyPassword(string password, string passwordHash);
         string HashPassword(string password);
         Task<(bool success, Dictionary<string, string>)> VerifyRegister(string phone, string email);
-        Task<(bool Success, string Message, string? Token, string? expiresAt, Customer? Customer)> LoginByOtpAsync(string phoneNumber, string otp);
+        Task<(bool Success, string Message, string? Token, string? expiresAt, Customer? Customer)> LoginByOtpAsync(string phoneNumber, OtpCodeTypeEnum type, string otp);
         Task<(bool success, string message)> ChangePasswordAsync(int customerId, UpdateCustomerPasswordDto dto);
+        Task<ValidationResponse> CheckExisting(CheckCustomerExistsRequest request);
     }
 }

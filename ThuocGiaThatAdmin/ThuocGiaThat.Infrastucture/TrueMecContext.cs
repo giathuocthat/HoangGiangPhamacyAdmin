@@ -20,6 +20,7 @@ namespace ThuocGiaThat.Infrastucture
 
         public DbSet<Category> Categories { get; set; }
         public DbSet<Brand> Brands { get; set; }
+        public DbSet<Bank> Banks { get; set; }
         // ProductType removed
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
@@ -1079,7 +1080,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.Address).HasMaxLength(500);
                 entity.Property(e => e.TaxCode).HasMaxLength(50);
                 entity.Property(e => e.BankAccount).HasMaxLength(50);
-                entity.Property(e => e.BankName).HasMaxLength(255);
+                entity.Property(e => e.ImageUrl).HasMaxLength(500);
                 entity.Property(e => e.CreditLimit).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.Notes).HasMaxLength(1000);
                 entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
@@ -1093,6 +1094,11 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasOne(e => e.Province)
                     .WithMany()
                     .HasForeignKey(e => e.ProvinceId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(e => e.Bank)
+                    .WithMany()
+                    .HasForeignKey(e => e.BankId)
                     .OnDelete(DeleteBehavior.SetNull);
 
                 entity.HasIndex(e => e.Code).IsUnique();
