@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThuocGiaThatAdmin.Contract.Responses;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
 
@@ -15,11 +16,11 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         {
         }
 
-        public new async Task<AddressDto?> GetByIdAsync(int id)
+        public new async Task<AddressDetailResponse?> GetByIdAsync(int id)
         {
             return await _context.Set<Address>()
                 .Where(x => x.Id == id)
-                .Select(x => new AddressDto
+                .Select(x => new AddressDetailResponse
                 {
                     Id = x.Id,
                     CustomerId = x.CustomerId,
@@ -33,7 +34,9 @@ namespace ThuocGiaThat.Infrastucture.Repositories
                     IsDefault = x.IsDefault,
                     AddressType = x.AddressType,
                     CreatedDate = x.CreatedDate,
-                    UpdatedDate = x.UpdatedDate
+                    UpdatedDate = x.UpdatedDate,
+                    ProvinceType = x.Province != null ? x.Province.Type : null,
+                    WardType  = x.Ward!= null ? x.Ward.Type : null
                 })
                 .FirstOrDefaultAsync();
         }
@@ -51,19 +54,26 @@ namespace ThuocGiaThat.Infrastucture.Repositories
                     RecipientName = x.RecipientName,
                     PhoneNumber = x.PhoneNumber,
                     AddressLine = x.AddressLine,
+                    WardId = x.WardId,
                     WardName = x.Ward != null ? x.Ward.Name : null,
+                    ProvinceId = x.ProvinceId,
                     ProvinceName = x.Province != null ? x.Province.Name : null,
                     IsDefault = x.IsDefault,
-                    AddressType = x.AddressType
+                    AddressType = x.AddressType,
+                    CreatedDate = x.CreatedDate,
+                    UpdatedDate = x.UpdatedDate,
+                    ProvinceType = x.Province != null ? x.Province.Type : null,
+                    WardType = x.Ward != null ? x.Ward.Type : null
+
                 })
                 .ToListAsync();
         }
 
-        public async Task<AddressDto?> GetDefaultByCustomerIdAsync(int customerId)
+        public async Task<AddressListItemDto?> GetDefaultByCustomerIdAsync(int customerId)
         {
             return await _context.Set<Address>()
                 .Where(x => x.CustomerId == customerId && x.IsDefault)
-                .Select(x => new AddressDto
+                .Select(x => new AddressListItemDto
                 {
                     Id = x.Id,
                     CustomerId = x.CustomerId,
@@ -77,7 +87,9 @@ namespace ThuocGiaThat.Infrastucture.Repositories
                     IsDefault = x.IsDefault,
                     AddressType = x.AddressType,
                     CreatedDate = x.CreatedDate,
-                    UpdatedDate = x.UpdatedDate
+                    UpdatedDate = x.UpdatedDate,
+                    ProvinceType = x.Province != null ? x.Province.Type : null,
+                    WardType = x.Ward != null ? x.Ward.Type : null
                 })
                 .FirstOrDefaultAsync();
         }

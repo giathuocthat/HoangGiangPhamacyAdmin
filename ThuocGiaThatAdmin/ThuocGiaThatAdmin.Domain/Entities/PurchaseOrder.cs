@@ -37,6 +37,11 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public PurchaseOrderStatus Status { get; set; } = PurchaseOrderStatus.Draft;
 
         /// <summary>
+        /// Trạng thái thanh toán
+        /// </summary>
+        public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Unpaid;
+
+        /// <summary>
         /// Tổng tiền hàng (chưa thuế, chưa phí)
         /// </summary>
         public decimal SubTotal { get; set; }
@@ -102,7 +107,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public string? Terms { get; set; }
 
         // Navigation properties
-        public Supplier Supplier { get; set; } = null!;
+        public virtual Supplier Supplier { get; set; } = null!;
         public SupplierContact? SupplierContact { get; set; }
         public Warehouse Warehouse { get; set; } = null!;
         public ICollection<PurchaseOrderItem> PurchaseOrderItems { get; set; } = new List<PurchaseOrderItem>();
