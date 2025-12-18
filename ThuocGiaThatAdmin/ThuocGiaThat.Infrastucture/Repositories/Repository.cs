@@ -167,8 +167,8 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         public virtual async Task<ThuocGiaThat.Infrastucture.Common.PagedResult<T>> GetPagedAsync(
             int pageNumber,
             int pageSize,
-            Expression<Func<T, bool>> predicate = null,
-            string sortField = null,
+            Expression<Func<T, bool>>? predicate = null,
+            string? sortField = null,
             string sortOrder = "asc",
             params Expression<Func<T, object>>[] includes)
         {

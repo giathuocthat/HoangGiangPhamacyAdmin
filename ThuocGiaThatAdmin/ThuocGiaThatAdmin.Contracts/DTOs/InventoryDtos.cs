@@ -122,6 +122,26 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public string? Notes { get; set; }
         public DateTime CreatedDate { get; set; }
     }
+
+    public class InventoryBatchDetailDto
+    {
+        public int Id { get; set; }
+        public int InventoryId { get; set; }
+        public string BatchNumber { get; set; } = string.Empty;
+        public string ProductName { get; set; } = string.Empty;
+        public string SKU { get; set; } = string.Empty;
+        public DateTime? ManufactureDate { get; set; }
+        public DateTime ExpiryDate { get; set; }
+        public int Quantity { get; set; }
+        public int QuantitySold { get; set; }
+        public int QuantityRemaining { get; set; }
+        public decimal? CostPrice { get; set; }
+        public string? Supplier { get; set; }
+        public string? PurchaseOrderNumber { get; set; }
+        public BatchStatus Status { get; set; }
+        public string? Notes { get; set; }
+        public DateTime CreatedDate { get; set; }
+    }
     
     public class CreateBatchDto
     {

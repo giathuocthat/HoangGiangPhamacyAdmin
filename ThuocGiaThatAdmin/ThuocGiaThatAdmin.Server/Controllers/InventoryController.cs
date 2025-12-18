@@ -43,6 +43,21 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         }
 
         /// <summary>
+        /// Get all batches of a specific inventory
+        /// </summary>
+        /// <param name="id">Inventory ID</param>
+        /// <returns>List of batches with detailed information</returns>
+        [HttpGet("{id}/batches")]
+        public async Task<IActionResult> GetInventoryBatches(int id)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var batches = await _inventoryService.GetInventoryBatchesAsync(id);
+                return Success(batches, "Inventory batches retrieved successfully");
+            }, "Get Inventory Batches");
+        }
+
+        /// <summary>
         /// Get low stock inventories
         /// </summary>
         [HttpGet("low-stock")]
@@ -53,6 +68,44 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 var inventories = await _inventoryService.GetLowStockInventoriesAsync();
                 return Ok(inventories);
             }, "Get Low Stock Inventories");
+        }
+
+        /// <summary>
+        /// Get inventories with pagination and search
+        /// </summary>
+        /// <param name="pageNumber">Page number (default: 1)</param>
+        /// <param name="pageSize">Page size (default: 10, max: 100)</param>
+        /// <param name="searchText">Search by product name, SKU, or warehouse name</param>
+        /// <returns>Paginated list of inventories</returns>
+        [HttpGet("list")]
+        public async Task<IActionResult> GetInventories(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? searchText = null)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                if (pageSize > 100)
+                {
+                    return BadRequestResponse("Page size cannot exceed 100");
+                }
+
+                var result = await _inventoryService.GetInventoriesAsync(pageNumber, pageSize, searchText);
+
+                var response = new
+                {
+                    Data = result.Items,
+                    Pagination = new
+                    {
+                        PageNumber = result.PageNumber,
+                        PageSize = result.PageSize,
+                        TotalCount = result.TotalCount,
+                        TotalPages = (int)Math.Ceiling(result.TotalCount / (double)result.PageSize)
+                    }
+                };
+
+                return Success(response, "Inventories retrieved successfully");
+            }, "Get Inventories List");
         }
 
         /// <summary>

@@ -338,6 +338,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 CreatedDate = o.CreatedDate,
                 OrderStatus = o.OrderStatus,
                 PaymentStatus = o.PaymentStatus,
+                IsFulfilled = o.IsFulfilled.GetValueOrDefault(),
                 TotalAmount = o.TotalAmount
             }).ToList();
 

@@ -175,6 +175,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public string OrderStatus { get; set; } = string.Empty;
         public string PaymentStatus { get; set; } = string.Empty;
         public decimal TotalAmount { get; set; }
+        public bool IsFulfilled {  get; set; }
     }
 
     /// <summary>
