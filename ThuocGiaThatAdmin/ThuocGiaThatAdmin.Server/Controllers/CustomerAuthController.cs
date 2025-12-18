@@ -106,6 +106,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                         hasBusinessInfo = customer.BusinessTypeId.HasValue,
                         businessTypeId = customer.BusinessTypeId,
                         businessTypeName = customer.BusinessType?.Name
+                        
                     }
                 };
 
