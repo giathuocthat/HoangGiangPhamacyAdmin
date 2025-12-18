@@ -370,7 +370,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Bank");
+                    b.ToTable("Banks");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Banner", b =>

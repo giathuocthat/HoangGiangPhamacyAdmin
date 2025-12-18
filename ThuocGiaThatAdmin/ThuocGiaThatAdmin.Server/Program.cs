@@ -153,6 +153,7 @@ builder.Services.AddScoped<IPurchaseOrderItemRepository, PurchaseOrderItemReposi
 builder.Services.AddScoped<IPurchaseOrderHistoryRepository, PurchaseOrderHistoryRepository>();
 builder.Services.AddScoped<IGoodsReceiptRepository, GoodsReceiptRepository>();
 builder.Services.AddScoped<IGoodsReceiptItemRepository, GoodsReceiptItemRepository>();
+builder.Services.AddScoped<IBankRepository, BankRepository>();
 
 // Generic Repository
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -203,6 +204,7 @@ builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<ISupplierContactService, SupplierContactService>();
 builder.Services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
 builder.Services.AddScoped<IGoodsReceiptService, GoodsReceiptService>();
+builder.Services.AddScoped<IBankService, BankService>();
 
 // other
 builder.Services.AddScoped<IRoleClaimService, RoleClaimService>();
@@ -279,6 +281,7 @@ using (var scope = app.Services.CreateScope())
     CategoryMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     InventoryPermissionMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     CamPaignMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
+    BankMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
 }
 
 // ============================================================

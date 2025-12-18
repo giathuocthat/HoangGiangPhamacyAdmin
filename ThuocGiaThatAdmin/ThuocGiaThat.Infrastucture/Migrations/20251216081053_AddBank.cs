@@ -18,7 +18,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                 nullable: true);
 
             migrationBuilder.CreateTable(
-                name: "Bank",
+                name: "Banks",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -45,7 +45,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                 name: "FK_CustomerPaymentAccounts_Bank_BankId",
                 table: "CustomerPaymentAccounts",
                 column: "BankId",
-                principalTable: "Bank",
+                principalTable: "Banks",
                 principalColumn: "Id");
         }
 
@@ -57,7 +57,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                 table: "CustomerPaymentAccounts");
 
             migrationBuilder.DropTable(
-                name: "Bank");
+                name: "Banks");
 
             migrationBuilder.DropIndex(
                 name: "IX_CustomerPaymentAccounts_BankId",
