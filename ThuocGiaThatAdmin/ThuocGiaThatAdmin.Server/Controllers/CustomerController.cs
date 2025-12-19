@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 using ThuocGiaThatAdmin.Contract.DTOs;
+using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Service.Interfaces;
 
 namespace ThuocGiaThatAdmin.Server.Controllers
@@ -134,6 +135,104 @@ namespace ThuocGiaThatAdmin.Server.Controllers
 
                 var customers = await _customerService.SearchByPhoneAsync(phoneNumber);
                 return Success(customers);
+            });
+        }
+
+        /// <summary>
+        /// GET: api/customer/{id}/documents
+        /// Get all documents for a customer
+        /// </summary>
+        [HttpGet("{id}/documents")]
+        public async Task<IActionResult> GetCustomerDocuments(int id)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var documents = await _customerService.GetCustomerDocumentsAsync(id);
+                return Success(documents);
+            });
+        }
+
+        /// <summary>
+        /// POST: api/customer/{id}/documents
+        /// Upload a new document for a customer
+        /// </summary>
+        [HttpPost("{id}/documents")]
+        public async Task<IActionResult> UploadCustomerDocument(int id, [FromForm] UploadCustomerDocumentDto dto)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                // Get current user ID from claims (if authentication is enabled)
+                // var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                string? userId = null; // For now, since authentication is commented out
+
+                var (success, message, document) = await _customerService.UploadCustomerDocumentAsync(id, dto, userId);
+
+                if (!success)
+                {
+                    if (message == "Customer not found")
+                    {
+                        return NotFoundResponse(message);
+                    }
+                    return BadRequestResponse(message);
+                }
+
+                return Created($"/api/customer/{id}/documents/{document!.Id}", document);
+            });
+        }
+
+        /// <summary>
+        /// PUT: api/customer/documents/{documentId}/verify
+        /// Verify or reject a customer document
+        /// </summary>
+        [HttpPut("documents/{documentId}/verify")]
+        public async Task<IActionResult> VerifyCustomerDocument(int documentId, [FromBody] VerifyDocumentDto dto)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                // Get current user ID from claims (if authentication is enabled)
+                // var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                string? userId = null; // For now, since authentication is commented out
+
+                var (success, message, document) = await _customerService.VerifyCustomerDocumentAsync(documentId, dto, userId);
+
+                if (!success)
+                {
+                    if (message == "Document not found")
+                    {
+                        return NotFoundResponse(message);
+                    }
+                    return BadRequestResponse(message);
+                }
+
+                return Success(document, message);
+            });
+        }
+
+        /// <summary>
+        /// PUT: api/customer/{id}/verify
+        /// Verify or reject a customer based on their documents
+        /// </summary>
+        [HttpPut("{id}/verify")]
+        public async Task<IActionResult> VerifyCustomer(int id, [FromBody] VerifyCustomerDto dto)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                // Get current user ID from claims (if authentication is enabled)
+                // var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                string? userId = null; // For now, since authentication is commented out
+
+                var (success, message, customerStatus) = await _customerService.VerifyCustomerAsync(id, dto, userId);
+
+                if (!success)
+                {
+                    if (message == "Customer not found")
+                    {
+                        return NotFoundResponse(message);
+                    }
+                    return BadRequestResponse(message);
+                }
+
+                return Success(customerStatus, message);
             });
         }
     }
