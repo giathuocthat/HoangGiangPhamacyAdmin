@@ -33,6 +33,7 @@ namespace ThuocGiaThat.Infrastucture
 
         // Inventory Management
         public DbSet<Warehouse> Warehouses { get; set; }
+        public DbSet<WarehouseLocation> WarehouseLocations { get; set; }
         public DbSet<InventoryBatch> InventoryBatches { get; set; }
         public DbSet<InventoryTransaction> InventoryTransactions { get; set; }
         public DbSet<ProductBatch> ProductBatches { get; set; }
@@ -336,15 +337,36 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasOne(e => e.ProductVariant).WithMany(e => e.PriceHistories).HasForeignKey(e => e.ProductVariantId).OnDelete(DeleteBehavior.Cascade);
             });
 
+            // ============ WarehouseLocation Configuration ============
+            modelBuilder.Entity<WarehouseLocation>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.LocationCode).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.ZoneName).HasMaxLength(100);
+                entity.Property(e => e.RackName).HasMaxLength(50);
+                entity.Property(e => e.ShelfName).HasMaxLength(50);
+                entity.Property(e => e.BinName).HasMaxLength(50);
+                entity.Property(e => e.Description).HasMaxLength(500);
+                entity.Property(e => e.Notes).HasMaxLength(500);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+
+                entity.HasOne(e => e.Warehouse)
+                    .WithMany()
+                    .HasForeignKey(e => e.WarehouseId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                // Unique constraint: LocationCode must be unique across the entire system
+                entity.HasIndex(e => e.LocationCode).IsUnique();
+                entity.HasIndex(e => e.WarehouseId);
+                entity.HasIndex(e => e.IsActive);
+            });
+
             // ============ BatchLocationStock Configuration ============
             modelBuilder.Entity<BatchLocationStock>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.LocationCode).IsRequired().HasMaxLength(100);
-                entity.Property(e => e.ZoneName).HasMaxLength(100);
-                entity.Property(e => e.RackName).HasMaxLength(100);
-                entity.Property(e => e.ShelfName).HasMaxLength(100);
-                entity.Property(e => e.BinName).HasMaxLength(100);
                 entity.Property(e => e.Notes).HasMaxLength(500);
                 entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
                 entity.Property(e => e.UpdatedDate);
@@ -365,14 +387,21 @@ namespace ThuocGiaThat.Infrastucture
                     .HasForeignKey(e => e.WarehouseId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                // Composite unique constraint: Mỗi batch chỉ có 1 record tại mỗi location code trong 1 warehouse
-                entity.HasIndex(e => new { e.InventoryBatchId, e.WarehouseId, e.LocationCode }).IsUnique();
+                // Relationship with WarehouseLocation
+                entity.HasOne(e => e.WarehouseLocation)
+                    .WithMany(e => e.BatchLocationStocks)
+                    .HasForeignKey(e => e.WarehouseLocationId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Composite unique constraint: Mỗi batch chỉ có 1 record tại mỗi location trong 1 warehouse
+                entity.HasIndex(e => new { e.InventoryBatchId, e.WarehouseLocationId }).IsUnique();
 
                 // Indexes for queries
                 entity.HasIndex(e => e.LocationCode);
                 entity.HasIndex(e => e.WarehouseId);
                 entity.HasIndex(e => e.ProductVariantId);
                 entity.HasIndex(e => e.InventoryBatchId);
+                entity.HasIndex(e => e.WarehouseLocationId);
                 entity.HasIndex(e => e.IsPrimaryLocation);
             });
 
