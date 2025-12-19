@@ -19,7 +19,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         /// <summary>
         /// Nhà cung cấp
         /// </summary>
-        public int SupplierId { get; set; }
+        public int? SupplierId { get; set; }
 
         /// <summary>
         /// Người liên hệ của nhà cung cấp
@@ -29,7 +29,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         /// <summary>
         /// Kho nhận hàng
         /// </summary>
-        public int WarehouseId { get; set; }
+        public int? WarehouseId { get; set; }
 
         /// <summary>
         /// Trạng thái đơn hàng

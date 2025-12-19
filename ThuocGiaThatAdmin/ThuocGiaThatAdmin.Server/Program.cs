@@ -210,7 +210,9 @@ builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<ISupplierContactService, SupplierContactService>();
 builder.Services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
 builder.Services.AddScoped<IGoodsReceiptService, GoodsReceiptService>();
+builder.Services.AddScoped<IGoodsReceiptItemService, GoodsReceiptItemService>();
 builder.Services.AddScoped<IBankService, BankService>();
+
 
 // other
 builder.Services.AddScoped<IRoleClaimService, RoleClaimService>();
@@ -281,7 +283,7 @@ builder.Services.AddRateLimiter(options =>
                 PermitLimit = 2,
                 Window = TimeSpan.FromMinutes(3),
                 QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-                QueueLimit = 0                 
+                QueueLimit = 0
             });
     });
 });
