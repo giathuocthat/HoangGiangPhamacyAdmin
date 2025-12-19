@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThat.Infrastucture.Repositories;
+using ThuocGiaThat.Infrastucture.Common;
 
 namespace ThuocGiaThatAdmin.Service.Services
 {
@@ -207,6 +208,89 @@ namespace ThuocGiaThatAdmin.Service.Services
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Get inventories with pagination and search
+        /// </summary>
+        public async Task<PagedResult<InventoryDto>> GetInventoriesAsync(
+            int pageNumber = 1,
+            int pageSize = 10,
+            string? searchText = null)
+        {
+            // Get all inventories with related data
+            var query = await _inventoryRepository.GetPagedAsync(
+                pageNumber,
+                pageSize,
+                searchText == null ?
+                    null :
+                    (x) => x.Warehouse.Name.Contains(searchText) || x.ProductVariant.Product.Name.Contains(searchText) || x.ProductVariant.SKU.Contains(searchText),
+                string.Empty,
+                includes: [x => x.ProductVariant.Product, x => x.Warehouse]
+            );
+
+            var listDto = query.Items.Select(x => new InventoryDto()
+            {
+                Id = x.Id,
+                ProductVariantId = x.ProductVariantId,
+                WarehouseId = x.WarehouseId,
+                QuantityOnHand = x.QuantityOnHand,
+                QuantityReserved = x.QuantityReserved,
+                QuantityAvailable = x.QuantityAvailable,
+                ProductName = x.ProductVariant.Product.Name,
+                SKU = x.ProductVariant.SKU,
+                WarehouseName = x.Warehouse.Name
+            });
+
+            return PagedResult<InventoryDto>.Create(listDto, query.TotalCount, pageNumber, pageSize);
+        }
+
+        /// <summary>
+        /// Get all batches of a specific inventory with detailed information
+        /// </summary>
+        public async Task<IEnumerable<InventoryBatchDetailDto>> GetInventoryBatchesAsync(int inventoryId)
+        {
+            // 1. Check if inventory exists
+            var inventory = await _inventoryRepository.GetByIdAsync(inventoryId);
+            if (inventory == null)
+            {
+                throw new KeyNotFoundException($"Inventory with ID {inventoryId} not found");
+            }
+
+            // 2. Get product variant and product info
+            var productVariant = await _productVariantRepository.GetByIdAsync(inventory.ProductVariantId);
+            if (productVariant == null)
+            {
+                throw new KeyNotFoundException($"Product variant {inventory.ProductVariantId} not found");
+            }
+
+            // 3. Get all batches for this inventory
+            var batches = await _batchRepository.FindAsync(b => b.InventoryId == inventoryId);
+
+            // 4. Map to DTOs with product information
+            var batchDtos = batches.Select(batch => new InventoryBatchDetailDto
+            {
+                Id = batch.Id,
+                InventoryId = batch.InventoryId,
+                BatchNumber = batch.BatchNumber,
+                ProductName = productVariant.Product?.Name ?? "Unknown",
+                SKU = productVariant.SKU,
+                ManufactureDate = batch.ManufactureDate,
+                ExpiryDate = batch.ExpiryDate,
+                Quantity = batch.Quantity,
+                QuantitySold = batch.QuantitySold,
+                QuantityRemaining = batch.QuantityRemaining,
+                CostPrice = batch.CostPrice,
+                Supplier = batch.Supplier,
+                PurchaseOrderNumber = batch.PurchaseOrderNumber,
+                Status = batch.Status,
+                Notes = batch.Notes,
+                CreatedDate = batch.CreatedDate
+            })
+            .OrderBy(b => b.ExpiryDate) // Sort by expiry date (FEFO)
+            .ToList();
+
+            return batchDtos;
         }
 
         // ========== Sale Transaction ==========

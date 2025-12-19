@@ -34,6 +34,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
                 .Include(s => s.SupplierContacts.Where(c => c.IsActive))
                 .Include(s => s.Ward)
                 .Include(s => s.Province)
+                .Include(s => s.Bank)
                 .FirstOrDefaultAsync(s => s.Id == id);
         }
 
@@ -72,6 +73,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
             var suppliers = await query
                 .Include(s => s.Ward)
                 .Include(s => s.Province)
+                .Include(s => s.Bank)
                 .OrderByDescending(s => s.CreatedDate)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)

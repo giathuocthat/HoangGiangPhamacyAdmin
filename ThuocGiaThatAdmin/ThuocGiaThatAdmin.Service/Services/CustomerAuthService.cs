@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 using ThuocGiaThat.Infrastucture;
 using ThuocGiaThat.Infrastucture.Repositories;
 using ThuocGiaThatAdmin.Contract.DTOs;
+using ThuocGiaThatAdmin.Contract.Enums;
+using ThuocGiaThatAdmin.Contract.Requests;
+using ThuocGiaThatAdmin.Contract.Responses;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Service.Interfaces;
 
@@ -28,15 +31,15 @@ namespace ThuocGiaThatAdmin.Service.Services
             _zaloService = zaloService;
         }
 
-        public async Task<(bool Success, string Message, CustomerProfileTokenDto Customer)> RegisterAsync(CustomerRegisterDto dto)
+        public async Task<(bool Success, string Message, CustomerProfileTokenDto? Customer)> RegisterAsync(CustomerRegisterDto dto)
         {
-            // Check if email already exists
+            // Check if phoneNumber or email already exists
             var existingCustomer = await _context.Customers
-                .FirstOrDefaultAsync(c => c.PhoneNumber == dto.PhoneNumber);
+                .FirstOrDefaultAsync(c => c.PhoneNumber == dto.PhoneNumber || c.Email == dto.Email);
 
             if (existingCustomer != null)
             {
-                return (false, "Phone Number has been already registered", null);
+                return existingCustomer.PhoneNumber == dto.PhoneNumber ? (false, "Phone Number has been already registered", null) : (false, "Email has been already registered", null);
             }
 
             var businessType = await _context.BusinessTypes
@@ -50,7 +53,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 PasswordHash = HashPassword(dto.Password),
                 BusinessTypeId = dto.BusinessTypeId,
                 CreatedDate = DateTime.UtcNow,
-                Email = dto.Email,
+                Email = dto.Email
             };
 
             customer.Addresses = new System.Collections.Generic.List<Address>
@@ -73,7 +76,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             var (token, expiresAt) = GenerateJwtTokenAndExpires(customer);
 
             var result = new CustomerProfileTokenDto
-            { 
+            {
                 FullName = customer.FullName,
                 BusinessTypeId = customer.BusinessTypeId,
                 BusinessTypeName = businessType?.Name,
@@ -81,7 +84,8 @@ namespace ThuocGiaThatAdmin.Service.Services
                 Email = customer.Email,
                 ExpiresAt = expiresAt,
                 Token = token,
-                Id = customer.Id
+                Id = customer.Id,
+                IsVerified = customer.IsVerified
             };
 
 
@@ -108,7 +112,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             return (true, "Login successful", token, expiresAt, customer);
         }
 
-        public async Task<(bool Success, string Message, string? Token, string? expiresAt, Customer? Customer)> LoginByOtpAsync(string phoneNumber, string otp)
+        public async Task<(bool Success, string Message, string? Token, string? expiresAt, Customer? Customer)> LoginByOtpAsync(string phoneNumber, OtpCodeTypeEnum type, string otp)
         {
             var customer = await _context.Customers
                 .Include(c => c.BusinessType)
@@ -119,7 +123,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 return (false, "Phone number does not exist", null, null, null);
             }
 
-            var isSuccess = await _zaloService.VerifyOtpAsync(phoneNumber, otp);
+            var isSuccess = await _zaloService.VerifyOtpAsync(phoneNumber, type, otp);
             if (!isSuccess) return (false, "Otp is not valid", null, null, null); ;
 
             var (token, expiresAt) = GenerateJwtTokenAndExpires(customer);
@@ -197,13 +201,12 @@ namespace ThuocGiaThatAdmin.Service.Services
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            var claims = new[]
+            var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, customer.Id.ToString()),                
-                new Claim(JwtRegisteredClaimNames.Name, customer.FullName),
-                new Claim("customer_id", customer.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, customer.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Name, customer.FullName),                
                 new Claim(ClaimTypes.Role, "Customer"),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
             var token = new JwtSecurityToken(
@@ -236,7 +239,7 @@ namespace ThuocGiaThatAdmin.Service.Services
         public async Task<(bool success, Dictionary<string, string>)> VerifyRegister(string phone, string email)
         {
             var isExistingPhone = await _context.Customers.AnyAsync(x => x.PhoneNumber == phone);
-            var isExistingEmail = await _context.Customers.AnyAsync(x => x.Email ==  email);
+            var isExistingEmail = await _context.Customers.AnyAsync(x => x.Email == email);
 
             var dictionnary = new Dictionary<string, string>();
             if (isExistingPhone) dictionnary.Add("phoneNumber", "Số điện thoại đã tồn tại");
@@ -259,6 +262,35 @@ namespace ThuocGiaThatAdmin.Service.Services
             await _context.SaveChangesAsync();
 
             return (true, "");
+        }
+
+        public async Task<ValidationResponse> CheckExisting(CheckCustomerExistsRequest request)
+        {
+            var existingCustomer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.PhoneNumber == request.PhoneNumber || c.Email == request.Email);
+
+            var result = new ValidationResponse();
+
+            if (existingCustomer == null) return result;
+
+            result.IsValid = false;
+            Dictionary<string, string> dict = new Dictionary<string, string>();
+
+            if (existingCustomer.PhoneNumber == request.PhoneNumber) result.Errors.Add(new ValidationError
+            {
+                FieldName = "phoneNumber",
+                ErrorCode = "phoneNumber_EXISTS",
+                ErrorMessage = "Số điện thoại đã tồn tại"
+            });
+
+            if (existingCustomer.Email == request.Email) result.Errors.Add(new ValidationError
+            {
+                FieldName = "email",
+                ErrorCode = "email_EXISTS",
+                ErrorMessage = "Email đã tồn tại"
+            });
+
+            return result;
         }
     }
 }

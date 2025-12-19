@@ -1,10 +1,13 @@
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using ThuocGiaThat.Infrastucture.Utils;
+using ThuocGiaThatAdmin.Contract.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Domain.Enums;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace ThuocGiaThat.Infrastucture.Repositories
 {
@@ -13,8 +16,11 @@ namespace ThuocGiaThat.Infrastucture.Repositories
     /// </summary>
     public class GoodsReceiptRepository : Repository<GoodsReceipt>, IGoodsReceiptRepository
     {
-        public GoodsReceiptRepository(TrueMecContext context) : base(context)
+        private readonly DynamicFilterService _filterService;
+
+        public GoodsReceiptRepository(TrueMecContext context, DynamicFilterService filterService) : base(context)
         {
+            _filterService = filterService;
         }
 
         public async Task<GoodsReceipt?> GetByReceiptNumberAsync(string receiptNumber)
@@ -77,6 +83,26 @@ namespace ThuocGiaThat.Infrastucture.Repositories
                 .Include(gr => gr.Warehouse)
                 .OrderByDescending(gr => gr.ScheduledDate ?? gr.CreatedDate)
                 .ToListAsync();
+        }
+
+        public async Task<(IList<GoodsReceipt> receipts, int totalCount)> GetFilteredGoodsReceiptsAsync(FilterRequest request)
+        {
+            var query = _dbSet.AsQueryable();
+            query = _filterService.ApplyFilters(query, request);
+
+            var totalCount = await query.CountAsync();
+
+            // Apply pagination with navigation properties
+            var items = await query
+                .Include(gr => gr.PurchaseOrder)
+                    .ThenInclude(po => po.Supplier)
+                .Include(gr => gr.Warehouse)
+                .Include(gr => gr.GoodsReceiptItems)
+                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
         }
 
         public async Task<(IList<GoodsReceipt> receipts, int totalCount)> GetPagedGoodsReceiptsAsync(

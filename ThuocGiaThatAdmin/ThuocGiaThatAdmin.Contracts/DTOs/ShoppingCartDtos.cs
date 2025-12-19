@@ -89,6 +89,8 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public bool PriceChanged { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
+        public int? BrandId { get; set; }
+        public string? BrandName { get; set; }
     }
     
     /// <summary>

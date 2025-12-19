@@ -18,5 +18,7 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
         public bool HasPaymentAccounts { get; set; }
         
         public DateTime CreatedDate { get; set; }
+
+        public bool IsVerified { get; set; }
     }
 }
