@@ -51,6 +51,7 @@ namespace ThuocGiaThatAdmin.Service
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id ?? string.Empty),
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName ?? string.Empty),
+                new Claim("Id", user.Id),
             };
 
             if (!string.IsNullOrEmpty(user.Email))
@@ -58,6 +59,7 @@ namespace ThuocGiaThatAdmin.Service
 
             if (!string.IsNullOrEmpty(user.FullName))
                 claims.Add(new Claim("fullName", user.FullName));
+
 
             // Include claims from UserManager
             var userClaims = await _userManager.GetClaimsAsync(user);
