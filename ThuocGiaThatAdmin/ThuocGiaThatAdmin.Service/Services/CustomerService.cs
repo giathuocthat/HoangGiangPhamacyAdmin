@@ -20,11 +20,13 @@ namespace ThuocGiaThatAdmin.Service.Services
     {
         private readonly ICustomerRepository _customerRepository;
         private readonly TrueMecContext _context;
+        private readonly FileUploadService _fileUploadService;
 
-        public CustomerService(ICustomerRepository customerRepository, TrueMecContext context)
+        public CustomerService(ICustomerRepository customerRepository, TrueMecContext context, FileUploadService fileUploadService)
         {
             _customerRepository = customerRepository;
             _context = context;
+            _fileUploadService = fileUploadService;
         }
 
         /// <summary>
@@ -284,6 +286,348 @@ namespace ThuocGiaThatAdmin.Service.Services
                 IssuePlace = x.ProvinceId,
                 FileName = x.UploadedFile.OriginalFileName
             }).ToListAsync();
+        }
+
+        /// <summary>
+        /// Get all documents for a customer
+        /// </summary>
+        public async Task<IList<CustomerDocumentDto>> GetCustomerDocumentsAsync(int customerId)
+        {
+            var documents = await _context.CustomerDocuments
+                .Include(x => x.UploadedFile)
+                .Include(x => x.VerifiedByUser)
+                .Where(x => x.CustomerId == customerId && !x.IsDeleted)
+                .OrderByDescending(x => x.CreatedDate)
+                .ToListAsync();
+
+            return documents.Select(doc => new CustomerDocumentDto
+            {
+                Id = doc.Id,
+                CustomerId = doc.CustomerId,
+                DocumentType = doc.DocumentType,
+                DocumentTypeName = doc.DocumentType.ToString(),
+                UploadedFileId = doc.UploadedFileId,
+                FileName = doc.UploadedFile.OriginalFileName,
+                FileUrl = doc.UploadedFile.FileUrl ?? string.Empty,
+                FileSize = doc.UploadedFile.FileSize,
+                ContentType = doc.UploadedFile.ContentType,
+                DocumentNumber = doc.DocumentNumber,
+                IssueDate = doc.IssueDate,
+                ExpiryDate = doc.ExpiryDate,
+                IssuingAuthority = doc.IssuingAuthority,
+                Notes = doc.Notes,
+                ProvinceId = doc.ProvinceId,
+                IsVerified = doc.IsVerified,
+                VerifiedByUserId = doc.VerifiedByUserId,
+                VerifiedByUserName = doc.VerifiedByUser?.UserName,
+                VerifiedDate = doc.VerifiedDate,
+                RejectionReason = doc.RejectionReason,
+                IsRequired = doc.IsRequired,
+                CreatedDate = doc.CreatedDate
+            }).ToList();
+        }
+
+        /// <summary>
+        /// Upload a new document for a customer
+        /// </summary>
+        public async Task<(bool Success, string Message, CustomerDocumentDto? Document)> UploadCustomerDocumentAsync(
+            int customerId, 
+            UploadCustomerDocumentDto dto, 
+            string? uploadedByUserId = null)
+        {
+            // Verify customer exists
+            var customer = await _customerRepository.GetByIdAsync(customerId);
+            if (customer == null)
+            {
+                return (false, "Customer not found", null);
+            }
+
+            try
+            {
+                // Upload file using FileUploadService
+                var uploadedFile = await _fileUploadService.UploadFileAsync(
+                    dto.File,
+                    UploadSource.Customer,
+                    relatedEntityId: customerId,
+                    description: $"Customer document: {dto.DocumentType}",
+                    uploadedByUserId: uploadedByUserId
+                );
+
+                // Create CustomerDocument entity
+                var customerDocument = new CustomerDocument
+                {
+                    CustomerId = customerId,
+                    DocumentType = dto.DocumentType,
+                    UploadedFileId = uploadedFile.Id,
+                    DocumentNumber = dto.DocumentNumber,
+                    IssueDate = dto.IssueDate,
+                    ExpiryDate = dto.ExpiryDate,
+                    IssuingAuthority = dto.IssuingAuthority,
+                    Notes = dto.Notes,
+                    IsRequired = dto.IsRequired,
+                    IsVerified = null, // Pending verification
+                    IsDeleted = false,
+                    CreatedDate = DateTime.UtcNow
+                };
+
+                await _context.CustomerDocuments.AddAsync(customerDocument);
+                await _context.SaveChangesAsync();
+
+                // Reload with includes to get full data
+                var createdDocument = await _context.CustomerDocuments
+                    .Include(x => x.UploadedFile)
+                    .Include(x => x.VerifiedByUser)
+                    .FirstOrDefaultAsync(x => x.Id == customerDocument.Id);
+
+                if (createdDocument == null)
+                {
+                    return (false, "Failed to create document", null);
+                }
+
+                var documentDto = new CustomerDocumentDto
+                {
+                    Id = createdDocument.Id,
+                    CustomerId = createdDocument.CustomerId,
+                    DocumentType = createdDocument.DocumentType,
+                    DocumentTypeName = createdDocument.DocumentType.ToString(),
+                    UploadedFileId = createdDocument.UploadedFileId,
+                    FileName = createdDocument.UploadedFile.OriginalFileName,
+                    FileUrl = createdDocument.UploadedFile.FileUrl ?? string.Empty,
+                    FileSize = createdDocument.UploadedFile.FileSize,
+                    ContentType = createdDocument.UploadedFile.ContentType,
+                    DocumentNumber = createdDocument.DocumentNumber,
+                    IssueDate = createdDocument.IssueDate,
+                    ExpiryDate = createdDocument.ExpiryDate,
+                    IssuingAuthority = createdDocument.IssuingAuthority,
+                    Notes = createdDocument.Notes,
+                    ProvinceId = createdDocument.ProvinceId,
+                    IsVerified = createdDocument.IsVerified,
+                    VerifiedByUserId = createdDocument.VerifiedByUserId,
+                    VerifiedByUserName = createdDocument.VerifiedByUser?.UserName,
+                    VerifiedDate = createdDocument.VerifiedDate,
+                    RejectionReason = createdDocument.RejectionReason,
+                    IsRequired = createdDocument.IsRequired,
+                    CreatedDate = createdDocument.CreatedDate
+                };
+
+                return (true, "Document uploaded successfully", documentDto);
+            }
+            catch (ArgumentException ex)
+            {
+                // File validation errors
+                return (false, ex.Message, null);
+            }
+            catch (Exception ex)
+            {
+                // Other errors
+                return (false, $"Failed to upload document: {ex.Message}", null);
+            }
+        }
+
+        /// <summary>
+        /// Verify or reject a customer document
+        /// </summary>
+        public async Task<(bool Success, string Message, CustomerDocumentDto? Document)> VerifyCustomerDocumentAsync(
+            int documentId,
+            VerifyDocumentDto dto,
+            string? verifiedByUserId = null)
+        {
+            // Validate: If rejected (IsApproved = false), RejectionReason is required
+            if (!dto.IsApproved && string.IsNullOrWhiteSpace(dto.RejectionReason))
+            {
+                return (false, "Rejection reason is required when rejecting a document", null);
+            }
+
+            // Get the document
+            var document = await _context.CustomerDocuments
+                .Include(x => x.UploadedFile)
+                .Include(x => x.VerifiedByUser)
+                .FirstOrDefaultAsync(x => x.Id == documentId && !x.IsDeleted);
+
+            if (document == null)
+            {
+                return (false, "Document not found", null);
+            }
+
+            // Update verification status
+            document.IsVerified = dto.IsApproved;
+            document.VerifiedByUserId = verifiedByUserId;
+            document.VerifiedDate = DateTime.UtcNow;
+            document.RejectionReason = dto.IsApproved ? null : dto.RejectionReason;
+            
+            // Update notes if provided
+            if (!string.IsNullOrWhiteSpace(dto.Notes))
+            {
+                document.Notes = dto.Notes;
+            }
+            
+            document.UpdatedDate = DateTime.UtcNow;
+
+            _context.CustomerDocuments.Update(document);
+            await _context.SaveChangesAsync();
+
+            // Reload to get updated data
+            var updatedDocument = await _context.CustomerDocuments
+                .Include(x => x.UploadedFile)
+                .Include(x => x.VerifiedByUser)
+                .FirstOrDefaultAsync(x => x.Id == documentId);
+
+            if (updatedDocument == null)
+            {
+                return (false, "Failed to verify document", null);
+            }
+
+            var documentDto = new CustomerDocumentDto
+            {
+                Id = updatedDocument.Id,
+                CustomerId = updatedDocument.CustomerId,
+                DocumentType = updatedDocument.DocumentType,
+                DocumentTypeName = updatedDocument.DocumentType.ToString(),
+                UploadedFileId = updatedDocument.UploadedFileId,
+                FileName = updatedDocument.UploadedFile.OriginalFileName,
+                FileUrl = updatedDocument.UploadedFile.FileUrl ?? string.Empty,
+                FileSize = updatedDocument.UploadedFile.FileSize,
+                ContentType = updatedDocument.UploadedFile.ContentType,
+                DocumentNumber = updatedDocument.DocumentNumber,
+                IssueDate = updatedDocument.IssueDate,
+                ExpiryDate = updatedDocument.ExpiryDate,
+                IssuingAuthority = updatedDocument.IssuingAuthority,
+                Notes = updatedDocument.Notes,
+                ProvinceId = updatedDocument.ProvinceId,
+                IsVerified = updatedDocument.IsVerified,
+                VerifiedByUserId = updatedDocument.VerifiedByUserId,
+                VerifiedByUserName = updatedDocument.VerifiedByUser?.UserName,
+                VerifiedDate = updatedDocument.VerifiedDate,
+                RejectionReason = updatedDocument.RejectionReason,
+                IsRequired = updatedDocument.IsRequired,
+                CreatedDate = updatedDocument.CreatedDate
+            };
+
+            var message = dto.IsApproved 
+                ? "Document verified successfully" 
+                : "Document rejected successfully";
+
+            return (true, message, documentDto);
+        }
+
+        /// <summary>
+        /// Verify or reject a customer based on their documents
+        /// </summary>
+        public async Task<(bool Success, string Message, CustomerStatusDto? CustomerStatus)> VerifyCustomerAsync(
+            int customerId,
+            VerifyCustomerDto dto,
+            string? verifiedByUserId = null)
+        {
+            // Validate: If rejected (IsApproved = false), RejectionReason is required
+            if (!dto.IsApproved && string.IsNullOrWhiteSpace(dto.RejectionReason))
+            {
+                return (false, "Rejection reason is required when rejecting a customer", null);
+            }
+
+            // Get the customer
+            var customer = await _context.Customers
+                .Include(x => x.ApprovedByUser)
+                .Include(x => x.Documents)
+                .FirstOrDefaultAsync(x => x.Id == customerId);
+
+            if (customer == null)
+            {
+                return (false, "Customer not found", null);
+            }
+
+            // If approving, validate that at least 1 document is verified
+            if (dto.IsApproved)
+            {
+                var verifiedDocumentsCount = await _context.CustomerDocuments
+                    .Where(x => x.CustomerId == customerId && x.IsVerified == true && !x.IsDeleted)
+                    .CountAsync();
+
+                if (verifiedDocumentsCount < 1)
+                {
+                    return (false, "Customer must have at least one verified document before approval", null);
+                }
+            }
+
+            // Store old status for verification record
+            var oldStatus = customer.Status;
+
+            // Determine new status
+            var newStatus = dto.IsApproved ? CustomerStatus.Approved : CustomerStatus.Suspended;
+
+            // Check if this is the initial approval
+            var isInitialApproval = dto.IsApproved && oldStatus == CustomerStatus.PendingApproval;
+
+            // Update customer status
+            customer.Status = newStatus;
+            
+            if (dto.IsApproved)
+            {
+                customer.ApprovedDate = DateTime.UtcNow;
+                customer.ApprovedByUserId = verifiedByUserId;
+            }
+            
+            customer.UpdatedDate = DateTime.UtcNow;
+
+            // Create CustomerVerification record
+            var verification = new CustomerVerification
+            {
+                CustomerId = customerId,
+                OldStatus = oldStatus,
+                NewStatus = newStatus,
+                ProcessedByUserId = verifiedByUserId,
+                ProcessedDate = DateTime.UtcNow,
+                Notes = dto.Notes,
+                RejectionReason = dto.IsApproved ? null : dto.RejectionReason,
+                Rating = dto.Rating,
+                IsInitialApproval = isInitialApproval,
+                CreatedDate = DateTime.UtcNow
+            };
+
+            _context.Customers.Update(customer);
+            await _context.CustomerVerifications.AddAsync(verification);
+            await _context.SaveChangesAsync();
+
+            // Get document counts
+            var verifiedDocsCount = await _context.CustomerDocuments
+                .Where(x => x.CustomerId == customerId && x.IsVerified == true && !x.IsDeleted)
+                .CountAsync();
+
+            var totalDocsCount = await _context.CustomerDocuments
+                .Where(x => x.CustomerId == customerId && !x.IsDeleted)
+                .CountAsync();
+
+            // Reload customer to get updated data
+            var updatedCustomer = await _context.Customers
+                .Include(x => x.ApprovedByUser)
+                .FirstOrDefaultAsync(x => x.Id == customerId);
+
+            if (updatedCustomer == null)
+            {
+                return (false, "Failed to verify customer", null);
+            }
+
+            // Map to DTO
+            var customerStatusDto = new CustomerStatusDto
+            {
+                Id = updatedCustomer.Id,
+                FullName = updatedCustomer.FullName,
+                Email = updatedCustomer.Email,
+                PhoneNumber = updatedCustomer.PhoneNumber,
+                Status = updatedCustomer.Status,
+                StatusName = updatedCustomer.Status.ToString(),
+                ApprovedDate = updatedCustomer.ApprovedDate,
+                ApprovedByUserId = updatedCustomer.ApprovedByUserId,
+                ApprovedByUserName = updatedCustomer.ApprovedByUser?.UserName,
+                VerifiedDocumentsCount = verifiedDocsCount,
+                TotalDocumentsCount = totalDocsCount,
+                CreatedDate = updatedCustomer.CreatedDate
+            };
+
+            var message = dto.IsApproved
+                ? "Customer approved successfully"
+                : "Customer rejected successfully";
+
+            return (true, message, customerStatusDto);
         }
     }
 }

@@ -48,5 +48,39 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
         /// <param name="customerId"></param>
         /// <returns></returns>
         Task<IList<CustomerLicenseResponse>> GetLicenses(int customerId);
+
+        /// <summary>
+        /// Get all documents for a customer
+        /// </summary>
+        /// <param name="customerId">Customer ID</param>
+        /// <returns>List of customer documents</returns>
+        Task<IList<CustomerDocumentDto>> GetCustomerDocumentsAsync(int customerId);
+
+        /// <summary>
+        /// Upload a new document for a customer
+        /// </summary>
+        /// <param name="customerId">Customer ID</param>
+        /// <param name="dto">Upload document DTO</param>
+        /// <param name="uploadedByUserId">User ID who uploaded the document</param>
+        /// <returns>Success status, message, and the created document</returns>
+        Task<(bool Success, string Message, CustomerDocumentDto? Document)> UploadCustomerDocumentAsync(int customerId, UploadCustomerDocumentDto dto, string? uploadedByUserId = null);
+
+        /// <summary>
+        /// Verify or reject a customer document
+        /// </summary>
+        /// <param name="documentId">Document ID</param>
+        /// <param name="dto">Verify document DTO</param>
+        /// <param name="verifiedByUserId">User ID who verified the document</param>
+        /// <returns>Success status, message, and the updated document</returns>
+        Task<(bool Success, string Message, CustomerDocumentDto? Document)> VerifyCustomerDocumentAsync(int documentId, VerifyDocumentDto dto, string? verifiedByUserId = null);
+
+        /// <summary>
+        /// Verify or reject a customer based on their documents
+        /// </summary>
+        /// <param name="customerId">Customer ID</param>
+        /// <param name="dto">Verify customer DTO</param>
+        /// <param name="verifiedByUserId">User ID who verified the customer</param>
+        /// <returns>Success status, message, and the customer status</returns>
+        Task<(bool Success, string Message, CustomerStatusDto? CustomerStatus)> VerifyCustomerAsync(int customerId, VerifyCustomerDto dto, string? verifiedByUserId = null);
     }
 }
