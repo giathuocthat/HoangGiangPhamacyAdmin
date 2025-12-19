@@ -18,34 +18,14 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public int WarehouseId { get; set; }
         
         /// <summary>
-        /// Mã vị trí đầy đủ theo format: Zone-Rack-Shelf-Bin
-        /// Ví dụ: "KA-R1-S2-B3"
+        /// ID của vị trí kho (tham chiếu đến WarehouseLocation)
+        /// </summary>
+        public int WarehouseLocationId { get; set; }
+        
+        /// <summary>
+        /// Mã vị trí (denormalized từ WarehouseLocation để truy vấn nhanh)
         /// </summary>
         public string LocationCode { get; set; } = string.Empty;
-        
-        /// <summary>
-        /// Tên khu vực (Zone)
-        /// Ví dụ: "Khu A", "Khu lạnh"
-        /// </summary>
-        public string? ZoneName { get; set; }
-        
-        /// <summary>
-        /// Tên/Mã giá (Rack)
-        /// Ví dụ: "R1", "R2"
-        /// </summary>
-        public string? RackName { get; set; }
-        
-        /// <summary>
-        /// Tên/Mã tầng (Shelf)
-        /// Ví dụ: "S1", "S2"
-        /// </summary>
-        public string? ShelfName { get; set; }
-        
-        /// <summary>
-        /// Tên/Mã ô (Bin)
-        /// Ví dụ: "B1", "B2", "B3"
-        /// </summary>
-        public string? BinName { get; set; }
         
         /// <summary>
         /// Số lượng của lô này tại vị trí này
@@ -74,6 +54,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public InventoryBatch InventoryBatch { get; set; } = null!;
         public ProductVariant ProductVariant { get; set; } = null!;
         public Warehouse Warehouse { get; set; } = null!;
+        public WarehouseLocation WarehouseLocation { get; set; } = null!;
         public ICollection<LocationStockMovement> Movements { get; set; } = new List<LocationStockMovement>();
     }
 }

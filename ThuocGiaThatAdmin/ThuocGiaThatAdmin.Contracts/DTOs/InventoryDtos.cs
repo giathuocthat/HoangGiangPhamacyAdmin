@@ -212,6 +212,9 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         [Range(1, int.MaxValue)]
         public int Quantity { get; set; }
         
+        [MaxLength(50)]
+        public string? LocationCode { get; set; }
+        
         public string? Notes { get; set; }
     }
     

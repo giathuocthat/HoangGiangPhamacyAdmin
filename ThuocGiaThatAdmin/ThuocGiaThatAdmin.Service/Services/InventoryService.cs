@@ -3,6 +3,7 @@ using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThat.Infrastucture.Repositories;
 using ThuocGiaThat.Infrastucture.Common;
+using ThuocGiaThat.Infrastucture;
 
 namespace ThuocGiaThatAdmin.Service.Services
 {
@@ -15,6 +16,8 @@ namespace ThuocGiaThatAdmin.Service.Services
         private readonly IInventoryTransactionRepository _transactionRepository;
         private readonly IStockAlertRepository _alertRepository;
         private readonly IRepository<ProductBatch> _productBatchRepository;
+        private readonly IRepository<BatchLocationStock> _batchLocationStockRepository;
+        private readonly TrueMecContext _context;
 
         public InventoryService(
             IRepository<Inventory> inventoryRepository,
@@ -23,7 +26,9 @@ namespace ThuocGiaThatAdmin.Service.Services
             IInventoryBatchRepository batchRepository,
             IInventoryTransactionRepository transactionRepository,
             IStockAlertRepository alertRepository,
-            IRepository<ProductBatch> productBatchRepository)
+            IRepository<ProductBatch> productBatchRepository,
+            IRepository<BatchLocationStock> batchLocationStockRepository,
+            TrueMecContext context)
         {
             _inventoryRepository = inventoryRepository;
             _productVariantRepository = productVariantRepository;
@@ -32,6 +37,8 @@ namespace ThuocGiaThatAdmin.Service.Services
             _transactionRepository = transactionRepository;
             _alertRepository = alertRepository;
             _productBatchRepository = productBatchRepository;
+            _batchLocationStockRepository = batchLocationStockRepository;
+            _context = context;
         }
 
         public async Task<PurchaseInventoryResponseDto> PurchaseInventoryAsync(PurchaseInventoryDto dto, string? userId = null)
@@ -157,13 +164,30 @@ namespace ThuocGiaThatAdmin.Service.Services
             await _transactionRepository.AddAsync(transaction);
             await _transactionRepository.SaveChangesAsync();
 
-            // 8. Check and create alerts if needed
+            // 8. Create or update BatchLocationStock if LocationCode is provided
+            if (!string.IsNullOrWhiteSpace(dto.LocationCode))
+            {
+                await CreateOrUpdateBatchLocationStockAsync(
+                    inventoryBatch.Id,
+                    productBatch.ProductVariantId,
+                    dto.WarehouseId,
+                    dto.LocationCode,
+                    dto.Quantity,
+                    isNewInventoryBatch);
+            }
+
+            // 9. Check and create alerts if needed
             await CheckAndCreateAlertsAsync(inventory, inventoryBatch);
 
-            // 9. Return response
+            // 10. Return response
             var message = isNewInventoryBatch 
                 ? $"Successfully added {dto.Quantity} units of batch '{dto.BatchNumber}' ({productVariant.SKU}) to inventory"
                 : $"Successfully updated batch '{dto.BatchNumber}' with {dto.Quantity} more units of {productVariant.SKU}";
+            
+            if (!string.IsNullOrWhiteSpace(dto.LocationCode))
+            {
+                message += $" at location {dto.LocationCode}";
+            }
                 
             return new PurchaseInventoryResponseDto
             {
@@ -876,6 +900,64 @@ namespace ThuocGiaThatAdmin.Service.Services
                 Notes = transaction.Notes,
                 CreatedDate = transaction.CreatedDate
             };
+        }
+
+
+        private async Task CreateOrUpdateBatchLocationStockAsync(
+            int inventoryBatchId,
+            int productVariantId,
+            int warehouseId,
+            string locationCode,
+            int quantity,
+            bool isPrimaryLocation)
+        {
+            // Validate that the location code exists in WarehouseLocation table
+            var warehouseLocation = await _context.WarehouseLocations
+                .FirstOrDefaultAsync(wl => wl.LocationCode == locationCode);
+
+            if (warehouseLocation == null)
+            {
+                throw new KeyNotFoundException(
+                    $"Location code '{locationCode}' not found. Please create the warehouse location first before using it for inventory.");
+            }
+
+            if (!warehouseLocation.IsActive)
+            {
+                throw new InvalidOperationException(
+                    $"Location '{locationCode}' is inactive. Please activate it before using it for inventory.");
+            }
+
+            // Check if this location already exists for this batch
+            var existingLocationStock = await _batchLocationStockRepository.FirstOrDefaultAsync(bls =>
+                bls.InventoryBatchId == inventoryBatchId &&
+                bls.WarehouseLocationId == warehouseLocation.Id);
+
+            if (existingLocationStock != null)
+            {
+                // Update existing location stock
+                existingLocationStock.Quantity += quantity;
+                _batchLocationStockRepository.Update(existingLocationStock);
+            }
+            else
+            {
+                // Create new location stock
+                var newLocationStock = new BatchLocationStock
+                {
+                    InventoryBatchId = inventoryBatchId,
+                    ProductVariantId = productVariantId,
+                    WarehouseId = warehouseId,
+                    WarehouseLocationId = warehouseLocation.Id,
+                    LocationCode = locationCode, // Denormalized for quick queries
+                    Quantity = quantity,
+                    QuantityReserved = 0,
+                    IsPrimaryLocation = isPrimaryLocation,
+                    Notes = $"Initial stock at location {locationCode}"
+                };
+
+                await _batchLocationStockRepository.AddAsync(newLocationStock);
+            }
+
+            await _batchLocationStockRepository.SaveChangesAsync();
         }
     }
 }
