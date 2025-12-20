@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ThuocGiaThat.Infrastucture;
 
@@ -11,9 +12,11 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    partial class TrueMecContextModelSnapshot : ModelSnapshot
+    [Migration("20251219094150_update_purchase_order")]
+    partial class update_purchase_order
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -563,6 +566,10 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("BinName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -592,14 +599,23 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<int>("QuantityReserved")
                         .HasColumnType("int");
 
+                    b.Property<string>("RackName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ShelfName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("WarehouseId")
                         .HasColumnType("int");
 
-                    b.Property<int>("WarehouseLocationId")
-                        .HasColumnType("int");
+                    b.Property<string>("ZoneName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -613,9 +629,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("WarehouseId");
 
-                    b.HasIndex("WarehouseLocationId");
-
-                    b.HasIndex("InventoryBatchId", "WarehouseLocationId")
+                    b.HasIndex("InventoryBatchId", "WarehouseId", "LocationCode")
                         .IsUnique();
 
                     b.ToTable("BatchLocationStocks");
@@ -3768,72 +3782,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.ToTable("Warehouses");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.WarehouseLocation", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BinName")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LocationCode")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int?>("MaxCapacity")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("RackName")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("ShelfName")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("WarehouseId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ZoneName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("LocationCode")
-                        .IsUnique();
-
-                    b.HasIndex("WarehouseId");
-
-                    b.ToTable("WarehouseLocations");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ApplicationUser", null)
@@ -3961,19 +3909,11 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.WarehouseLocation", "WarehouseLocation")
-                        .WithMany("BatchLocationStocks")
-                        .HasForeignKey("WarehouseLocationId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("InventoryBatch");
 
                     b.Navigation("ProductVariant");
 
                     b.Navigation("Warehouse");
-
-                    b.Navigation("WarehouseLocation");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Category", b =>
@@ -4731,16 +4671,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("Province");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.WarehouseLocation", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Warehouse", "Warehouse")
-                        .WithMany()
-                        .HasForeignKey("WarehouseId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Warehouse");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ActiveIngredient", b =>
                 {
                     b.Navigation("ProductActiveIngredients");
@@ -4918,11 +4848,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("Inventories");
 
                     b.Navigation("Transactions");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.WarehouseLocation", b =>
-                {
-                    b.Navigation("BatchLocationStocks");
                 });
 #pragma warning restore 612, 618
         }

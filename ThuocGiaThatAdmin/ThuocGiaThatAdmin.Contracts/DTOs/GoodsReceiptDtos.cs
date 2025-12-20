@@ -143,4 +143,29 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public int OrderedQuantity { get; set; }
         public string? Notes { get; set; }
     }
+
+    /// <summary>
+    /// DTO for updating quality inspection
+    /// </summary>
+    public class UpdateQualityInspectionDto
+    {
+        public int ReceivedQuantity { get; set; }
+        public int AcceptedQuantity { get; set; }
+        public int RejectedQuantity { get; set; }
+        public QualityStatus QualityStatus { get; set; }
+        public string? BatchNumber { get; set; }
+        public DateTime? ManufactureDate { get; set; }
+        public DateTime? ExpiryDate { get; set; }
+        public string? InspectionNotes { get; set; }
+    }
+
+    /// <summary>
+    /// DTO for updating item location in warehouse
+    /// </summary>
+    public class UpdateItemLocationDto
+    {
+        public string? LocationCode { get; set; }
+        public string? ShelfNumber { get; set; }
+        public string? Notes { get; set; }
+    }
 }

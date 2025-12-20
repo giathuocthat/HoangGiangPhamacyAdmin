@@ -12,11 +12,11 @@ namespace ThuocGiaThatAdmin.Contract.Responses
     {
         public int Id { get; set; }
         public string OrderNumber { get; set; } = string.Empty;
-        public int SupplierId { get; set; }
+        public int? SupplierId { get; set; }
         public string SupplierName { get; set; } = string.Empty;
         public int? SupplierContactId { get; set; }
         public string? SupplierContactName { get; set; }
-        public int WarehouseId { get; set; }
+        public int? WarehouseId { get; set; }
         public string WarehouseName { get; set; } = string.Empty;
         public PurchaseOrderStatus Status { get; set; }
         public string StatusName { get; set; }
