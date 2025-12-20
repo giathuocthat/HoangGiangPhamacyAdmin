@@ -272,7 +272,7 @@ namespace ThuocGiaThatAdmin.Service.Services
         /// <summary>
         /// Get all batches of a specific inventory with detailed information
         /// </summary>
-        public async Task<IEnumerable<InventoryBatchDetailDto>> GetInventoryBatchesAsync(int inventoryId)
+        public async Task<InventoryBatchesResponseDto> GetInventoryBatchesAsync(int inventoryId)
         {
             // 1. Check if inventory exists
             var inventory = await _inventoryRepository.GetByIdAsync(inventoryId);
@@ -314,7 +314,41 @@ namespace ThuocGiaThatAdmin.Service.Services
             .OrderBy(b => b.ExpiryDate) // Sort by expiry date (FEFO)
             .ToList();
 
-            return batchDtos;
+            // 5. Calculate pending received quantity
+            // Get all Purchase Order Items for this variant and warehouse that have been received
+            var poItems = await _context.PurchaseOrderItems
+                .Include(x => x.PurchaseOrder)
+                .Where(x => 
+                    x.ProductVariantId == inventory.ProductVariantId && 
+                    x.PurchaseOrder.WarehouseId == inventory.WarehouseId && 
+                    x.ReceivedQuantity > 0)
+                .ToListAsync();
+
+            int pendingReceivedQuantity = 0;
+            if (poItems.Any())
+            {
+                var totalReceived = poItems.Sum(x => x.ReceivedQuantity);
+                
+                // Find all Purchase transactions linked to these POs
+                // We use PO Numbers to link transactions
+                var poNumbers = poItems.Select(x => x.PurchaseOrder.OrderNumber).Distinct().ToList();
+                
+                var purchaseTransactions = await _transactionRepository.FindAsync(t => 
+                    t.ProductVariantId == inventory.ProductVariantId &&
+                    t.WarehouseId == inventory.WarehouseId &&
+                    t.Type == TransactionType.Purchase &&
+                    poNumbers.Contains(t.ReferenceNumber ?? ""));
+                
+                var totalEntered = purchaseTransactions.Sum(t => t.Quantity);
+                
+                pendingReceivedQuantity = Math.Max(0, totalReceived - totalEntered);
+            }
+
+            return new InventoryBatchesResponseDto
+            {
+                Batches = batchDtos,
+                PendingReceivedQuantity = pendingReceivedQuantity
+            };
         }
 
         // ========== Sale Transaction ==========
