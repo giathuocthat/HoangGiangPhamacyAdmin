@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
+Ôªøusing Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Logging;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 using ThuocGiaThatAdmin.Contract.DTOs;
 using ThuocGiaThatAdmin.Contract.Enums;
 using ThuocGiaThatAdmin.Contract.Requests;
+using ThuocGiaThatAdmin.Server.Extensions;
 using ThuocGiaThatAdmin.Server.Models;
 using ThuocGiaThatAdmin.Service.Interfaces;
 
@@ -20,13 +22,16 @@ namespace ThuocGiaThatAdmin.Server.Controllers
     {
         private readonly ICustomerAuthService _customerAuthService;
         private readonly IZaloService _zaloService;
+        private readonly IWebHostEnvironment _env;
 
         public CustomerAuthController(
             ICustomerAuthService customerAuthService,
-            ILogger<CustomerAuthController> logger, IZaloService zaloService) : base(logger)
+            ILogger<CustomerAuthController> logger, IZaloService zaloService,
+            IWebHostEnvironment env) : base(logger)
         {
             _customerAuthService = customerAuthService;
             _zaloService = zaloService;
+            _env = env;
         }
 
         /// <summary>
@@ -43,10 +48,10 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 {
                     return BadRequest(new ApiErrorResponse
                     {
-                        Detail = "M„ otp khÙng chÌnh x·c",
+                        Detail = "M√£ otp kh√¥ng ch√≠nh x√°c",
                         Errors = new Dictionary<string, string>
                         {
-                            ["otp"] = "M„ OTP khÙng chÌnh x·c"
+                            ["otp"] = "M√£ OTP kh√¥ng ch√≠nh x√°c"
                         }
                     });
                 }
@@ -89,18 +94,28 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             return await ExecuteActionAsync(async () =>
             {
-                var (success, message, token, expiresAt, customer) = await _customerAuthService.LoginAsync(dto);
+                var (success, accessToken, refreshToken, customer) = await _customerAuthService.LoginAsync(dto);
 
                 if (!success)
                 {
-                    return UnauthorizedResponse(message);
+                    return BadRequest(new ApiErrorResponse
+                    {
+                        Detail = "S·ªë ƒëi·ªán tho·∫°i ho·∫∑c m·∫≠t kh·∫©u kh√¥ng ch√≠nh x√°c",
+                    });
                 }
+
+                Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = false, //todo
+                    SameSite = SameSiteMode.Lax,
+                    Path = "/", ///api/customer/auth/refreshToken",
+                    MaxAge = TimeSpan.FromDays(dto.RememberMe == true ? 7 : 1)
+                });
 
                 var response = new
                 {
-                    accessToken = token,
-                    tokenType = "Bearer",
-                    expiresAt = expiresAt,
+                    accessToken = accessToken,
                     customer = new
                     {
                         id = customer!.Id,
@@ -115,6 +130,17 @@ namespace ThuocGiaThatAdmin.Server.Controllers
 
                 return Success(response, "Login successful");
             });
+        }
+
+        [HttpPost("refreshToken")]
+        public IActionResult RefreshToken()
+        {
+            var refreshToken = Request.Cookies["refresh_token"];
+            if (string.IsNullOrEmpty(refreshToken)) return BadRequest(new ApiErrorResponse { Detail = "RefreshToken kh√¥ng t·ªìn t·∫°i" });
+
+            var accessToken = _customerAuthService.Refresh(refreshToken);
+
+            return Ok(new { accessToken });
         }
 
         /// <summary>
@@ -142,7 +168,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             return await ExecuteActionAsync(async () =>
             {
-                var customerId = int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
+                var customerId = User.GetCustomerId();// int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
                 var customer = await _customerAuthService.GetCustomerByIdAsync(customerId);
 
                 if (customer == null)
@@ -228,10 +254,10 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 {
                     return BadRequest(new ApiErrorResponse
                     {
-                        Detail = "M„ otp khÙng chÌnh x·c",
+                        Detail = "M√£ otp kh√¥ng ch√≠nh x√°c",
                         Errors = new Dictionary<string, string>
                         {
-                            ["otp"] = "M„ OTP khÙng chÌnh x·c"
+                            ["otp"] = "M√£ OTP kh√¥ng ch√≠nh x√°c"
                         }
                     });
                 }
