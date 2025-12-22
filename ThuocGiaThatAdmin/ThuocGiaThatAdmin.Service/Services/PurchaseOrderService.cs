@@ -242,6 +242,8 @@ namespace ThuocGiaThatAdmin.Service.Services
                     purchaseOrderItemDetail.DiscountAmount = itemDto.DiscountAmount;
                     purchaseOrderItemDetail.TotalAmount = itemTotal + itemTax - itemDto.DiscountAmount;
                     purchaseOrderItemDetail.Notes = itemDto.Notes;
+
+                    _itemRepository.Update(purchaseOrderItemDetail);
                 }
 
                 // neu chua co
@@ -261,8 +263,6 @@ namespace ThuocGiaThatAdmin.Service.Services
                   };
                     await _itemRepository.AddAsync(purchaseOrderItem);
                 }
-
-                _itemRepository.Update(purchaseOrderItemDetail);
             }
 
 
