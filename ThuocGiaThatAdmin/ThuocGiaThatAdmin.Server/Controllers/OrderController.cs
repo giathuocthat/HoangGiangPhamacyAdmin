@@ -118,7 +118,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// <summary>
         /// Get orders for the logged-in customer
         /// </summary>
-        //[Authorize(Roles = "Customer")]
+        ////[Authorize(Roles = "Customer")]
         [HttpGet("customer/list")]
         public async Task<IActionResult> GetCustomerOrder(
             [FromQuery] int pageNumber = 1,
@@ -174,7 +174,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             }, "Update Order Status");
         }
 
-        [Authorize(Roles = "Customer")]
+        //[Authorize(Roles = "Customer")]
         [HttpGet("defaultAddress")]
         public async Task<IActionResult> GetDefaultAddress()
         {
@@ -183,7 +183,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             return Ok(address);
         }
 
-        [Authorize(Roles = "Customer")]
+        //[Authorize(Roles = "Customer")]
         [HttpPost("checkout")]
         public async Task<IActionResult> Checkout([FromBody] CheckoutOrderDto order)
         {
@@ -224,7 +224,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             }, "Update Delivery Status");
         }
 
-        [Authorize(Roles = "Customer")]
+        //[Authorize(Roles = "Customer")]
         [HttpGet("listorders")]
         public async Task<IActionResult> GetListOrders()
         {
@@ -233,7 +233,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = "Customer")]
+        //[Authorize(Roles = "Customer")]
         [HttpGet("detail/{id}")]
         public async Task<IActionResult> GetOrderDetail(int id)
         {

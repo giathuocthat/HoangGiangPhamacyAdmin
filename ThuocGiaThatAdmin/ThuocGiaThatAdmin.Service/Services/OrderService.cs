@@ -478,6 +478,8 @@ namespace ThuocGiaThatAdmin.Service.Services
                 TrackingNumber = order.TrackingNumber,
                 ShippedDate = order.ShippedDate,
                 DeliveredDate = order.DeliveredDate,
+                EstimatedDeliveryDate = order.EstimatedDeliveryDate,
+                DeliveryMethod = order.DeliveryMethod,
                 DeliveryNotes = order.DeliveryNotes,
                 Note = order.Note,
                 OrderItems = order.OrderItems.Select(oi => new OrderItemResponseDto
@@ -668,7 +670,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                     },
                     PaymentMethod = x.PaymentMethod,
                     DeliveryDate = x.CreatedDate.AddDays(7),
-                    DeliveryMethod = "",
+                    DeliveryMethod = x.DeliveryMethod,
                     Note = x.Note,
                     Items = x.OrderItems.Select(y => new
                     {

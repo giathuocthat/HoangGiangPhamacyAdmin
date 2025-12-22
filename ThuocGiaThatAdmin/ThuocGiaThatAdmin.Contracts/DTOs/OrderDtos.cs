@@ -55,7 +55,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
     {
         // Customer Information - can select existing or create new
         public int? CustomerId { get; set; }
-        
+
         // Customer details for new customer creation (required if CustomerId is null)
         public string? CustomerFullName { get; set; }
         public string? CustomerEmail { get; set; }
@@ -141,6 +141,8 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public string? TrackingNumber { get; set; }
         public DateTime? ShippedDate { get; set; }
         public DateTime? DeliveredDate { get; set; }
+        public DateTime? EstimatedDeliveryDate { get; set; }
+        public string? DeliveryMethod { get; set; }
         public string? DeliveryNotes { get; set; }
         public string? Note { get; set; }
         public List<OrderItemResponseDto> OrderItems { get; set; } = new List<OrderItemResponseDto>();
@@ -175,7 +177,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public string OrderStatus { get; set; } = string.Empty;
         public string PaymentStatus { get; set; } = string.Empty;
         public decimal TotalAmount { get; set; }
-        public bool IsFulfilled {  get; set; }
+        public bool IsFulfilled { get; set; }
     }
 
     /// <summary>
