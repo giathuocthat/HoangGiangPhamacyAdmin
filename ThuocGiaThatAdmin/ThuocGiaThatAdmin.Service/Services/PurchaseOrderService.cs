@@ -187,13 +187,16 @@ namespace ThuocGiaThatAdmin.Service.Services
                 throw new ArgumentNullException(nameof(dto));
 
             var order = await _purchaseOrderRepository.GetWithDetailsAsync(id);
+
             if (order == null)
                 throw new InvalidOperationException($"Purchase order {id} not found");
 
             if (order.Status != PurchaseOrderStatus.Draft)
                 throw new InvalidOperationException("Only draft orders can be updated");
 
+
             // Update basic info
+            order.SupplierId = dto.SupplierId;
             order.SupplierContactId = dto.SupplierContactId;
             order.ExpectedDeliveryDate = dto.ExpectedDeliveryDate;
             order.ShippingFee = dto.ShippingFee;
@@ -214,11 +217,55 @@ namespace ThuocGiaThatAdmin.Service.Services
             // Update items (simplified - in production, handle add/remove/update)
             foreach (var itemDto in dto.Items)
             {
-                var itemTotal = itemDto.OrderedQuantity * itemDto.UnitPrice;
-                var itemTax = itemTotal * itemDto.TaxRate / 100;
-                subTotal += itemTotal;
-                taxAmount += itemTax;
+                var purchaseOrderItemDetail = await _itemRepository.GetByIdAsync(itemDto.Id);
+
+                // neu da co roi
+                if (purchaseOrderItemDetail != null)
+                {
+                    if (itemDto.OrderedQuantity <= 0)
+                    {
+                        throw new InvalidOperationException("OrderQuantity must be greater than zero.");
+                    }
+
+                    if (itemDto.UnitPrice <= 0)
+                    {
+                        throw new InvalidOperationException("UnitPrice must be greater than zero.");
+                    }
+
+                    var itemTotal = itemDto.OrderedQuantity * itemDto.UnitPrice;
+                    var itemTax = itemTotal * itemDto.TaxRate / 100;
+                    subTotal += itemTotal;
+                    taxAmount += itemTax;
+                    purchaseOrderItemDetail.OrderedQuantity = itemDto.OrderedQuantity;
+                    purchaseOrderItemDetail.UnitPrice = itemDto.UnitPrice;
+                    purchaseOrderItemDetail.TaxRate = itemDto.TaxRate;
+                    purchaseOrderItemDetail.DiscountAmount = itemDto.DiscountAmount;
+                    purchaseOrderItemDetail.TotalAmount = itemTotal + itemTax - itemDto.DiscountAmount;
+                    purchaseOrderItemDetail.Notes = itemDto.Notes;
+                }
+
+                // neu chua co
+                else
+                {
+                  var purchaseOrderItem = new PurchaseOrderItem
+                  {
+                      PurchaseOrderId = order.Id,
+                      ProductVariantId = itemDto.ProductVariantId,
+                      OrderedQuantity = itemDto.OrderedQuantity,
+                      ReceivedQuantity = 0,
+                      UnitPrice = itemDto.UnitPrice,
+                      TaxRate = itemDto.TaxRate,
+                      DiscountAmount = itemDto.DiscountAmount,
+                      TotalAmount = itemDto.OrderedQuantity * itemDto.UnitPrice + (itemDto.OrderedQuantity * itemDto.UnitPrice * itemDto.TaxRate / 100) - itemDto.DiscountAmount,
+                      Notes = itemDto.Notes
+                  };
+                    await _itemRepository.AddAsync(purchaseOrderItem);
+                }
+
+                _itemRepository.Update(purchaseOrderItemDetail);
             }
+
+
 
             order.SubTotal = subTotal;
             order.TaxAmount = taxAmount;
