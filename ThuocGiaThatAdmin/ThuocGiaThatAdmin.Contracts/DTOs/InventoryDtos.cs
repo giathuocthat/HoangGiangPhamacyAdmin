@@ -142,6 +142,12 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public string? Notes { get; set; }
         public DateTime CreatedDate { get; set; }
     }
+
+    public class InventoryBatchesResponseDto
+    {
+        public IEnumerable<InventoryBatchDetailDto> Batches { get; set; } = new List<InventoryBatchDetailDto>();
+        public int PendingReceivedQuantity { get; set; }
+    }
     
     public class CreateBatchDto
     {

@@ -52,8 +52,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             return await ExecuteActionAsync(async () =>
             {
-                var batches = await _inventoryService.GetInventoryBatchesAsync(id);
-                return Success(batches, "Inventory batches retrieved successfully");
+                var result = await _inventoryService.GetInventoryBatchesAsync(id);
+                return Success(result, "Inventory batches retrieved successfully");
             }, "Get Inventory Batches");
         }
 
