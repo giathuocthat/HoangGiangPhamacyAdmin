@@ -42,9 +42,9 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
 
     public class CreatePurchaseOrderDto
     {
-        public int SupplierId { get; set; }
+        public int? SupplierId { get; set; }
         public int? SupplierContactId { get; set; }
-        public int WarehouseId { get; set; }
+        public int? WarehouseId { get; set; }
         public DateTime? ExpectedDeliveryDate { get; set; }
         public decimal ShippingFee { get; set; }
         public decimal DiscountAmount { get; set; }
