@@ -19,7 +19,9 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         private readonly OrderService _orderService;
         private readonly IAddressService _addressSevice;
         private readonly VNPayService _vnPayService;
-        public OrderController(OrderService orderService, ILogger<OrderController> logger, IAddressService addressService, VNPayService vnPayService)
+
+        public OrderController(OrderService orderService, ILogger<OrderController> logger,
+            IAddressService addressService, VNPayService vnPayService)
             : base(logger)
         {
             _orderService = orderService ?? throw new ArgumentNullException(nameof(orderService));
@@ -76,20 +78,6 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         }
 
         /// <summary>
-        /// Get all orders
-        /// </summary>
-        /// <returns>List of all orders</returns>
-        [HttpGet]
-        public async Task<IActionResult> GetAllOrders()
-        {
-            return await ExecuteActionAsync(async () =>
-            {
-                var orders = await _orderService.GetAllOrdersAsync();
-                return Success(orders, "Orders retrieved successfully");
-            }, "Get All Orders");
-        }
-
-        /// <summary>
         /// Get orders with pagination and search
         /// </summary>
         /// <param name="pageNumber">Page number (default: 1)</param>
@@ -125,6 +113,49 @@ namespace ThuocGiaThatAdmin.Server.Controllers
 
                 return Success(response, "Orders retrieved successfully");
             }, "Get Orders List");
+        }
+
+        /// <summary>
+        /// Get orders for the logged-in customer
+        /// </summary>
+        //[Authorize(Roles = "Customer")]
+        [HttpGet("customer/list")]
+        public async Task<IActionResult> GetCustomerOrder(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? searchText = null)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                if (pageSize > 100)
+                {
+                    return BadRequestResponse("Page size cannot exceed 100");
+                }
+
+                // Get customer ID from claims for security
+                var customerIdClaim = User.FindFirst("sub");
+                if (customerIdClaim == null || !int.TryParse(customerIdClaim.Value, out int customerId))
+                {
+                    return UnauthorizedResponse("Invalid customer authentication");
+                }
+
+                var (orders, totalCount) =
+                    await _orderService.GetOrdersAsync(pageNumber, pageSize, searchText, customerId);
+
+                var response = new
+                {
+                    Data = orders,
+                    Pagination = new
+                    {
+                        PageNumber = pageNumber,
+                        PageSize = pageSize,
+                        TotalCount = totalCount,
+                        TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+                    }
+                };
+
+                return Success(response, "Customer orders retrieved successfully");
+            }, "Get Customer Orders");
         }
 
         /// <summary>
@@ -218,7 +249,6 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             var rawData = await FormatRequestData(Request);
 
 
-
             var vnpParams = new SortedList<string, string>();
             foreach (var key in Request.Query.Keys)
             {
@@ -259,6 +289,5 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 });
             }
         }
-
     }
 }
