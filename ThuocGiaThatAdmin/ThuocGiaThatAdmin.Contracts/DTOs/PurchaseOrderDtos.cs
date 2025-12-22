@@ -130,12 +130,12 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
     public class UpdatePurchaseOrderItemDto
     {
         public int Id { get; set; }
-        public int ProductVariantId { get; set; }
         public int OrderedQuantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal TaxRate { get; set; }
         public decimal DiscountAmount { get; set; }
         public string? Notes { get; set; }
+        public int ProductVariantId { get; set; }
     }
 
     // ============ PurchaseOrderHistory DTOs ============
