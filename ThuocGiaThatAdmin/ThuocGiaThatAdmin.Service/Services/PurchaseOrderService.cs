@@ -190,12 +190,14 @@ namespace ThuocGiaThatAdmin.Service.Services
             if (order == null)
                 throw new InvalidOperationException($"Purchase order {id} not found");
 
-            if (order.Status != PurchaseOrderStatus.Draft)
-                throw new InvalidOperationException("Only draft orders can be updated");
+            // FIX: Change OR to AND
+            if (order.Status != PurchaseOrderStatus.Draft && order.Status != PurchaseOrderStatus.Pending)
+                throw new InvalidOperationException("Only Draft/Pending orders can be updated");
 
             // Update basic info
+            order.SupplierId = dto.SupplierId ?? order.SupplierId;
             order.SupplierContactId = dto.SupplierContactId;
-            order.ExpectedDeliveryDate = dto.ExpectedDeliveryDate;
+            order.ExpectedDeliveryDate = dto.ExpectedDeliveryDate ?? order.ExpectedDeliveryDate;
             order.ShippingFee = dto.ShippingFee;
             order.DiscountAmount = dto.DiscountAmount;
             order.Notes = dto.Notes;
@@ -207,22 +209,84 @@ namespace ThuocGiaThatAdmin.Service.Services
                 order.PaymentStatus = dto.PaymentStatus.Value;
             }
 
-            // Recalculate totals
-            decimal subTotal = 0;
-            decimal taxAmount = 0;
-
-            // Update items (simplified - in production, handle add/remove/update)
-            foreach (var itemDto in dto.Items)
+            // FIX: Update items properly
+            if (dto.Items != null && dto.Items.Any())
             {
-                var itemTotal = itemDto.OrderedQuantity * itemDto.UnitPrice;
-                var itemTax = itemTotal * itemDto.TaxRate / 100;
-                subTotal += itemTotal;
-                taxAmount += itemTax;
-            }
+                decimal subTotal = 0;
+                decimal taxAmount = 0;
 
-            order.SubTotal = subTotal;
-            order.TaxAmount = taxAmount;
-            order.TotalAmount = subTotal + taxAmount + dto.ShippingFee - dto.DiscountAmount;
+                // Process each item from DTO
+                foreach (var itemDto in dto.Items)
+                {
+                    // Validation
+                    if (itemDto.OrderedQuantity <= 0)
+                        throw new InvalidOperationException("OrderedQuantity must be greater than zero.");
+                    if (itemDto.UnitPrice < 0)
+                        throw new InvalidOperationException("UnitPrice must be greater than or equal to zero.");
+
+                    // Find existing item by its database ID
+                    var existingItem = order.PurchaseOrderItems
+                        .FirstOrDefault(x => x.Id == itemDto.Id);
+
+                    var itemTotal = itemDto.OrderedQuantity * itemDto.UnitPrice;
+                    var itemTax = itemTotal * itemDto.TaxRate / 100;
+                    subTotal += itemTotal;
+                    taxAmount += itemTax;
+
+                    if (existingItem != null)
+                    {
+                        // Update existing item
+                        existingItem.OrderedQuantity = itemDto.OrderedQuantity;
+                        existingItem.UnitPrice = itemDto.UnitPrice;
+                        existingItem.TaxRate = itemDto.TaxRate;
+                        existingItem.DiscountAmount = itemDto.DiscountAmount;
+                        existingItem.TotalAmount = itemTotal + itemTax - itemDto.DiscountAmount;
+                        existingItem.Notes = itemDto.Notes;
+
+                        _itemRepository.Update(existingItem);
+                    }
+                    else
+                    {
+                        // Add new item (if itemDto.Id == 0 or not found)
+                        var variant = await _productVariantRepository.GetByIdAsync(itemDto.ProductVariantId);
+                        if (variant == null)
+                            throw new InvalidOperationException($"Product variant {itemDto.ProductVariantId} not found");
+
+                        var newItem = new PurchaseOrderItem
+                        {
+                            PurchaseOrderId = order.Id,
+                            ProductVariantId = itemDto.ProductVariantId,
+                            OrderedQuantity = itemDto.OrderedQuantity,
+                            ReceivedQuantity = 0,
+                            UnitPrice = itemDto.UnitPrice,
+                            TaxRate = itemDto.TaxRate,
+                            DiscountAmount = itemDto.DiscountAmount,
+                            TotalAmount = itemTotal + itemTax - itemDto.DiscountAmount,
+                            ProductName = variant.Product?.Name ?? string.Empty,
+                            SKU = variant.SKU,
+                            Notes = itemDto.Notes
+                        };
+
+                        order.PurchaseOrderItems.Add(newItem);
+                    }
+                }
+
+                // Remove items that are not in the DTO (user deleted them)
+                var itemIdsFromDto = dto.Items.Where(x => x.Id > 0).Select(x => x.Id).ToList();
+                var itemsToRemove = order.PurchaseOrderItems
+                    .Where(x => !itemIdsFromDto.Contains(x.Id))
+                    .ToList();
+
+                foreach (var itemToRemove in itemsToRemove)
+                {
+                    order.PurchaseOrderItems.Remove(itemToRemove);
+                    _itemRepository.Delete(itemToRemove);
+                }
+
+                order.SubTotal = subTotal;
+                order.TaxAmount = taxAmount;
+                order.TotalAmount = subTotal + taxAmount + dto.ShippingFee - dto.DiscountAmount;
+            }
 
             _purchaseOrderRepository.Update(order);
             await _purchaseOrderRepository.SaveChangesAsync();

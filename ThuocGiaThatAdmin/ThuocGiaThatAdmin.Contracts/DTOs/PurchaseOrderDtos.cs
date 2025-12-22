@@ -56,6 +56,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
 
     public class UpdatePurchaseOrderDto
     {
+        public int? SupplierId { get; set; }
         public int? SupplierContactId { get; set; }
         public DateTime? ExpectedDeliveryDate { get; set; }
         public decimal ShippingFee { get; set; }
@@ -129,6 +130,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
     public class UpdatePurchaseOrderItemDto
     {
         public int Id { get; set; }
+        public int ProductVariantId { get; set; }
         public int OrderedQuantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal TaxRate { get; set; }
