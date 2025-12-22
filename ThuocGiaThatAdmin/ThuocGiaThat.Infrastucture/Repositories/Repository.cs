@@ -219,6 +219,11 @@ namespace ThuocGiaThat.Infrastucture.Repositories
             return await _context.SaveChangesAsync();
         }
 
+        public IQueryable<T> AsAsQueryable()
+        {
+            return _dbSet.AsQueryable();
+        }
+
         #endregion
     }
 }
