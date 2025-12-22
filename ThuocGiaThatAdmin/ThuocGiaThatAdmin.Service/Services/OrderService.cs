@@ -22,6 +22,7 @@ namespace ThuocGiaThatAdmin.Service.Services
     {
         private readonly TrueMecContext _context;
         private readonly VNPayService _vnPayService;
+
         public OrderService(TrueMecContext context, VNPayService vnPayService)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
@@ -208,7 +209,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             foreach (var itemDto in orderItems)
             {
                 var variant = variants.First(v => v.Id == itemDto.ProductVariantId);
-                
+
                 // Use the current price from the product variant
                 var unitPrice = variant.Price;
                 var totalLineAmount = itemDto.Quantity * unitPrice;
@@ -238,8 +239,8 @@ namespace ThuocGiaThatAdmin.Service.Services
             var createdOrder = await _context.Orders
                 .Include(o => o.Customer)
                 .Include(o => o.OrderItems)
-                    .ThenInclude(oi => oi.ProductVariant)
-                    .ThenInclude(v => v.Product)
+                .ThenInclude(oi => oi.ProductVariant)
+                .ThenInclude(v => v.Product)
                 .FirstOrDefaultAsync(o => o.Id == order.Id);
 
             // Load location data if available
@@ -249,7 +250,7 @@ namespace ThuocGiaThatAdmin.Service.Services
 
             if (wardId.HasValue)
                 ward = await _context.Wards.FindAsync(wardId.Value);
-            
+
             if (provinceId.HasValue)
                 province = await _context.Provinces.FindAsync(provinceId.Value);
 
@@ -265,27 +266,11 @@ namespace ThuocGiaThatAdmin.Service.Services
             var order = await _context.Orders
                 .Include(o => o.Customer)
                 .Include(o => o.OrderItems)
-                    .ThenInclude(oi => oi.ProductVariant)
-                    .ThenInclude(v => v.Product)
+                .ThenInclude(oi => oi.ProductVariant)
+                .ThenInclude(v => v.Product)
                 .FirstOrDefaultAsync(o => o.Id == id);
 
             return order == null ? null : MapToResponseDto(order, null, null, null);
-        }
-
-        /// <summary>
-        /// Get all orders
-        /// </summary>
-        public async Task<List<OrderResponseDto>> GetAllOrdersAsync()
-        {
-            var orders = await _context.Orders
-                .Include(o => o.Customer)
-                .Include(o => o.OrderItems)
-                    .ThenInclude(oi => oi.ProductVariant)
-                    .ThenInclude(v => v.Product)
-                .OrderByDescending(o => o.CreatedDate)
-                .ToListAsync();
-
-            return orders.Select(o => MapToResponseDto(o, null, null, null)).ToList();
         }
 
         /// <summary>
@@ -294,7 +279,8 @@ namespace ThuocGiaThatAdmin.Service.Services
         public async Task<(List<OrderListDto> Orders, int TotalCount)> GetOrdersAsync(
             int pageNumber,
             int pageSize,
-            string? searchText)
+            string? searchText,
+            int? customerId = null)
         {
             if (pageNumber < 1)
                 throw new ArgumentException("Page number must be greater than 0", nameof(pageNumber));
@@ -305,6 +291,12 @@ namespace ThuocGiaThatAdmin.Service.Services
             var query = _context.Orders
                 .Include(o => o.Customer)
                 .AsQueryable();
+
+            // Filter by customer if provided
+            if (customerId.HasValue)
+            {
+                query = query.Where(o => o.CustomerId == customerId.Value);
+            }
 
             // Apply search filter
             if (!string.IsNullOrWhiteSpace(searchText))
@@ -353,8 +345,8 @@ namespace ThuocGiaThatAdmin.Service.Services
             var order = await _context.Orders
                 .Include(o => o.Customer)
                 .Include(o => o.OrderItems)
-                    .ThenInclude(oi => oi.ProductVariant)
-                    .ThenInclude(v => v.Product)
+                .ThenInclude(oi => oi.ProductVariant)
+                .ThenInclude(v => v.Product)
                 .FirstOrDefaultAsync(o => o.Id == orderId);
 
             if (order == null)
@@ -388,8 +380,8 @@ namespace ThuocGiaThatAdmin.Service.Services
             var order = await _context.Orders
                 .Include(o => o.Customer)
                 .Include(o => o.OrderItems)
-                    .ThenInclude(oi => oi.ProductVariant)
-                    .ThenInclude(v => v.Product)
+                .ThenInclude(oi => oi.ProductVariant)
+                .ThenInclude(v => v.Product)
                 .FirstOrDefaultAsync(o => o.Id == orderId);
 
             if (order == null)
@@ -402,7 +394,8 @@ namespace ThuocGiaThatAdmin.Service.Services
             // Validate delivery status transition
             if (!currentDeliveryStatus.CanTransitionTo(newDeliveryStatus))
             {
-                var validStatuses = string.Join(", ", currentDeliveryStatus.GetValidNextStatuses().Select(s => s.ToString()));
+                var validStatuses = string.Join(", ",
+                    currentDeliveryStatus.GetValidNextStatuses().Select(s => s.ToString()));
                 throw new InvalidOperationException(
                     $"Cannot transition from {currentDeliveryStatus} to {newDeliveryStatus}. Valid transitions are: {validStatuses}");
             }
@@ -485,6 +478,8 @@ namespace ThuocGiaThatAdmin.Service.Services
                 TrackingNumber = order.TrackingNumber,
                 ShippedDate = order.ShippedDate,
                 DeliveredDate = order.DeliveredDate,
+                EstimatedDeliveryDate = order.EstimatedDeliveryDate,
+                DeliveryMethod = order.DeliveryMethod,
                 DeliveryNotes = order.DeliveryNotes,
                 Note = order.Note,
                 OrderItems = order.OrderItems.Select(oi => new OrderItemResponseDto
@@ -519,8 +514,12 @@ namespace ThuocGiaThatAdmin.Service.Services
                 WardId = orderDto.WardId,
                 ProvinceId = orderDto.ProvinceId,
                 OrderItems = orderDto.Items
-                            .Select(x => new OrderItem { ProductId = x.ProductId, ProductVariantId = x.ProductVariantId, Quantity = x.Quantity, UnitPrice = x.Price, TotalLineAmount = x.Quantity * x.Price })
-                            .ToList(),
+                    .Select(x => new OrderItem
+                    {
+                        ProductId = x.ProductId, ProductVariantId = x.ProductVariantId, Quantity = x.Quantity,
+                        UnitPrice = x.Price, TotalLineAmount = x.Quantity * x.Price
+                    })
+                    .ToList(),
                 SubTotal = orderDto.SubTotal,
                 ShippingPhone = orderDto.ShippingPhone
             };
@@ -529,16 +528,17 @@ namespace ThuocGiaThatAdmin.Service.Services
             foreach (var orderItem in order.OrderItems)
             {
                 CreateOrderItemSnapshotForNewItem(orderItem);
-            }            
+            }
 
-            if (order.PaymentMethod == PaymentMethod.Cash.ToString()) 
+            if (order.PaymentMethod == PaymentMethod.Cash.ToString())
             {
                 _context.Orders.Add(order);
                 // Save everything in one transaction
                 await _context.SaveChangesAsync();
 
                 return order.Id;
-            } else
+            }
+            else
             {
                 var transaction = new PaymentTransaction
                 {
@@ -558,7 +558,7 @@ namespace ThuocGiaThatAdmin.Service.Services
 
                 var paymentInfo = new PaymentInformationModel
                 {
-                    OrderId = transaction.TransactionCode, // Dùng TransactionCode làm vnp_TxnRef
+                    OrderId = transaction.TransactionCode, // Dï¿½ng TransactionCode lï¿½m vnp_TxnRef
                     Amount = order.TotalAmount,
                     CreatedDate = DateTime.Now,
                     BankCode = order.PaymentMethod
@@ -569,7 +569,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 return paymentUrl;
             }
         }
-        
+
         /// <summary>
         /// Create snapshot of product information for a new order item (before save)
         /// Uses navigation property instead of OrderItemId
@@ -578,26 +578,26 @@ namespace ThuocGiaThatAdmin.Service.Services
         {
             var variant = _context.ProductVariants
                 .Include(v => v.Product)
-                    .ThenInclude(p => p.Category)
+                .ThenInclude(p => p.Category)
                 .Include(v => v.Product.Brand)
                 .FirstOrDefault(v => v.Id == orderItem.ProductVariantId);
-            
+
             if (variant == null) return;
-            
+
             var product = variant.Product;
-            
+
             // Get variant attributes as JSON string
             var variantAttributes = _context.VariantOptionValues
                 .Where(vov => vov.ProductVariantId == variant.Id)
                 .Include(vov => vov.ProductOptionValue)
-                    .ThenInclude(pov => pov.ProductOption)
+                .ThenInclude(pov => pov.ProductOption)
                 .Select(vov => new { vov.ProductOptionValue.ProductOption.Name, vov.ProductOptionValue.Value })
                 .ToList();
-            
-            var variantAttributesJson = variantAttributes.Any() 
-                ? System.Text.Json.JsonSerializer.Serialize(variantAttributes) 
+
+            var variantAttributesJson = variantAttributes.Any()
+                ? System.Text.Json.JsonSerializer.Serialize(variantAttributes)
                 : null;
-            
+
             var snapshot = new OrderItemSnapshot
             {
                 OrderItem = orderItem, // Use navigation property instead of OrderItemId
@@ -624,27 +624,29 @@ namespace ThuocGiaThatAdmin.Service.Services
                 DosageInstructions = product.DosageInstructions,
                 IsPrescriptionDrug = product.IsPrescriptionDrug
             };
-            
+
             _context.OrderItemSnapshots.Add(snapshot);
         }
 
         public async Task<OrderSummaryDto?> GetOrderSummary(int id)
         {
-            return await _context.Orders.Where(x => x.Id == id).Select(x => new OrderSummaryDto { Id = x.Id, Total = x.TotalAmount, OrderNumber = x.OrderNumber }).FirstOrDefaultAsync();
+            return await _context.Orders.Where(x => x.Id == id).Select(x => new OrderSummaryDto
+                { Id = x.Id, Total = x.TotalAmount, OrderNumber = x.OrderNumber }).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<dynamic>> GetListOrders(int customerId)
         {
-            return await _context.Orders.Where(x => x.CustomerId == customerId).OrderByDescending(x => x.CreatedDate).Select(x => new
-            {
-                Id = x.Id,
-                OrderNumber = x.OrderNumber,
-                OrderStatus = Enum.Parse<OrderStatus>(x.OrderStatus),
-                OrderStatusDescription = Enum.Parse<OrderStatus>(x.OrderStatus).GetDescription(),
-                NumberOfProducts = x.OrderItems.Count,
-                TotalOfItems = x.OrderItems.Sum(i => i.Quantity),
-                CreatedDate = x.CreatedDate
-            }).ToListAsync();
+            return await _context.Orders.Where(x => x.CustomerId == customerId).OrderByDescending(x => x.CreatedDate)
+                .Select(x => new
+                {
+                    Id = x.Id,
+                    OrderNumber = x.OrderNumber,
+                    OrderStatus = Enum.Parse<OrderStatus>(x.OrderStatus),
+                    OrderStatusDescription = Enum.Parse<OrderStatus>(x.OrderStatus).GetDescription(),
+                    NumberOfProducts = x.OrderItems.Count,
+                    TotalOfItems = x.OrderItems.Sum(i => i.Quantity),
+                    CreatedDate = x.CreatedDate
+                }).ToListAsync();
         }
 
         public async Task<dynamic?> GetOrderDetailAsync(int id)
@@ -668,7 +670,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                     },
                     PaymentMethod = x.PaymentMethod,
                     DeliveryDate = x.CreatedDate.AddDays(7),
-                    DeliveryMethod = "",
+                    DeliveryMethod = x.DeliveryMethod,
                     Note = x.Note,
                     Items = x.OrderItems.Select(y => new
                     {
@@ -683,17 +685,14 @@ namespace ThuocGiaThatAdmin.Service.Services
                     SubTotal = x.SubTotal,
                     ShippingFee = x.ShippingFee,
                     UtilityFee = 0,
-
                 }).FirstOrDefaultAsync();
 
                 return orderDetail;
             }
             catch (Exception ex)
             {
-
                 throw;
             }
-            
         }
     }
 }
