@@ -671,6 +671,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                     PaymentMethod = x.PaymentMethod,
                     DeliveryDate = x.CreatedDate.AddDays(7),
                     DeliveryMethod = x.DeliveryMethod,
+                    x.EstimatedDeliveryDate,
                     Note = x.Note,
                     Items = x.OrderItems.Select(y => new
                     {

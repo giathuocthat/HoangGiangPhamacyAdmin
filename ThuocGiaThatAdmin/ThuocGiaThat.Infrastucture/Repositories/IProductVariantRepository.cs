@@ -15,5 +15,6 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         Task<IEnumerable<ProductVariant>> GetByIdsAsync(IList<int> ids);
 
         Task<ProductVariant?> GetVariantWithProduct(int variantId);
+        Task<ProductVariant?> GetDetail(int variantId);
     }
 }

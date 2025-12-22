@@ -142,7 +142,9 @@ namespace ThuocGiaThatAdmin.Service.Services
             // Add items
             foreach (var itemDto in dto.Items)
             {
-                var variant = await _productVariantRepository.GetByIdAsync(itemDto.ProductVariantId);
+               // var variant = await _productVariantRepository.GetByIdAsync(itemDto.ProductVariantId);
+                var variant = await _productVariantRepository.GetDetail(itemDto.ProductVariantId);
+
                 if (variant == null)
                     throw new InvalidOperationException($"Product variant {itemDto.ProductVariantId} not found");
 

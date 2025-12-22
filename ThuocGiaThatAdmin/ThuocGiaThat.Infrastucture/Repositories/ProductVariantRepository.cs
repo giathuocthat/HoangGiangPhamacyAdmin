@@ -22,5 +22,15 @@ namespace ThuocGiaThat.Infrastucture.Repositories
                 .Include(v => v.Product)
                 .FirstOrDefaultAsync(v => v.Id == variantId);
         }
+
+        public async Task<ProductVariant?> GetDetail(int variantId)
+        {
+            return await _context.ProductVariants
+                .Include(v => v.Product)
+                    .ThenInclude(p => p.Brand)
+                .Include(v => v.Product)
+                    .ThenInclude(p => p.Category)
+                .FirstOrDefaultAsync(v => v.Id == variantId);
+        }
     }
 }
