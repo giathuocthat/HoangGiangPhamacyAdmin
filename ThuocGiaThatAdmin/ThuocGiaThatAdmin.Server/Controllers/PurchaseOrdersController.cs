@@ -45,7 +45,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             return await ExecuteActionAsync(async () =>
             {
-                var order = await _purchaseOrderService.GetByIdAsync(id);
+                var order = await _purchaseOrderService.GetWithDetailsAsync(id);
                 if (order == null)
                     return NotFoundResponse($"Purchase order with ID {id} not found");
 
