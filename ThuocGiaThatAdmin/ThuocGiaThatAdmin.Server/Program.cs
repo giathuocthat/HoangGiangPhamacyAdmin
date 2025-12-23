@@ -19,7 +19,6 @@ using ThuocGiaThatAdmin.Server.Extensions;
 using ThuocGiaThatAdmin.Service;
 using ThuocGiaThatAdmin.Service.Interfaces;
 using ThuocGiaThatAdmin.Service.Services;
-
 using ThuocGiaThatAdmin.Common.Interfaces;
 using ThuocGiaThatAdmin.Queries;
 using ThuocGiaThatAdmin.Commands;
@@ -65,7 +64,7 @@ builder.Services.AddSwaggerGen(options =>
                     Id = "Bearer"
                 }
             },
-            new string[] {}
+            new string[] { }
         }
     });
 });
@@ -93,24 +92,24 @@ var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
 var signingKey = new SymmetricSecurityKey(keyBytes);
 
 builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtIssuer,
-        ValidAudience = jwtAudience,
-        IssuerSigningKey = signingKey
-    };
-    options.MapInboundClaims = false;
-});
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = signingKey
+        };
+        options.MapInboundClaims = false;
+    });
 
 builder.Services.AddResponseCompression(options =>
 {
@@ -160,6 +159,9 @@ builder.Services.AddScoped<IGoodsReceiptRepository, GoodsReceiptRepository>();
 builder.Services.AddScoped<IGoodsReceiptItemRepository, GoodsReceiptItemRepository>();
 builder.Services.AddScoped<IBankRepository, BankRepository>();
 
+// Sales Region Repository
+builder.Services.AddScoped<ISalesRegionRepository, SalesRegionRepository>();
+
 // Generic Repository
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
@@ -167,6 +169,7 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 // Register Services (Legacy - for backward compatibility)
 // ============================================================
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<ActiveIngredientService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<ProductOptionService>();
 builder.Services.AddScoped<FileUploadService>();
@@ -213,6 +216,9 @@ builder.Services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
 builder.Services.AddScoped<IGoodsReceiptService, GoodsReceiptService>();
 builder.Services.AddScoped<IGoodsReceiptItemService, GoodsReceiptItemService>();
 builder.Services.AddScoped<IBankService, BankService>();
+
+// Sales Region Service
+builder.Services.AddScoped<ISalesRegionService, SalesRegionService>();
 
 
 
@@ -264,8 +270,8 @@ builder.Services.AddCors(options =>
         {
             policy.WithOrigins(allowedOrigins)
                   .AllowAnyMethod() // Allows any HTTP method (GET, POST, PUT, DELETE, etc.)
-                  .AllowAnyHeader()
-                  .AllowCredentials(); // Allows any header in the request
+                  .AllowAnyHeader();
+                  // .AllowCredentials(); // Allows any header in the request
         });
 });
 
@@ -308,15 +314,19 @@ using (var scope = app.Services.CreateScope())
     ChildrenRoleMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     UserMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     // seed role claims (permissions) for admin role
-    RoleClaimsMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
+    AdminPermissionMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
+    SaleManagerPermissionMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
+    SaleMemberPermissionMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
+    InventoryPermissionMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
+
     CountryMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     ProvinceMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     WardMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     BusinessTypeMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     CategoryMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
-    InventoryPermissionMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     CamPaignMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     BankMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
+
 }
 
 // ============================================================

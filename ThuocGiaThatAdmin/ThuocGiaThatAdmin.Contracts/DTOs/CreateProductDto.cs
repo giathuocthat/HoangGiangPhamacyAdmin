@@ -27,7 +27,8 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
 
         [Required(ErrorMessage = "Slug is required")]
         [StringLength(250, ErrorMessage = "Slug cannot exceed 250 characters")]
-        [RegularExpression(@"^[a-z0-9]+(?:-[a-z0-9]+)*$", ErrorMessage = "Slug must be lowercase, alphanumeric with hyphens only")]
+        [RegularExpression(@"^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            ErrorMessage = "Slug must be lowercase, alphanumeric with hyphens only")]
         public string Slug { get; set; } = string.Empty;
 
         [Url(ErrorMessage = "Invalid URL format")]
@@ -54,6 +55,8 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public bool IsActive { get; set; } = true;
 
         public bool IsFeatured { get; set; } = false;
+
+        public bool IsPublished { get; set; } = false;
         public string? DrugEfficacy { get; set; }
         public string? DosageInstructions { get; set; }
 
@@ -61,5 +64,8 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public List<ProductImageDto> Images { get; set; } = new List<ProductImageDto>();
 
         public List<ProductVariantDto> ProductVariants { get; set; } = new List<ProductVariantDto>();
+
+        public List<ProductActiveIngredientDto> ProductActiveIngredients { get; set; } =
+            new List<ProductActiveIngredientDto>();
     }
 }

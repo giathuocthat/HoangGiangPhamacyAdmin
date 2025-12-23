@@ -47,6 +47,7 @@ namespace HoangGiangPhamacyAuthentication.Controllers
             {
                 return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
             }
+
             var roldeDetail = await _roleManager.FindByIdAsync(dto.Role.ToString());
 
             if (roldeDetail != null)
@@ -187,6 +188,79 @@ namespace HoangGiangPhamacyAuthentication.Controllers
             }
 
             return Ok(users);
+        }
+
+        // ========== Sales Hierarchy Endpoints ==========
+
+        /// <summary>
+        /// GET: api/user/{managerId}/sales-team
+        /// Lấy danh sách Sale Members thuộc team của một Sale Manager
+        /// </summary>
+        [HttpGet("{managerId}/sales-team")]
+        public async Task<IActionResult> GetSalesTeamMembers(string managerId)
+        {
+            if (string.IsNullOrWhiteSpace(managerId))
+                return BadRequest(new { error = "Manager ID is required" });
+
+            try
+            {
+                var teamMembers = await _userService.GetSalesTeamMembersAsync(managerId);
+                return Ok(teamMembers);
+            }
+            catch (ArgumentNullException)
+            {
+                return BadRequest(new { error = "Invalid manager ID" });
+            }
+        }
+
+        /// <summary>
+        /// POST: api/user/{userId}/assign-manager
+        /// Assign một manager cho user
+        /// </summary>
+        [HttpPost("{userId}/assign-manager")]
+        public async Task<IActionResult> AssignManager(string userId, [FromBody] AssignManagerRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return BadRequest(new { error = "User ID is required" });
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                var success = await _userService.AssignManagerAsync(userId, request.ManagerId);
+
+                if (!success)
+                    return BadRequest(new { error = "Failed to assign manager. User or manager not found, or circular assignment detected." });
+
+                return Ok(new { message = "Manager assigned successfully" });
+            }
+            catch (ArgumentNullException)
+            {
+                return BadRequest(new { error = "Invalid user ID" });
+            }
+        }
+
+        /// <summary>
+        /// GET: api/user/sales-users
+        /// Lấy danh sách tất cả Sales Users (để hiển thị trong dropdown)
+        /// </summary>
+        [HttpGet("sales-users")]
+        public async Task<IActionResult> GetSalesUsers()
+        {
+            var salesUsers = await _userService.GetSalesUsersAsync();
+            return Ok(salesUsers);
+        }
+
+        /// <summary>
+        /// GET: api/user/sales-users
+        /// Lấy danh sách tất cả Sales Users (để hiển thị trong dropdown)
+        /// </summary>
+        [HttpGet("sales-manager-users")]
+        public async Task<IActionResult> GetSalesManagerUsers()
+        {
+            var salesUsers = await _userService.GetSalesManagerUsersAsync();
+            return Ok(salesUsers);
         }
     }
 }

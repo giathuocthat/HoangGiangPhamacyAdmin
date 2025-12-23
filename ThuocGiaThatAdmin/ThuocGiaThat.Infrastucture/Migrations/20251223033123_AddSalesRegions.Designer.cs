@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ThuocGiaThat.Infrastucture;
 
@@ -11,9 +12,11 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    partial class TrueMecContextModelSnapshot : ModelSnapshot
+    [Migration("20251223033123_AddSalesRegions")]
+    partial class AddSalesRegions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1212,16 +1215,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsDefault")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsVerfied")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Note")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("TaxCode")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1233,7 +1226,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.ToTable("CustomerInvoiceInfo", (string)null);
+                    b.ToTable("CustomerInvoiceInfo");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.CustomerPaymentAccount", b =>
@@ -1810,9 +1803,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("CustomerInvoiceInfoId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("DeliveredDate")
                         .HasColumnType("datetime2");
 
@@ -1831,9 +1821,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.Property<DateTime?>("EstimatedDeliveryDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<bool>("ExportInvoice")
-                        .HasColumnType("bit");
 
                     b.Property<bool?>("IsFulfilled")
                         .HasColumnType("bit");
@@ -1903,8 +1890,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
-
-                    b.HasIndex("CustomerInvoiceInfoId");
 
                     b.HasIndex("OrderNumber")
                         .IsUnique();
@@ -2331,9 +2316,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool?>("IsPrescriptionDrug")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsPublished")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
@@ -4375,10 +4357,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.CustomerInvoiceInfo", null)
-                        .WithMany("Orders")
-                        .HasForeignKey("CustomerInvoiceInfoId");
-
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Province", "Province")
                         .WithMany()
                         .HasForeignKey("ProvinceId")
@@ -4960,11 +4938,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("PaymentAccounts");
 
                     b.Navigation("VerificationHistory");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.CustomerInvoiceInfo", b =>
-                {
-                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.GoodsReceipt", b =>

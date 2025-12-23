@@ -20,13 +20,20 @@ namespace ThuocGiaThatAdmin.Service
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly IRepository<ApplicationUser> _userRepository;
+        private readonly IRepository<ApplicationRole> _roleRepository;
+        private readonly IRepository<ApplicationRoleClaim> _roleClaimRepository;
+        private readonly RoleManager<ApplicationRole> _roleManager;
 
         public TokenService(UserManager<ApplicationUser> userManager, IConfiguration configuration,
-            IRepository<ApplicationUser> userRepository)
+            IRepository<ApplicationUser> userRepository, IRepository<ApplicationRole> roleRepository,
+            IRepository<ApplicationRoleClaim> roleClaimRepository, RoleManager<ApplicationRole> roleManager)
         {
             _userManager = userManager;
             _configuration = configuration;
             _userRepository = userRepository;
+            _roleRepository = roleRepository;
+            _roleClaimRepository = roleClaimRepository;
+            _roleManager = roleManager;
         }
 
         /// <summary>
@@ -57,20 +64,30 @@ namespace ThuocGiaThatAdmin.Service
             if (!string.IsNullOrEmpty(user.Email))
                 claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email));
 
+
             if (!string.IsNullOrEmpty(user.FullName))
                 claims.Add(new Claim("fullName", user.FullName));
 
-
             // Include claims from UserManager
             var userClaims = await _userManager.GetClaimsAsync(user);
+
             if (userClaims != null)
                 claims.AddRange(userClaims);
 
             // Include roles as claims
             var roles = await _userManager.GetRolesAsync(user);
+
             foreach (var role in roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
+
+                var roleDetail = await _roleManager.FindByNameAsync(role);
+
+                if (roleDetail != null)
+                {
+                    var roleClaims = await _roleManager.GetClaimsAsync(roleDetail);
+                    claims.AddRange(roleClaims);
+                }
             }
 
             var keyBytes = Encoding.UTF8.GetBytes(key);
