@@ -1,11 +1,15 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using ThuocGiaThat.Infrastucture.Repositories;
+using ThuocGiaThat.Infrastucture.Utils;
+using ThuocGiaThatAdmin.Contract.DTOs;
 using ThuocGiaThatAdmin.Contract.Responses;
+using ThuocGiaThatAdmin.Domain.Constants;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Service.Interfaces;
 
@@ -16,12 +20,16 @@ namespace ThuocGiaThatAdmin.Service
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IRepository<ApplicationUser> _userRepository;
+        private readonly DynamicFilterService _dynamicFilterService;
 
-        public UserService(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, IRepository<ApplicationUser> userRepository)
+        public UserService(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager,
+            IRepository<ApplicationUser> userRepository,
+            DynamicFilterService dynamicFilterService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _userRepository = userRepository;
+            _dynamicFilterService = dynamicFilterService;
         }
 
         public async Task<ApplicationUser?> GetByIdAsync(string id)
@@ -114,7 +122,7 @@ namespace ThuocGiaThatAdmin.Service
             return await _userManager.RemoveFromRoleAsync(user, role);
         }
 
-        public async Task<IEnumerable<UserResponse>> GetAllAsync(int pageIndex, int pageSize)
+        public Task<IEnumerable<UserResponse>> GetAllAsync(int pageIndex, int pageSize)
         {
             var users = _userManager.Users.Where(x => x.UserName != "ADMIN" && x.UserName != "admin")
                 .Skip((pageIndex - 1) * pageSize)
@@ -133,7 +141,34 @@ namespace ThuocGiaThatAdmin.Service
                 Roles = (_userManager.GetRolesAsync(x).Result).Select(r => new RoleResponse { Name = r }).ToArray()
             });
 
-            return result;
+            return Task.FromResult(result);
+        }
+
+        public Task<IEnumerable<UserResponse>> GetDeactivatedUsersAsync(FilterRequest request)
+        {
+            var query = _userRepository.AsAsQueryable();
+
+            var filter = _dynamicFilterService.ApplyFilters(query, request);
+
+            var users = query
+                .Where(x => x.UserName != Admin.AdminUserName && x.IsActive == false)
+                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .ToList();
+
+            var result = users.Select(x => new UserResponse
+            {
+                Id = x.Id,
+                FullName = x.FullName,
+                UserName = x.UserName,
+                PhoneNumber = x.PhoneNumber,
+                Email = x.Email,
+                CreatedDate = x.CreatedDate,
+                IsActive = x.IsActive,
+                Roles = (_userManager.GetRolesAsync(x).Result).Select(r => new RoleResponse { Name = r }).ToArray()
+            });
+
+            return Task.FromResult(result);
         }
 
         public async Task DeactivateUser(string userName)
@@ -146,6 +181,12 @@ namespace ThuocGiaThatAdmin.Service
                 _userRepository.Update(userDetail);
                 await _userRepository.SaveChangesAsync();
             }
+        }
+
+        public async Task<ApplicationUser> FindByPhone(string phoneNumber)
+        {
+            var userDetail = await _userRepository.FirstOrDefaultAsync(x => x.PhoneNumber == phoneNumber);
+            return userDetail;
         }
     }
 }

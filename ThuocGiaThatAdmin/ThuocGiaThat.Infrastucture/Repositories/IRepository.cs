@@ -43,5 +43,6 @@ namespace ThuocGiaThat.Infrastucture.Repositories
 
         // Save changes
         Task<int> SaveChangesAsync();
+        IQueryable<T> AsAsQueryable();
     }
 }
