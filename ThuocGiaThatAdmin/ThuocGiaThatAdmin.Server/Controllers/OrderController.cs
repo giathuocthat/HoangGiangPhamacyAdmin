@@ -90,7 +90,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10,
             [FromQuery] string? searchText = null)
-        {
+         {
             return await ExecuteActionAsync(async () =>
             {
                 if (pageSize > 100)
