@@ -35,6 +35,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                     IsVerified = x.IsVerfied,
                     Note = x.Note,
                     TaxCode = x.TaxCode,
+                    BuyerName = x.BuyerName
                 }).FirstOrDefaultAsync();
             } else
             {
@@ -48,6 +49,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                     IsVerified = x.IsVerfied,
                     Note = x.Note,
                     TaxCode = x.TaxCode,
+                    BuyerName = x.BuyerName
                 }).FirstOrDefaultAsync();
             }
         }

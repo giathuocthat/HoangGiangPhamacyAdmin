@@ -190,7 +190,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             return await ExecuteActionAsync(async () =>
             {
-                var customerId = int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
+                var customerId = User.GetCustomerId();
                 order.CustomerId = customerId;
                 order.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
                 var result = await _orderService.CreateOrderAsync(order);
@@ -297,6 +297,13 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             return Ok();
         }
-            
+
+        [Authorize(Roles = "Customer")]
+        [HttpGet("TotalItemsInCart")]
+        public async Task<IActionResult> GetTotalItemsInCartAsync()
+        {
+            var total = await _orderService.GetTotalItemsInCart(User.GetCustomerId());
+            return Ok(total);
+        }
     }
 }

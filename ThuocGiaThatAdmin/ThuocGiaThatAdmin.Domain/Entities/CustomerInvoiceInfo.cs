@@ -22,5 +22,6 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public bool IsVerfied { get; set;  } = false;
         public bool IsDefault { get; set; } = false;
         public string Note {  get; set; } = string.Empty;
+        public ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 }

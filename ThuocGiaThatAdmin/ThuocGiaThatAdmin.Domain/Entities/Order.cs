@@ -55,7 +55,10 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public Customer? Customer { get; set; }
         public Ward? Ward { get; set; }
         public Province? Province { get; set; }
+        public bool ExportInvoice { get; set; } = true;
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
         public ICollection<PaymentTransaction> PaymentTransactions { get; set; }
+        public int? CustomerInvoiceInfoId { get; set; }
+
     }
 }

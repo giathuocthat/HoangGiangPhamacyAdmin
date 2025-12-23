@@ -1,9 +1,11 @@
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ThuocGiaThatAdmin.Contracts.DTOs;
+using ThuocGiaThat.Infrastucture;
 using ThuocGiaThat.Infrastucture.Repositories;
+using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Service.Interfaces;
 
@@ -15,17 +17,20 @@ namespace ThuocGiaThatAdmin.Service.Services
         private readonly IShoppingCartItemRepository _cartItemRepository;
         private readonly IProductRepository _productRepository;
         private readonly IRepository<ProductVariant> _variantRepository;
+        private readonly TrueMecContext _context;             
 
         public ShoppingCartService(
             IShoppingCartRepository cartRepository,
             IShoppingCartItemRepository cartItemRepository,
             IProductRepository productRepository,
-            IRepository<ProductVariant> variantRepository)
+            IRepository<ProductVariant> variantRepository,
+            TrueMecContext context)
         {
             _cartRepository = cartRepository;
             _cartItemRepository = cartItemRepository;
             _productRepository = productRepository;
             _variantRepository = variantRepository;
+            _context = context;
         }
 
         public async Task<ShoppingCartDto> LoadCartAsync(int? customerId, string? sessionId, MergeLocalCartDto? localCart = null)
@@ -384,5 +389,26 @@ namespace ThuocGiaThatAdmin.Service.Services
         }
 
         #endregion
+
+        public async Task<int> ClearItemsInCart(int orderId, int customerId)
+        {
+            var cart = await _context.ShoppingCarts.Where(x => x.CustomerId == customerId).Include(x => x.CartItems).FirstOrDefaultAsync();
+            if (cart == null) return 0;
+
+            var productVariantIds = await _context.OrderItems.Where(x => x.OrderId == orderId).Select(x => x.ProductVariantId).ToListAsync();
+            var cartItems = cart.CartItems.Where(x => productVariantIds.Contains(x.ProductVariantId)).ToList();
+            _context.ShoppingCartItems.RemoveRange(cartItems);
+
+            var deletedCartItemIds = cartItems.Select(x => x.Id).ToList();
+
+            cart.TotalItems = cart.CartItems.Where(x => !deletedCartItemIds.Contains(x.Id)).Sum(i => i.Quantity);
+            cart.SubTotal = cart.CartItems.Where(x => !deletedCartItemIds.Contains(x.Id)).Sum(i => i.TotalLineAmount);
+            cart.TotalAmount = cart.SubTotal; // No discount
+            cart.UpdatedDate = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return cart.TotalItems;
+        }
     }
 }
