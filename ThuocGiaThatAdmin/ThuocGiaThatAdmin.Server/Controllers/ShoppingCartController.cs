@@ -136,6 +136,15 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             }, "Clear Cart");
         }
 
+        [HttpDelete("removeCartItemsByOrderId/{orderId}")]
+        public async Task<IActionResult> RemoveCartItemsByOrderId(int orderId)
+        {
+            var result = await _cartService.ClearItemsInCart(orderId, User.GetCustomerId());
+
+            return Success(result);
+        }
+
+
         #region Helper Methods
 
         private int? GetCustomerId()

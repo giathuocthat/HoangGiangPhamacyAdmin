@@ -528,6 +528,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.TotalAmount).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
                 entity.Property(e => e.UpdatedDate);
+                entity.Property(e => e.CustomerInvoiceInfoId).IsRequired(false);
 
                 entity.HasOne(e => e.Customer).WithMany(e => e.Orders).HasForeignKey(e => e.CustomerId).OnDelete(DeleteBehavior.SetNull);
 

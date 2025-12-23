@@ -194,7 +194,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     BusinessTypeName = customer.BusinessType?.Name,
                     HasBusinessInfo = customer.BusinessTypeId.HasValue,
                     HasPaymentAccounts = customer.PaymentAccounts.Any(),
-                    CreatedDate = customer.CreatedDate
+                    CreatedDate = customer.CreatedDate,
+                    IsVerified = customer.IsVerified
                 };
 
                 return Success(profile);

@@ -256,13 +256,13 @@ builder.Services.AddScoped<IWarehousePickingService, WarehousePickingService>();
 builder.Services.AddScoped<IWarehousePickingRepository, WarehousePickingRepository>();
 
 // Add CORS to allow frontend to call this API
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000")
-            //.AllowAnyOrigin() // Allows requests from any origin
+            policy.WithOrigins(allowedOrigins)
                   .AllowAnyMethod() // Allows any HTTP method (GET, POST, PUT, DELETE, etc.)
                   .AllowAnyHeader()
                   .AllowCredentials(); // Allows any header in the request
