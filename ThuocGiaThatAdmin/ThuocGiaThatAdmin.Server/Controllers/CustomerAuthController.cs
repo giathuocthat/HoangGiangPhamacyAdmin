@@ -154,6 +154,14 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             {
                 // Since we are using stateless JWT, we just return success.
                 // The client should discard the token.
+                Response.Cookies.Delete("refresh_token", new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = false, //todo
+                    SameSite = SameSiteMode.Lax,
+                    Path = "/", ///api/customer/auth/refreshToken",
+                });
+
                 return Success("Logout successful");
             });
         }

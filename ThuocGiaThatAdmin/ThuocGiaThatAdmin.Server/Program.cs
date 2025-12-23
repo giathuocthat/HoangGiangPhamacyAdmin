@@ -215,6 +215,7 @@ builder.Services.AddScoped<IGoodsReceiptItemService, GoodsReceiptItemService>();
 builder.Services.AddScoped<IBankService, BankService>();
 
 
+
 // other
 builder.Services.AddScoped<IRoleClaimService, RoleClaimService>();
 builder.Services.AddScoped<DynamicFilterService>();
@@ -243,7 +244,7 @@ builder.Services.AddScoped<IProductCollectionService, ProductCollectionService>(
 builder.Services.AddScoped<VNPayService>();
 builder.Services.AddScoped<IZaloService, ZaloService>();
 builder.Services.AddScoped<HttpClient>();
-
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 
 
 // Order Fulfillment Service

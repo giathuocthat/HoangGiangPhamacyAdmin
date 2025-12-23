@@ -95,7 +95,7 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<GoodsReceipt> GoodsReceipts { get; set; }
         public DbSet<GoodsReceiptItem> GoodsReceiptItems { get; set; }
 
-
+        public DbSet<CustomerInvoiceInfo> CustomerInvoiceInfos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -1314,6 +1314,8 @@ namespace ThuocGiaThat.Infrastucture
             {
                 entity.HasIndex(o => new { o.Phone, o.Code, o.IsUsed, o.Type });
             });
+
+            modelBuilder.Entity<CustomerInvoiceInfo>().ToTable("CustomerInvoiceInfo");
         }
     }
 }
