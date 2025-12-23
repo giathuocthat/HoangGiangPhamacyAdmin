@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 using ThuocGiaThatAdmin.Contracts.DTOs;
+using ThuocGiaThatAdmin.Server.Extensions;
 using ThuocGiaThatAdmin.Service.Interfaces;
 
 namespace ThuocGiaThatAdmin.Server.Controllers
@@ -11,7 +12,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
     /// API Controller for Address management
     /// </summary>
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/[controller]")]    
     public class AddressesController : BaseApiController
     {
         private readonly IAddressService _addressService;
@@ -42,11 +43,13 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// <summary>
         /// Get all addresses by customer ID
         /// </summary>
-        [HttpGet("customer/{customerId}")]
-        public async Task<IActionResult> GetByCustomerId([FromRoute] int customerId)
+        [HttpGet("customer")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> GetByCustomerId()
         {
             return await ExecuteActionAsync(async () =>
             {
+                var customerId = User.GetCustomerId();
                 var addresses = await _addressService.GetByCustomerIdAsync(customerId);
                 return Success(addresses);
             }, "Get Addresses By Customer Id");
@@ -55,11 +58,13 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// <summary>
         /// Get default address by customer ID
         /// </summary>
-        [HttpGet("customer/{customerId}/default")]
-        public async Task<IActionResult> GetDefaultByCustomerId(int customerId)
+        [HttpGet("customer/default")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> GetDefaultByCustomerId()
         {
             return await ExecuteActionAsync(async () =>
             {
+                var customerId = User.GetCustomerId();
                 var address = await _addressService.GetDefaultAddress(customerId);
                 if (address == null)
                     return NotFoundResponse($"No default address found for customer {customerId}");
@@ -76,7 +81,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             return await ExecuteActionAsync(async () =>
             {
-                var customerId = int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
+                var customerId = User.GetCustomerId();// int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
                 dto.CustomerId = customerId;
                 var address = await _addressService.CreateAsync(dto);
                 return Success(address, "Address created successfully");

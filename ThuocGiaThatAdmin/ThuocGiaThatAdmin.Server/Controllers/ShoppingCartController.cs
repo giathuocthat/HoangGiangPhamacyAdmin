@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Security.Claims;
@@ -8,6 +9,7 @@ using ThuocGiaThatAdmin.Service.Interfaces;
 
 namespace ThuocGiaThatAdmin.Server.Controllers
 {
+    [Authorize(Roles = "Customer")]
     public class ShoppingCartController : BaseApiController
     {
         private readonly IShoppingCartService _cartService;
@@ -21,7 +23,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// <summary>
         /// Load cart
         /// </summary>
-        [HttpGet]
+        [HttpGet]        
         public async Task<IActionResult> GetCart([FromQuery] string? sessionId)
         {
             return await ExecuteActionAsync(async () =>
@@ -64,6 +66,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// Add item to cart
         /// </summary>
         [HttpPost("add")]
+        [Authorize]
         public async Task<IActionResult> AddToCart([FromBody] AddToCartDto dto)
         {
             return await ExecuteActionAsync(async () =>

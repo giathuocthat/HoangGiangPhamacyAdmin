@@ -215,6 +215,7 @@ builder.Services.AddScoped<IGoodsReceiptItemService, GoodsReceiptItemService>();
 builder.Services.AddScoped<IBankService, BankService>();
 
 
+
 // other
 builder.Services.AddScoped<IRoleClaimService, RoleClaimService>();
 builder.Services.AddScoped<DynamicFilterService>();
@@ -243,7 +244,7 @@ builder.Services.AddScoped<IProductCollectionService, ProductCollectionService>(
 builder.Services.AddScoped<VNPayService>();
 builder.Services.AddScoped<IZaloService, ZaloService>();
 builder.Services.AddScoped<HttpClient>();
-
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 
 
 // Order Fulfillment Service
@@ -260,9 +261,11 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAllOrigins",
         policy =>
         {
-            policy.AllowAnyOrigin() // Allows requests from any origin
+            policy.WithOrigins("http://localhost:3000")
+            //.AllowAnyOrigin() // Allows requests from any origin
                   .AllowAnyMethod() // Allows any HTTP method (GET, POST, PUT, DELETE, etc.)
-                  .AllowAnyHeader(); // Allows any header in the request
+                  .AllowAnyHeader()
+                  .AllowCredentials(); // Allows any header in the request
         });
 });
 
