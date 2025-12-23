@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ThuocGiaThat.Infrastucture;
 
@@ -11,9 +12,11 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    partial class TrueMecContextModelSnapshot : ModelSnapshot
+    [Migration("20251223031350_AddSalesHierarchy")]
+    partial class AddSalesHierarchy
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -314,9 +317,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("RegionId")
-                        .HasColumnType("int");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -338,8 +338,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.HasIndex("RegionId");
 
                     b.ToTable("Users", (string)null);
                 });
@@ -1071,9 +1069,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("RegionId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("RewardPoints")
                         .HasColumnType("int");
 
@@ -1099,8 +1094,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("Email")
                         .IsUnique()
                         .HasFilter("[Email] IS NOT NULL");
-
-                    b.HasIndex("RegionId");
 
                     b.HasIndex("SaleUserId");
 
@@ -1211,16 +1204,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
-
-                    b.Property<bool>("IsDefault")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsVerfied")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Note")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TaxCode")
                         .IsRequired()
@@ -2325,9 +2308,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<bool?>("IsPrescriptionDrug")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsPublished")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -3025,78 +3005,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("PurchaseOrderId");
 
                     b.ToTable("PurchaseOrderItems");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.SalesRegion", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.HasIndex("IsActive");
-
-                    b.ToTable("SalesRegions");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Code = "MB",
-                            CreatedDate = new DateTime(2025, 12, 23, 3, 31, 22, 377, DateTimeKind.Utc).AddTicks(5351),
-                            Description = "Khu vực miền Bắc Việt Nam",
-                            IsActive = true,
-                            Name = "Miền Bắc"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Code = "MT",
-                            CreatedDate = new DateTime(2025, 12, 23, 3, 31, 22, 377, DateTimeKind.Utc).AddTicks(5354),
-                            Description = "Khu vực miền Trung Việt Nam",
-                            IsActive = true,
-                            Name = "Miền Trung"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Code = "MN",
-                            CreatedDate = new DateTime(2025, 12, 23, 3, 31, 22, 377, DateTimeKind.Utc).AddTicks(5359),
-                            Description = "Khu vực miền Nam Việt Nam",
-                            IsActive = true,
-                            Name = "Miền Nam"
-                        });
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ShoppingCart", b =>
@@ -4023,14 +3931,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .HasForeignKey("ManagerId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.SalesRegion", "Region")
-                        .WithMany("SalesUsers")
-                        .HasForeignKey("RegionId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.Navigation("Manager");
-
-                    b.Navigation("Region");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Banner", b =>
@@ -4152,11 +4053,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .HasForeignKey("BusinessTypeId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.SalesRegion", "Region")
-                        .WithMany("Customers")
-                        .HasForeignKey("RegionId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ApplicationUser", "SaleUser")
                         .WithMany("AssignedCustomers")
                         .HasForeignKey("SaleUserId")
@@ -4165,8 +4061,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("ApprovedByUser");
 
                     b.Navigation("BusinessType");
-
-                    b.Navigation("Region");
 
                     b.Navigation("SaleUser");
                 });
@@ -5032,13 +4926,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.PurchaseOrderItem", b =>
                 {
                     b.Navigation("GoodsReceiptItems");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.SalesRegion", b =>
-                {
-                    b.Navigation("Customers");
-
-                    b.Navigation("SalesUsers");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ShoppingCart", b =>

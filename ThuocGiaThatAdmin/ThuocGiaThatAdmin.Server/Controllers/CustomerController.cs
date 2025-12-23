@@ -235,5 +235,70 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 return Success(customerStatus, message);
             });
         }
+
+        // ========== Sales Hierarchy Endpoints ==========
+
+        /// <summary>
+        /// GET: api/customer/by-sale-user/{saleUserId}
+        /// Lấy danh sách customers được assign cho một sale user
+        /// </summary>
+        [HttpGet("by-sale-user/{saleUserId}")]
+        public async Task<IActionResult> GetCustomersBySaleUser(string saleUserId)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                if (string.IsNullOrWhiteSpace(saleUserId))
+                {
+                    return BadRequestResponse("Sale user ID is required");
+                }
+
+                var customers = await _customerService.GetCustomersBySaleUserAsync(saleUserId);
+                return Success(customers);
+            });
+        }
+
+        /// <summary>
+        /// GET: api/customer/by-sales-team/{managerId}
+        /// Lấy danh sách customers của toàn bộ sales team (cho Sale Manager)
+        /// </summary>
+        [HttpGet("by-sales-team/{managerId}")]
+        public async Task<IActionResult> GetCustomersBySalesTeam(string managerId)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                if (string.IsNullOrWhiteSpace(managerId))
+                {
+                    return BadRequestResponse("Manager ID is required");
+                }
+
+                var customers = await _customerService.GetCustomersBySalesTeamAsync(managerId);
+                return Success(customers);
+            });
+        }
+
+        /// <summary>
+        /// POST: api/customer/{customerId}/assign-sale-user
+        /// Assign customer cho sale user
+        /// </summary>
+        [HttpPost("{customerId}/assign-sale-user")]
+        public async Task<IActionResult> AssignSaleUser(int customerId, [FromBody] AssignCustomerToSaleRequest request)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequestResponse("Invalid request");
+                }
+
+                var success = await _customerService.AssignSaleUserAsync(customerId, request.SaleUserId);
+
+                if (!success)
+                {
+                    return BadRequestResponse("Failed to assign sale user. Customer or sale user not found.");
+                }
+
+                return Success(new { message = "Sale user assigned successfully" });
+            });
+        }
     }
 }

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using ThuocGiaThat.Infrastucture;
 using ThuocGiaThat.Infrastucture.Repositories;
 using ThuocGiaThat.Infrastucture.Utils;
 using ThuocGiaThatAdmin.Contract.DTOs;
@@ -21,15 +22,18 @@ namespace ThuocGiaThatAdmin.Service
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IRepository<ApplicationUser> _userRepository;
         private readonly DynamicFilterService _dynamicFilterService;
+        private readonly TrueMecContext _context;
 
         public UserService(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager,
             IRepository<ApplicationUser> userRepository,
-            DynamicFilterService dynamicFilterService)
+            DynamicFilterService dynamicFilterService,
+            TrueMecContext context)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _userRepository = userRepository;
             _dynamicFilterService = dynamicFilterService;
+            _context = context;
         }
 
         public async Task<ApplicationUser?> GetByIdAsync(string id)
@@ -60,6 +64,7 @@ namespace ThuocGiaThatAdmin.Service
             {
                 return IdentityResult.Failed(new IdentityError { Description = "Email already exist." });
             }
+
 
             return await _userManager.CreateAsync(user, password);
         }
@@ -187,6 +192,139 @@ namespace ThuocGiaThatAdmin.Service
         {
             var userDetail = await _userRepository.FirstOrDefaultAsync(x => x.PhoneNumber == phoneNumber);
             return userDetail;
+        }
+
+        // ========== Sales Hierarchy Methods Implementation ==========
+        public async Task<IEnumerable<SalesTeamMemberDto>> GetSalesTeamMembersAsync(string managerId)
+        {
+            if (string.IsNullOrWhiteSpace(managerId))
+                throw new ArgumentNullException(nameof(managerId));
+
+            var salesMembers = await _userRepository
+                .AsAsQueryable()
+                .Where(u => u.ManagerId == managerId && u.IsActive)
+                .Include(u => u.AssignedCustomers)
+                .Include(u => u.Region)
+                .ToListAsync();
+
+            return salesMembers.Select(u => new SalesTeamMemberDto
+            {
+                Id = u.Id,
+                FullName = u.FullName ?? string.Empty,
+                Email = u.Email,
+                PhoneNumber = u.PhoneNumber,
+                IsActive = u.IsActive,
+                AssignedCustomerCount = u.AssignedCustomers?.Count ?? 0,
+                CreatedDate = u.CreatedDate,
+                RegionId = u.RegionId,
+                RegionName = u.Region?.Name
+            });
+        }
+        public async Task<bool> AssignManagerAsync(string userId, string? managerId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                throw new ArgumentNullException(nameof(userId));
+
+            var user = await _userRepository.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+                return false;
+
+            // Validate manager exists if managerId is provided
+            if (!string.IsNullOrWhiteSpace(managerId))
+            {
+                var manager = await _userRepository.FirstOrDefaultAsync(u => u.Id == managerId);
+                if (manager == null)
+                    return false;
+
+                // Prevent circular assignment: check if manager is in user's team
+                if (await IsInSalesTeamAsync(userId, managerId))
+                    return false;
+            }
+
+            user.ManagerId = managerId;
+            _userRepository.Update(user);
+            await _userRepository.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<IEnumerable<SalesUserDto>> GetSalesUsersAsync()
+        {
+            // Get Sale Managers for all regions (users with "Sale Manager" role in each region)
+            var salesUsers = await (from u in _context.Users
+                                      join ur in _context.UserRoles on u.Id equals ur.UserId
+                                      join r in _context.Roles on ur.RoleId equals r.Id
+                                      where 
+                                        (r.Name == SaleManagerPermission.Role || r.Name == SaleMemberPermissions.Role)
+                                        && u.IsActive
+                                      select new { u.Id, u.FullName, u.Email, u.PhoneNumber, u.IsActive, u.Manager, u.ManagerId, u.Region, u.RegionId })
+                                      .ToListAsync();
+
+            return salesUsers.Select(u => new SalesUserDto
+            {
+                Id = u.Id,
+                FullName = u.FullName ?? string.Empty,
+                Email = u.Email,
+                PhoneNumber = u.PhoneNumber,
+                IsActive = u.IsActive,
+                ManagerId = u.ManagerId,
+                ManagerName = u.Manager?.FullName,
+                RegionId = u.RegionId,
+                RegionName = u.Region?.Name
+            });
+        }
+
+        /// <summary>
+        /// Helper method to check if a user is in another user's sales team (prevent circular assignment)
+        /// </summary>
+        private async Task<bool> IsInSalesTeamAsync(string userId, string potentialMemberId)
+        {
+            var user = await _userRepository
+                .AsAsQueryable()
+                .Where(u => u.Id == userId)
+                .Include(u => u.SalesTeamMembers)
+                .FirstOrDefaultAsync();
+
+            if (user == null) return false;
+
+            // Direct member check
+            if (user.SalesTeamMembers.Any(m => m.Id == potentialMemberId))
+                return true;
+
+            // Recursive check for nested team members
+            foreach (var member in user.SalesTeamMembers)
+            {
+                if (await IsInSalesTeamAsync(member.Id, potentialMemberId))
+                    return true;
+            }
+
+            return false;
+        }
+
+        public async Task<IEnumerable<SalesUserDto>> GetSalesManagerUsersAsync()
+        {
+            // Get Sale Managers for all regions (users with "Sale Manager" role in each region)
+            var salesUsers = await(from u in _context.Users
+                                   join ur in _context.UserRoles on u.Id equals ur.UserId
+                                   join r in _context.Roles on ur.RoleId equals r.Id
+                                   where
+                                     (r.Name == SaleManagerPermission.Role)
+                                     && u.IsActive
+                                   select new { u.Id, u.FullName, u.Email, u.PhoneNumber, u.IsActive, u.Manager, u.ManagerId, u.Region, u.RegionId })
+                                      .ToListAsync();
+
+            return salesUsers.Select(u => new SalesUserDto
+            {
+                Id = u.Id,
+                FullName = u.FullName ?? string.Empty,
+                Email = u.Email,
+                PhoneNumber = u.PhoneNumber,
+                IsActive = u.IsActive,
+                ManagerId = u.ManagerId,
+                ManagerName = u.Manager?.FullName,
+                RegionId = u.RegionId,
+                RegionName = u.Region?.Name
+            });
         }
     }
 }

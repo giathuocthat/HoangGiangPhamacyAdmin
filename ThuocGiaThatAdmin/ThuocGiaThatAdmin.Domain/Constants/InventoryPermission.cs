@@ -9,6 +9,10 @@ namespace ThuocGiaThatAdmin.Domain.Constants
     public static class InventoryPermission
     {
         public const string ClaimType = "Permission";
+        public const string GroupName = "Inventory";
+        public const string Role = "Inventory";
+        public const string Description = "Inventory management permissions";
+        public const string Category = "Inventory";
 
         public static class Order
         {

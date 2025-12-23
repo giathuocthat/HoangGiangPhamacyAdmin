@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using ThuocGiaThatAdmin.Domain.Constants;
 using ThuocGiaThatAdmin.Domain.Entities;
 
 namespace ThuocGiaThatAdmin.Server.Controllers
@@ -19,7 +20,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var roles = _roleManager.Roles;
+            var roles = _roleManager.Roles.Where( x=> x.Name != AdminPermission.Role);
 
             return Ok(roles);
         }

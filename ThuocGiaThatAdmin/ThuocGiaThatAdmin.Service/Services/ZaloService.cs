@@ -45,7 +45,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 Type = otpRequest.Type.ToString()
             };
             _context.OtpCodes.Add(otpCode);
-            await _context.SaveChangesAsync(); return true;
+            await _context.SaveChangesAsync();
 
             var body = new ZaloZNSRequest
             {
