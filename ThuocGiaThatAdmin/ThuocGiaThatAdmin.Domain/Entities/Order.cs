@@ -27,12 +27,13 @@ namespace ThuocGiaThatAdmin.Domain.Entities
 
         // Delivery Information
         public string DeliveryStatus { get; set; } = "NotShipped"; // NotShipped, Preparing, ReadyToShip, InTransit, OutForDelivery, Delivered, Failed, Returned
+        public string? DeliveryMethod { get; set; }
         public string? ShippingCarrier { get; set; } // e.g., "Viettel Post", "Giao Hang Nhanh"
         public string? TrackingNumber { get; set; }
         public DateTime? ShippedDate { get; set; }
         public DateTime? DeliveredDate { get; set; }
+        public DateTime? EstimatedDeliveryDate { get; set; }
         public string? DeliveryNotes { get; set; }
-
         public string? Note { get; set; }
         // UpdatedDate inherited
 

@@ -54,13 +54,11 @@ namespace HoangGiangPhamacyAuthentication.Controllers
                 var roleName = roldeDetail.Name;
                 var isInRole = await _userManager.IsInRoleAsync(user, roleName);
 
-                if(!isInRole)
+                if (!isInRole)
                 {
                     await _userManager.AddToRoleAsync(user, roleName);
                 }
             }
-            
-
 
             // return location to the created resource
             var response = new { id = user.Id, username = user.UserName, email = user.Email };
@@ -157,14 +155,14 @@ namespace HoangGiangPhamacyAuthentication.Controllers
 
             foreach (var item in users)
             {
-                item.Role = string.Join(",", item.Roles.Select(x => x.Name));
+                item.Role = item.Roles != null ? string.Join(",", item.Roles.Select(x => x.Name)) : string.Empty;
             }
 
             return Ok(users);
         }
 
         [HttpDelete("{id}/deactivate")]
-        public async Task<IActionResult> DeleteUser(string id)
+        public async Task<IActionResult> DeactivateUser(string id)
         {
             var userDetail = await _userService.GetByIdAsync(id);
 
@@ -176,6 +174,19 @@ namespace HoangGiangPhamacyAuthentication.Controllers
             await _userService.DeactivateUser(userDetail.UserName);
 
             return Ok();
+        }
+
+        [HttpPost("deactivated")]
+        public async Task<IActionResult> GetDeactivatedUsers([FromBody] FilterRequest request)
+        {
+            var users = await _userService.GetDeactivatedUsersAsync(request);
+
+            foreach (var item in users)
+            {
+                item.Role = item.Roles != null ? string.Join(",", item.Roles.Select(x => x.Name)) : string.Empty;
+            }
+
+            return Ok(users);
         }
     }
 }

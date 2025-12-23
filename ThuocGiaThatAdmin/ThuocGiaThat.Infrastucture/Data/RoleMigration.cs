@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThuocGiaThatAdmin.Domain.Constants;
 using ThuocGiaThatAdmin.Domain.Entities;
 
 namespace ThuocGiaThat.Infrastucture.Data
@@ -25,10 +26,10 @@ namespace ThuocGiaThat.Infrastucture.Data
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
             // Read from configuration (secure this in production)
-            var adminUserName = configuration["AdminUser:UserName"] ?? "admin";
+            var adminUserName = configuration["AdminUser:UserName"] ?? Admin.AdminUserName;
             var adminEmail = configuration["AdminUser:Email"] ?? "admin@giathuocthat.vn";
             var adminPassword = configuration["AdminUser:Password"] ?? "Admin@123"; // replace in production
-            var adminRole = "Admin";
+            var adminRole = Admin.AdminRoleName;
 
             try
             {

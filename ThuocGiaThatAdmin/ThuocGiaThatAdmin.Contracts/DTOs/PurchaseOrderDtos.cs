@@ -42,9 +42,9 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
 
     public class CreatePurchaseOrderDto
     {
-        public int SupplierId { get; set; }
+        public int? SupplierId { get; set; }
         public int? SupplierContactId { get; set; }
-        public int WarehouseId { get; set; }
+        public int? WarehouseId { get; set; }
         public DateTime? ExpectedDeliveryDate { get; set; }
         public decimal ShippingFee { get; set; }
         public decimal DiscountAmount { get; set; }
@@ -56,6 +56,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
 
     public class UpdatePurchaseOrderDto
     {
+        public int? SupplierId { get; set; }
         public int? SupplierContactId { get; set; }
         public DateTime? ExpectedDeliveryDate { get; set; }
         public decimal ShippingFee { get; set; }
@@ -134,6 +135,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public decimal TaxRate { get; set; }
         public decimal DiscountAmount { get; set; }
         public string? Notes { get; set; }
+        public int ProductVariantId { get; set; }
     }
 
     // ============ PurchaseOrderHistory DTOs ============

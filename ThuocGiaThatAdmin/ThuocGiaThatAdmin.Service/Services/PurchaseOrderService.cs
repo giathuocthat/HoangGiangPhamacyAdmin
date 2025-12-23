@@ -21,17 +21,20 @@ namespace ThuocGiaThatAdmin.Service.Services
         private readonly IPurchaseOrderItemRepository _itemRepository;
         private readonly IPurchaseOrderHistoryRepository _historyRepository;
         private readonly IProductVariantRepository _productVariantRepository;
+        private readonly IProductRepository _productRepository;
 
         public PurchaseOrderService(
             IPurchaseOrderRepository purchaseOrderRepository,
             IPurchaseOrderItemRepository itemRepository,
             IPurchaseOrderHistoryRepository historyRepository,
-            IProductVariantRepository productVariantRepository)
+            IProductVariantRepository productVariantRepository,
+            IProductRepository productRepository)
         {
             _purchaseOrderRepository = purchaseOrderRepository ?? throw new ArgumentNullException(nameof(purchaseOrderRepository));
             _itemRepository = itemRepository ?? throw new ArgumentNullException(nameof(itemRepository));
             _historyRepository = historyRepository ?? throw new ArgumentNullException(nameof(historyRepository));
             _productVariantRepository = productVariantRepository ?? throw new ArgumentNullException(nameof(productVariantRepository));
+            _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
         }
 
         public async Task<IEnumerable<PurchaseOrderResponse>> GetAllAsync()
@@ -142,7 +145,21 @@ namespace ThuocGiaThatAdmin.Service.Services
             // Add items
             foreach (var itemDto in dto.Items)
             {
-                var variant = await _productVariantRepository.GetByIdAsync(itemDto.ProductVariantId);
+               // var variant = await _productVariantRepository.GetByIdAsync(itemDto.ProductVariantId);
+                var variant = await _productVariantRepository.GetDetail(itemDto.ProductVariantId);
+
+                if (null == variant)
+                {
+                    throw new InvalidOperationException($"Product variant {itemDto.ProductVariantId} not found");
+                }
+
+                var productDetail = await _productRepository.GetByIdAsync(variant.ProductId);
+
+                if(productDetail == null)
+                {
+                    throw new InvalidOperationException($"Product {variant.ProductId} not found");
+                }
+
                 if (variant == null)
                     throw new InvalidOperationException($"Product variant {itemDto.ProductVariantId} not found");
 
@@ -161,7 +178,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                     TaxRate = itemDto.TaxRate,
                     DiscountAmount = itemDto.DiscountAmount,
                     TotalAmount = itemTotal + itemTax - itemDto.DiscountAmount,
-                    ProductName = variant.Product?.Name ?? string.Empty,
+                    ProductName = productDetail.Name ?? string.Empty,
                     SKU = variant.SKU,
                     Notes = itemDto.Notes
                 });
@@ -187,13 +204,16 @@ namespace ThuocGiaThatAdmin.Service.Services
                 throw new ArgumentNullException(nameof(dto));
 
             var order = await _purchaseOrderRepository.GetWithDetailsAsync(id);
+
             if (order == null)
                 throw new InvalidOperationException($"Purchase order {id} not found");
 
             if (order.Status != PurchaseOrderStatus.Draft)
                 throw new InvalidOperationException("Only draft orders can be updated");
 
+
             // Update basic info
+            order.SupplierId = dto.SupplierId;
             order.SupplierContactId = dto.SupplierContactId;
             order.ExpectedDeliveryDate = dto.ExpectedDeliveryDate;
             order.ShippingFee = dto.ShippingFee;
@@ -211,13 +231,49 @@ namespace ThuocGiaThatAdmin.Service.Services
             decimal subTotal = 0;
             decimal taxAmount = 0;
 
+            foreach (var item in order.PurchaseOrderItems)
+            {
+                var purchaseOrderItemDetail = await _itemRepository.GetByIdAsync(item.Id);
+                _itemRepository.Delete(purchaseOrderItemDetail);
+            }
+
             // Update items (simplified - in production, handle add/remove/update)
             foreach (var itemDto in dto.Items)
             {
+                var purchaseOrderItemDetail = await _itemRepository.GetByIdAsync(itemDto.Id);
+                var productVariantDetail = await _productVariantRepository.GetByIdAsync(itemDto.ProductVariantId);
+
+                if (itemDto.OrderedQuantity <= 0)
+                {
+                    throw new InvalidOperationException("OrderQuantity must be greater than zero.");
+                }
+
+                if (itemDto.UnitPrice <= 0)
+                {
+                    throw new InvalidOperationException("UnitPrice must be greater than zero.");
+                }
                 var itemTotal = itemDto.OrderedQuantity * itemDto.UnitPrice;
                 var itemTax = itemTotal * itemDto.TaxRate / 100;
+
                 subTotal += itemTotal;
                 taxAmount += itemTax;
+
+                var purchaseOrderItem = new PurchaseOrderItem
+                {
+                    PurchaseOrderId = order.Id,
+                    ProductVariantId = itemDto.ProductVariantId,
+                    OrderedQuantity = itemDto.OrderedQuantity,
+                    ReceivedQuantity = 0,
+                    UnitPrice = itemDto.UnitPrice,
+                    TaxRate = itemDto.TaxRate,
+                    ProductName = productVariantDetail?.Product?.Name ?? string.Empty,
+                    DiscountAmount = itemDto.DiscountAmount,
+                    TotalAmount = itemDto.OrderedQuantity * itemDto.UnitPrice + (itemDto.OrderedQuantity * itemDto.UnitPrice * itemDto.TaxRate / 100) - itemDto.DiscountAmount,
+                    Notes = itemDto.Notes,
+                    UpdatedDate = DateTime.Now
+                };
+                await _itemRepository.AddAsync(purchaseOrderItem);
+
             }
 
             order.SubTotal = subTotal;
