@@ -267,11 +267,11 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAllOrigins",
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000")
-            //.AllowAnyOrigin() // Allows requests from any origin
+            policy//.WithOrigins("https://localhost:5001")
+            .AllowAnyOrigin() // Allows requests from any origin
                   .AllowAnyMethod() // Allows any HTTP method (GET, POST, PUT, DELETE, etc.)
-                  .AllowAnyHeader()
-                  .AllowCredentials(); // Allows any header in the request
+                  .AllowAnyHeader();
+                  //.AllowCredentials(); // Allows any header in the request
         });
 });
 
