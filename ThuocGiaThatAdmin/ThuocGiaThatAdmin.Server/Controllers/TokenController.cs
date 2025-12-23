@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -18,12 +17,14 @@ namespace HoangGiangPhamacyAuthentication.Controllers
     {
         private readonly ITokenService _tokenService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IUserService _userService;
 
-        public TokenController(ITokenService tokenService, UserManager<ApplicationUser> userManager)
+        public TokenController(ITokenService tokenService, UserManager<ApplicationUser> userManager, IUserService userService)
         {
             _tokenService = tokenService;
             _userManager = userManager;
-        }
+            _userService = userService;
+        }   
 
         // POST: api/token
         [HttpPost]
@@ -31,7 +32,20 @@ namespace HoangGiangPhamacyAuthentication.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var user = await _userManager.FindByEmailAsync(model.Email);
+            ApplicationUser user = null;
+
+            var emailUser = await _userManager.FindByEmailAsync(model.Email);
+            var phoneUser = await _userService.FindByPhone(model.Email);
+
+            if (emailUser != null)
+            {
+                user = emailUser;
+            }
+            if(phoneUser != null)
+            {
+                user = phoneUser;
+            }
+
             if (user == null) return Unauthorized(new { error = "invalid_credentials" });
 
             var valid = await _userManager.CheckPasswordAsync(user, model.Password);

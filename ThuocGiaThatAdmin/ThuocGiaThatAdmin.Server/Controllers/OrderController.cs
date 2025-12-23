@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using ThuocGiaThatAdmin.Contract.DTOs;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
+using ThuocGiaThatAdmin.Server.Extensions;
 using ThuocGiaThatAdmin.Service.Interfaces;
 using ThuocGiaThatAdmin.Service.Services;
 
@@ -178,7 +179,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         [HttpGet("defaultAddress")]
         public async Task<IActionResult> GetDefaultAddress()
         {
-            var customerId = int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
+            var customerId = User.GetCustomerId(); //int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
             var address = await _addressSevice.GetDefaultAddress(customerId);
             return Ok(address);
         }
@@ -289,5 +290,13 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 });
             }
         }
+
+        [Authorize(Roles = "Customer")]
+        [HttpGet("invoice")]
+        public async Task<IActionResult> GetInvoiceAsync()
+        {
+            return Ok();
+        }
+            
     }
 }
