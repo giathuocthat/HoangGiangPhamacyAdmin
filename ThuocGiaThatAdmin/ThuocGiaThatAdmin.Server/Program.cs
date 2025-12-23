@@ -19,7 +19,6 @@ using ThuocGiaThatAdmin.Server.Extensions;
 using ThuocGiaThatAdmin.Service;
 using ThuocGiaThatAdmin.Service.Interfaces;
 using ThuocGiaThatAdmin.Service.Services;
-
 using ThuocGiaThatAdmin.Common.Interfaces;
 using ThuocGiaThatAdmin.Queries;
 using ThuocGiaThatAdmin.Commands;
@@ -65,7 +64,7 @@ builder.Services.AddSwaggerGen(options =>
                     Id = "Bearer"
                 }
             },
-            new string[] {}
+            new string[] { }
         }
     });
 });
@@ -93,24 +92,24 @@ var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
 var signingKey = new SymmetricSecurityKey(keyBytes);
 
 builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtIssuer,
-        ValidAudience = jwtAudience,
-        IssuerSigningKey = signingKey
-    };
-    options.MapInboundClaims = false;
-});
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = signingKey
+        };
+        options.MapInboundClaims = false;
+    });
 
 builder.Services.AddResponseCompression(options =>
 {
@@ -167,6 +166,7 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 // Register Services (Legacy - for backward compatibility)
 // ============================================================
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<ActiveIngredientService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<ProductOptionService>();
 builder.Services.AddScoped<FileUploadService>();
@@ -245,7 +245,6 @@ builder.Services.AddScoped<IZaloService, ZaloService>();
 builder.Services.AddScoped<HttpClient>();
 
 
-
 // Order Fulfillment Service
 builder.Services.AddScoped<IOrderFulfillmentService, OrderFulfillmentService>();
 builder.Services.AddScoped<IOrderFulfillmentRepository, OrderFulfillmentRepository>();
@@ -261,8 +260,8 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy.AllowAnyOrigin() // Allows requests from any origin
-                  .AllowAnyMethod() // Allows any HTTP method (GET, POST, PUT, DELETE, etc.)
-                  .AllowAnyHeader(); // Allows any header in the request
+                .AllowAnyMethod() // Allows any HTTP method (GET, POST, PUT, DELETE, etc.)
+                .AllowAnyHeader(); // Allows any header in the request
         });
 });
 
