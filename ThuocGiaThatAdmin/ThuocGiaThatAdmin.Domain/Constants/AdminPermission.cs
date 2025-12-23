@@ -13,6 +13,7 @@ namespace ThuocGiaThatAdmin.Domain.Constants
     public static class AdminPermission
     {
         public const string ClaimType = "Permission";
+        public const string Role = "Admin";
 
         public static class Customer
         {

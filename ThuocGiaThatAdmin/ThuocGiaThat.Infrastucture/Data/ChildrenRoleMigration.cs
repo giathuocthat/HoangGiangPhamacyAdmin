@@ -28,15 +28,9 @@ namespace ThuocGiaThat.Infrastucture.Data
             {
                 var childRoles = new List<string>()
                 {
-                    "Regional Sales Manager",
-                    "Regional Sales Executive",
-                    "Inventory Manager",
-                    "Employee",
-                    "Cashier",
-                    "Supervisor",
-                    "Store Keeper",
-                    "Quality Analyst",
-                    "Sale"
+                    SaleManagerPermission.Role,
+                    SaleMemberPermissions.Role,
+                    SaleManagerPermission.Role
                 };
 
                 foreach (var item in childRoles)

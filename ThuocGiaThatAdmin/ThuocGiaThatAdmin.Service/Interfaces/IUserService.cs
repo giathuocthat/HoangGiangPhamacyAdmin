@@ -36,6 +36,7 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
         /// Lấy danh sách tất cả Sales Users (để hiển thị trong dropdown)
         /// </summary>
         Task<IEnumerable<SalesUserDto>> GetSalesUsersAsync();
+        Task<IEnumerable<SalesUserDto>> GetSalesManagerUsersAsync();
     }
 
 }

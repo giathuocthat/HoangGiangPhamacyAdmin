@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using ThuocGiaThat.Infrastucture;
 using ThuocGiaThat.Infrastucture.Repositories;
 using ThuocGiaThat.Infrastucture.Utils;
 using ThuocGiaThatAdmin.Contract.DTOs;
@@ -21,15 +22,18 @@ namespace ThuocGiaThatAdmin.Service
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IRepository<ApplicationUser> _userRepository;
         private readonly DynamicFilterService _dynamicFilterService;
+        private readonly TrueMecContext _context;
 
         public UserService(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager,
             IRepository<ApplicationUser> userRepository,
-            DynamicFilterService dynamicFilterService)
+            DynamicFilterService dynamicFilterService,
+            TrueMecContext context)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _userRepository = userRepository;
             _dynamicFilterService = dynamicFilterService;
+            _context = context;
         }
 
         public async Task<ApplicationUser?> GetByIdAsync(string id)
@@ -60,6 +64,7 @@ namespace ThuocGiaThatAdmin.Service
             {
                 return IdentityResult.Failed(new IdentityError { Description = "Email already exist." });
             }
+
 
             return await _userManager.CreateAsync(user, password);
         }
@@ -247,13 +252,15 @@ namespace ThuocGiaThatAdmin.Service
 
         public async Task<IEnumerable<SalesUserDto>> GetSalesUsersAsync()
         {
-            // Get all active users (you may want to filter by specific sales roles)
-            var salesUsers = await _userRepository
-                .AsAsQueryable()
-                .Where(u => u.IsActive)
-                .Include(u => u.Manager)
-                .Include(u => u.Region)
-                .ToListAsync();
+            // Get Sale Managers for all regions (users with "Sale Manager" role in each region)
+            var salesUsers = await (from u in _context.Users
+                                      join ur in _context.UserRoles on u.Id equals ur.UserId
+                                      join r in _context.Roles on ur.RoleId equals r.Id
+                                      where 
+                                        (r.Name == SaleManagerPermission.Role || r.Name == SaleMemberPermissions.Role)
+                                        && u.IsActive
+                                      select new { u.Id, u.FullName, u.Email, u.PhoneNumber, u.IsActive, u.Manager, u.ManagerId, u.Region, u.RegionId })
+                                      .ToListAsync();
 
             return salesUsers.Select(u => new SalesUserDto
             {
@@ -294,6 +301,32 @@ namespace ThuocGiaThatAdmin.Service
             }
 
             return false;
+        }
+
+        public async Task<IEnumerable<SalesUserDto>> GetSalesManagerUsersAsync()
+        {
+            // Get Sale Managers for all regions (users with "Sale Manager" role in each region)
+            var salesUsers = await(from u in _context.Users
+                                   join ur in _context.UserRoles on u.Id equals ur.UserId
+                                   join r in _context.Roles on ur.RoleId equals r.Id
+                                   where
+                                     (r.Name == SaleManagerPermission.Role)
+                                     && u.IsActive
+                                   select new { u.Id, u.FullName, u.Email, u.PhoneNumber, u.IsActive, u.Manager, u.ManagerId, u.Region, u.RegionId })
+                                      .ToListAsync();
+
+            return salesUsers.Select(u => new SalesUserDto
+            {
+                Id = u.Id,
+                FullName = u.FullName ?? string.Empty,
+                Email = u.Email,
+                PhoneNumber = u.PhoneNumber,
+                IsActive = u.IsActive,
+                ManagerId = u.ManagerId,
+                ManagerName = u.Manager?.FullName,
+                RegionId = u.RegionId,
+                RegionName = u.Region?.Name
+            });
         }
     }
 }
