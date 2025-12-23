@@ -103,7 +103,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 UpdatedDate = DateTime.UtcNow
             };
 
-            await _addressRepository.UpdateAsync(address);
+            //await _addressRepository.UpdateAsync(address);
 
             // Return the full DTO with navigation properties
             return await _addressRepository.GetByIdAsync(id)

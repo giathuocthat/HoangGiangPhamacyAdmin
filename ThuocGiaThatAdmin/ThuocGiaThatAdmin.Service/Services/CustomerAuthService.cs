@@ -92,7 +92,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             return (true, "Registration successful", result);
         }
 
-        public async Task<(bool Success, string Message, string? Token, string? expiresAt, Customer? Customer)> LoginAsync(CustomerLoginDto dto)
+        public async Task<(bool Success, string? accessToken, string? refreshToken, Customer? Customer)> LoginAsync(CustomerLoginDto dto)
         {
             var customer = await _context.Customers
                 .Include(c => c.BusinessType)
@@ -100,16 +100,106 @@ namespace ThuocGiaThatAdmin.Service.Services
 
             if (customer == null)
             {
-                return (false, "Invalid phone number or password", null, null, null);
+                return (false, null, null, null);
             }
 
             if (!VerifyPassword(dto.Password, customer.PasswordHash))
             {
-                return (false, "Invalid email or password", null, null, null);
+                return (false, null, null, null);
             }
 
-            var (token, expiresAt) = GenerateJwtTokenAndExpires(customer);
-            return (true, "Login successful", token, expiresAt, customer);
+            var jwtSettings = _configuration.GetSection("Jwt");
+
+            var accessTokenExpires = DateTime.Now.AddMinutes(int.Parse(jwtSettings["ExpiresMinutes"] ?? "60"));
+            var accessToken = GenerateJwtToken(customer, accessTokenExpires);
+
+            var refreshTokenExpires = dto.RememberMe == true ? DateTime.Now.AddDays(7) : DateTime.Now.AddDays(1);
+            var refreshToken = GenerateJwtToken(customer, refreshTokenExpires);
+
+            return (true, accessToken, refreshToken, customer);
+        }
+
+        private string GenerateJwtToken(Customer customer, DateTime expires)
+        {
+            var jwtSettings = _configuration.GetSection("Jwt");
+            var secretKey = jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key not configured");
+            var issuer = jwtSettings["Issuer"] ?? "ThuocGiaThatAPI";
+            var audience = jwtSettings["Audience"] ?? "ThuocGiaThatCustomers";
+            var expiryMinutes = int.Parse(jwtSettings["ExpiresMinutes"] ?? "60");
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, customer.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Name, customer.FullName),
+                new Claim(ClaimTypes.Role, "Customer"),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            };
+
+            var token = new JwtSecurityToken(
+                issuer: issuer,
+                audience: audience,
+                claims: claims,
+                expires: expires,
+                signingCredentials: credentials
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public string Refresh(string refreshToken)
+        {
+            var principal = ValidateRefreshToken(refreshToken);
+            var customerId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+            var fullName = principal.FindFirstValue(JwtRegisteredClaimNames.Name);
+            string accessToken = GenerateJwtToken(new Customer { Id = int.Parse(customerId), FullName = fullName });
+
+            return accessToken;
+        } 
+
+        public ClaimsPrincipal ValidateRefreshToken(string refreshToken)
+        {
+            var jwtSettings = _configuration.GetSection("Jwt");
+            var secretKey = jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key not configured");
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var issuer = jwtSettings["Issuer"] ?? "ThuocGiaThatAPI";
+            var audience = jwtSettings["Audience"] ?? "ThuocGiaThatCustomers";
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(secretKey);
+
+            try
+            {
+                var principal = tokenHandler.ValidateToken(refreshToken, new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = issuer,
+
+                    ValidateAudience = true,
+                    ValidAudience = audience,
+
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = securityKey,
+
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero,
+
+                    RequireExpirationTime = true
+                }, out SecurityToken validatedToken);
+
+                return principal;
+            }
+            catch (SecurityTokenExpiredException)
+            {
+                throw new SecurityTokenException("Refresh token expired");
+            }
+            catch (Exception)
+            {
+                throw new SecurityTokenException("Invalid refresh token");
+            }
         }
 
         public async Task<(bool Success, string Message, string? Token, string? expiresAt, Customer? Customer)> LoginByOtpAsync(string phoneNumber, OtpCodeTypeEnum type, string otp)

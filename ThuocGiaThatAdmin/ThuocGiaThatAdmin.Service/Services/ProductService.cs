@@ -77,7 +77,8 @@ namespace ThuocGiaThatAdmin.Service.Services
         /// <param name="pageNumber">Page number (1-based)</param>
         /// <param name="pageSize">Number of items per page</param>
         /// <returns>Tuple containing list of products and total count</returns>
-        public async Task<(IEnumerable<Product> products, int TotalCount)> GetPagedProductsAsync(int pageNumber = 1, int pageSize = 10)
+        public async Task<(IEnumerable<Product> products, int TotalCount)> GetPagedProductsAsync(int pageNumber = 1,
+            int pageSize = 10)
         {
             if (pageNumber <= 0)
                 throw new ArgumentException("Page number must be greater than 0", nameof(pageNumber));
@@ -213,12 +214,27 @@ namespace ThuocGiaThatAdmin.Service.Services
                 }
             }
 
+            // Map Product Active Ingredients
+            if (dto.ProductActiveIngredients != null && dto.ProductActiveIngredients.Any())
+            {
+                foreach (var ingredientDto in dto.ProductActiveIngredients)
+                {
+                    product.ProductActiveIngredients.Add(new ProductActiveIngredient
+                    {
+                        ActiveIngredientId = ingredientDto.ActiveIngredientId ?? 0,
+                        Quantity = ingredientDto.Quantity,
+                        DisplayOrder = ingredientDto.DisplayOrder,
+                        IsMainIngredient = ingredientDto.IsMainIngredient
+                    });
+                }
+            }
+
             // Create product using existing method
             await CreateProductAsync(product);
 
             // Retrieve created product with all related data
             var createdProduct = await GetProductByIdAsync(product.Id);
-            
+
             if (createdProduct == null)
                 throw new InvalidOperationException("Failed to retrieve created product");
 
@@ -326,7 +342,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             var existingProduct = await _context.Products
                 .Include(p => p.Images)
                 .Include(p => p.ProductVariants)
-                    .ThenInclude(v => v.VariantOptionValues)
+                .ThenInclude(v => v.VariantOptionValues)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (existingProduct == null)
@@ -525,6 +541,29 @@ namespace ThuocGiaThatAdmin.Service.Services
                 }
             }
 
+            // Update Product Active Ingredients
+            // Remove all existing ingredients
+            var existingIngredients = _context.ProductActiveIngredients
+                .Where(pai => pai.ProductId == id)
+                .ToList();
+            _context.ProductActiveIngredients.RemoveRange(existingIngredients);
+
+            // Add new ingredients from DTO
+            if (dto.ProductActiveIngredients != null && dto.ProductActiveIngredients.Any())
+            {
+                foreach (var ingredientDto in dto.ProductActiveIngredients)
+                {
+                    _context.ProductActiveIngredients.Add(new ProductActiveIngredient
+                    {
+                        ProductId = id,
+                        ActiveIngredientId = ingredientDto.ActiveIngredientId ?? 0,
+                        Quantity = ingredientDto.Quantity,
+                        DisplayOrder = ingredientDto.DisplayOrder,
+                        IsMainIngredient = ingredientDto.IsMainIngredient
+                    });
+                }
+            }
+
             return await _context.SaveChangesAsync();
         }
 
@@ -583,7 +622,8 @@ namespace ThuocGiaThatAdmin.Service.Services
         /// <param name="pageNumber">Page number (1-based)</param>
         /// <param name="pageSize">Number of items per page</param>
         /// <returns>Tuple containing products with enhanced data and total count</returns>
-        public async Task<(IEnumerable<dynamic> products, int totalCount)> GetStoreProductsAsync(int pageNumber = 1, int pageSize = 10)
+        public async Task<(IEnumerable<dynamic> products, int totalCount)> GetStoreProductsAsync(int pageNumber = 1,
+            int pageSize = 10)
         {
             if (pageNumber <= 0)
                 throw new ArgumentException("Page number must be greater than 0", nameof(pageNumber));
@@ -593,41 +633,41 @@ namespace ThuocGiaThatAdmin.Service.Services
 
             // Get total count
             var totalCount = await _context.Products.Where(p => p.IsActive).CountAsync();
-            
+
             // Get products with all related data using efficient eager loading
             var products = await _context.Products
                 .Where(p => p.IsActive)
                 .Include(p => p.Brand)
                 .Include(p => p.Category)
                 .Include(p => p.ProductVariants)
-                    .ThenInclude(v => v.Inventories)
+                .ThenInclude(v => v.Inventories)
                 .Include(p => p.ProductVariants)
-                    .ThenInclude(v => v.VariantOptionValues)
-                        .ThenInclude(vov => vov.ProductOptionValue)
-                            .ThenInclude(pov => pov.ProductOption)
+                .ThenInclude(v => v.VariantOptionValues)
+                .ThenInclude(vov => vov.ProductOptionValue)
+                .ThenInclude(pov => pov.ProductOption)
                 .OrderByDescending(p => p.CreatedDate)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .AsNoTracking()
                 .ToListAsync();
-            
+
             // Get all variant IDs for this page
             var variantIds = products
                 .SelectMany(p => p.ProductVariants.Select(v => v.Id))
                 .ToList();
-            
+
             // Get sold quantities for all variants in one query
             var soldQuantities = await _context.OrderItems
                 .Where(oi => variantIds.Contains(oi.ProductVariantId))
                 .GroupBy(oi => oi.ProductVariantId)
                 .Select(g => new { VariantId = g.Key, SoldQuantity = g.Sum(oi => oi.Quantity) })
                 .ToDictionaryAsync(x => x.VariantId, x => x.SoldQuantity);
-            
+
             // Get ProductStatusMaps for all variants in one query
             var productStatusMaps = await _context.ProductStatusMaps
                 .Where(psm => variantIds.Contains(psm.ProductVariantId))
                 .ToListAsync();
-            
+
             // Group status maps by variant ID
             var statusMapsByVariant = productStatusMaps
                 .GroupBy(psm => psm.ProductVariantId)
@@ -635,7 +675,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                     g => g.Key,
                     g => g.Select(psm => new { psm.StatusType, psm.StatusName }).ToList()
                 );
-            
+
             // Map to dynamic result
             var result = products.Select(product => new
             {
@@ -659,7 +699,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 product.UpdatedDate,
                 BrandName = product.Brand?.Name,
                 CategoryName = product.Category?.Name,
-                
+
                 // Enhanced variant information
                 ProductVariants = product.ProductVariants.Select(variant => new
                 {
@@ -680,7 +720,8 @@ namespace ThuocGiaThatAdmin.Service.Services
                     // Get ProductVariantStatuses from pre-loaded dictionary
                     ProductVariantStatuses = statusMapsByVariant.ContainsKey(variant.Id)
                         ? statusMapsByVariant[variant.Id]
-                        : Enumerable.Empty<object>().Select(x => new { StatusType = default(ProductStatusType), StatusName = string.Empty }).ToList(),
+                        : Enumerable.Empty<object>().Select(x => new
+                            { StatusType = default(ProductStatusType), StatusName = string.Empty }).ToList(),
 
                     // Option values (e.g., Màu đen, Size X)
                     OptionValues = variant.VariantOptionValues.Select(vov => new
@@ -695,7 +736,6 @@ namespace ThuocGiaThatAdmin.Service.Services
 
             return (result, totalCount);
         }
-
 
         #endregion
 
@@ -726,7 +766,8 @@ namespace ThuocGiaThatAdmin.Service.Services
                 .AnyAsync(psm => psm.ProductVariantId == dto.ProductVariantId && psm.StatusType == dto.StatusType);
 
             if (duplicate)
-                throw new InvalidOperationException($"ProductStatusMap already exists for ProductVariantId {dto.ProductVariantId} with StatusType {dto.StatusType}");
+                throw new InvalidOperationException(
+                    $"ProductStatusMap already exists for ProductVariantId {dto.ProductVariantId} with StatusType {dto.StatusType}");
 
             // Create new ProductStatusMap
             var productStatusMap = new ProductStatusMap
@@ -750,9 +791,11 @@ namespace ThuocGiaThatAdmin.Service.Services
 
         #endregion
 
-        public async Task<IEnumerable<dynamic>> GetProductCollectionByTypeAsync(ProductStatusType productStatusType,int pageSize = 10)
+        public async Task<IEnumerable<dynamic>> GetProductCollectionByTypeAsync(ProductStatusType productStatusType,
+            int pageSize = 10)
         {
-            var productVariantIds = _context.ProductStatusMaps.Where(x => x.StatusType == productStatusType).Take(pageSize).Select(x => x.ProductVariantId).ToList();
+            var productVariantIds = _context.ProductStatusMaps.Where(x => x.StatusType == productStatusType)
+                .Take(pageSize).Select(x => x.ProductVariantId).ToList();
             return await _context.ProductVariants.Where(x => productVariantIds.Contains(x.Id)).Select(x => new
             {
                 Id = x.ProductId,
@@ -811,7 +854,8 @@ namespace ThuocGiaThatAdmin.Service.Services
         /// </summary>
         /// <param name="request">Request parameters for filtering and pagination</param>
         /// <returns>Tuple containing list of product variants and total count</returns>
-        public async Task<(IEnumerable<ProductVariantListItemDto> variants, int totalCount)> GetProductVariantsAsync(GetProductVariantsRequestDto request)
+        public async Task<(IEnumerable<ProductVariantListItemDto> variants, int totalCount)> GetProductVariantsAsync(
+            GetProductVariantsRequestDto request)
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
@@ -826,8 +870,8 @@ namespace ThuocGiaThatAdmin.Service.Services
             var query = _context.ProductVariants
                 .Include(v => v.Product)
                 .Include(v => v.VariantOptionValues)
-                    .ThenInclude(vov => vov.ProductOptionValue)
-                        .ThenInclude(pov => pov.ProductOption)
+                .ThenInclude(vov => vov.ProductOptionValue)
+                .ThenInclude(pov => pov.ProductOption)
                 .AsQueryable();
 
             // Apply filters
@@ -846,7 +890,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             }
             else
             {
-                query = query.Where(v => v.IsActive ==  true);
+                query = query.Where(v => v.IsActive == true);
             }
 
             // Apply search
@@ -895,6 +939,5 @@ namespace ThuocGiaThatAdmin.Service.Services
 
             return (result, totalCount);
         }
-
     }
 }

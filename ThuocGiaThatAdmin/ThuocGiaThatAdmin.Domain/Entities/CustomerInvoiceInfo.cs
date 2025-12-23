@@ -19,5 +19,8 @@ namespace ThuocGiaThatAdmin.Domain.Entities
 
         // Navigation properties
         public Customer Customer { get; set; } = null!;
+        public bool IsVerfied { get; set;  } = false;
+        public bool IsDefault { get; set; } = false;
+        public string Note {  get; set; } = string.Empty;
     }
 }

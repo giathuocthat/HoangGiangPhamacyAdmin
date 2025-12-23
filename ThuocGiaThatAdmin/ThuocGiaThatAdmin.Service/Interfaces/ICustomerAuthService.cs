@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Threading.Tasks;
 using ThuocGiaThatAdmin.Contract.DTOs;
 using ThuocGiaThatAdmin.Contract.Enums;
@@ -10,7 +11,7 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
     public interface ICustomerAuthService
     {
         Task<(bool Success, string Message, CustomerProfileTokenDto Customer)> RegisterAsync(CustomerRegisterDto dto);
-        Task<(bool Success, string Message, string? Token, string? expiresAt, Customer? Customer)> LoginAsync(CustomerLoginDto dto);
+        Task<(bool Success, string? accessToken, string? refreshToken, Customer? Customer)> LoginAsync(CustomerLoginDto dto);
         Task<Customer?> GetCustomerByIdAsync(int customerId);
         Task<Customer?> GetCustomerByEmailAsync(string email);
         Task<bool> UpdateProfileAsync(int customerId, UpdateCustomerProfileDto dto);
@@ -23,5 +24,7 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
         Task<(bool Success, string Message, string? Token, string? expiresAt, Customer? Customer)> LoginByOtpAsync(string phoneNumber, OtpCodeTypeEnum type, string otp);
         Task<(bool success, string message)> ChangePasswordAsync(int customerId, UpdateCustomerPasswordDto dto);
         Task<ValidationResponse> CheckExisting(CheckCustomerExistsRequest request);
+        ClaimsPrincipal ValidateRefreshToken(string refreshToken);
+        string Refresh(string refreshToken);
     }
 }
