@@ -107,7 +107,6 @@ namespace ThuocGiaThatAdmin.Service
 
             var handler = new JwtSecurityTokenHandler();
             var accessToken = handler.WriteToken(jwt);
-
             var refreshToken = GenerateRefreshToken();
 
             return (AccessToken: accessToken, RefreshToken: refreshToken, ExpiresUtc: expires);
