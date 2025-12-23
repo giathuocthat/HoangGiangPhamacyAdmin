@@ -6,8 +6,8 @@ using ThuocGiaThatAdmin.Domain.Entities;
 
 namespace ThuocGiaThat.Infrastucture
 {
-
-    public class TrueMecContext : IdentityDbContext<ApplicationUser, ApplicationRole, string, IdentityUserClaim<string>, IdentityUserRole<string>, IdentityUserLogin<string>, ApplicationRoleClaim, IdentityUserToken<string>>
+    public class TrueMecContext : IdentityDbContext<ApplicationUser, ApplicationRole, string, IdentityUserClaim<string>,
+        IdentityUserRole<string>, IdentityUserLogin<string>, ApplicationRoleClaim, IdentityUserToken<string>>
     {
         public TrueMecContext(DbContextOptions<TrueMecContext> options) : base(options)
         {
@@ -20,7 +20,9 @@ namespace ThuocGiaThat.Infrastucture
 
         public DbSet<Category> Categories { get; set; }
         public DbSet<Brand> Brands { get; set; }
+
         public DbSet<Bank> Banks { get; set; }
+
         // ProductType removed
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
@@ -28,6 +30,8 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<ProductOptionValue> ProductOptionValues { get; set; }
         public DbSet<ProductVariant> ProductVariants { get; set; }
         public DbSet<VariantOptionValue> VariantOptionValues { get; set; }
+        public DbSet<ActiveIngredient> ActiveIngredients { get; set; }
+        public DbSet<ProductActiveIngredient> ProductActiveIngredients { get; set; }
         public DbSet<Inventory> Inventories { get; set; }
         public DbSet<PriceHistory> PriceHistories { get; set; }
 
@@ -145,8 +149,10 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.CreatedDate).HasColumnName("CreatedDate").HasDefaultValueSql("GETUTCDATE()");
                 entity.Property(e => e.UpdatedDate).HasColumnName("UpdatedDate");
 
-                entity.HasOne(e => e.Category).WithMany(e => e.Products).HasForeignKey(e => e.CategoryId).OnDelete(DeleteBehavior.Restrict);
-                entity.HasOne(e => e.Brand).WithMany(e => e.Products).HasForeignKey(e => e.BrandId).OnDelete(DeleteBehavior.SetNull);
+                entity.HasOne(e => e.Category).WithMany(e => e.Products).HasForeignKey(e => e.CategoryId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(e => e.Brand).WithMany(e => e.Products).HasForeignKey(e => e.BrandId)
+                    .OnDelete(DeleteBehavior.SetNull);
 
                 entity.HasIndex(e => e.Slug).IsUnique();
             });
@@ -156,7 +162,8 @@ namespace ThuocGiaThat.Infrastucture
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
-                entity.HasOne(e => e.Product).WithMany(e => e.ProductOptions).HasForeignKey(e => e.ProductId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.Product).WithMany(e => e.ProductOptions).HasForeignKey(e => e.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             // ============ ProductOptionValue Configuration ============
@@ -164,7 +171,8 @@ namespace ThuocGiaThat.Infrastucture
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Value).IsRequired().HasMaxLength(255);
-                entity.HasOne(e => e.ProductOption).WithMany(e => e.ProductOptionValues).HasForeignKey(e => e.ProductOptionId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.ProductOption).WithMany(e => e.ProductOptionValues)
+                    .HasForeignKey(e => e.ProductOptionId).OnDelete(DeleteBehavior.Cascade);
             });
 
             // ============ ProductVariant Configuration ============
@@ -177,7 +185,8 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
                 entity.Property(e => e.UpdatedDate);
 
-                entity.HasOne(e => e.Product).WithMany(e => e.ProductVariants).HasForeignKey(e => e.ProductId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.Product).WithMany(e => e.ProductVariants).HasForeignKey(e => e.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
                 entity.HasIndex(e => e.SKU).IsUnique();
             });
 
@@ -185,8 +194,10 @@ namespace ThuocGiaThat.Infrastucture
             modelBuilder.Entity<VariantOptionValue>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.HasOne(e => e.ProductVariant).WithMany(e => e.VariantOptionValues).HasForeignKey(e => e.ProductVariantId).OnDelete(DeleteBehavior.Cascade);
-                entity.HasOne(e => e.ProductOptionValue).WithMany(e => e.VariantOptionValues).HasForeignKey(e => e.ProductOptionValueId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(e => e.ProductVariant).WithMany(e => e.VariantOptionValues)
+                    .HasForeignKey(e => e.ProductVariantId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.ProductOptionValue).WithMany(e => e.VariantOptionValues)
+                    .HasForeignKey(e => e.ProductOptionValueId).OnDelete(DeleteBehavior.Restrict);
                 entity.HasIndex(e => new { e.ProductVariantId, e.ProductOptionValueId }).IsUnique();
             });
 
@@ -312,12 +323,12 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasOne(e => e.ProductVariant)
                     .WithMany()
                     .HasForeignKey(e => e.ProductVariantId)
-                    .OnDelete(DeleteBehavior.NoAction);  // Changed from Cascade to NoAction to prevent cycle
+                    .OnDelete(DeleteBehavior.NoAction); // Changed from Cascade to NoAction to prevent cycle
 
                 entity.HasOne(e => e.Warehouse)
                     .WithMany()
                     .HasForeignKey(e => e.WarehouseId)
-                    .OnDelete(DeleteBehavior.NoAction);  // Changed from Restrict to NoAction
+                    .OnDelete(DeleteBehavior.NoAction); // Changed from Restrict to NoAction
 
                 entity.HasOne(e => e.Batch)
                     .WithMany()
@@ -336,7 +347,8 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
-                entity.HasOne(e => e.ProductVariant).WithMany(e => e.PriceHistories).HasForeignKey(e => e.ProductVariantId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.ProductVariant).WithMany(e => e.PriceHistories)
+                    .HasForeignKey(e => e.ProductVariantId).OnDelete(DeleteBehavior.Cascade);
             });
 
             // ============ WarehouseLocation Configuration ============
@@ -382,7 +394,8 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasOne(e => e.ProductVariant)
                     .WithMany()
                     .HasForeignKey(e => e.ProductVariantId)
-                    .OnDelete(DeleteBehavior.Restrict);  // Changed from Cascade to Restrict to avoid multiple cascade paths
+                    .OnDelete(DeleteBehavior
+                        .Restrict); // Changed from Cascade to Restrict to avoid multiple cascade paths
 
                 entity.HasOne(e => e.Warehouse)
                     .WithMany(e => e.BatchLocationStocks)
@@ -454,9 +467,9 @@ namespace ThuocGiaThat.Infrastucture
 
                 // Business Type relationship (nullable)
                 entity.HasOne(e => e.BusinessType)
-                      .WithMany()
-                      .HasForeignKey(e => e.BusinessTypeId)
-                      .OnDelete(DeleteBehavior.SetNull);
+                    .WithMany()
+                    .HasForeignKey(e => e.BusinessTypeId)
+                    .OnDelete(DeleteBehavior.SetNull);
 
                 // Enterprise Information fields
                 entity.Property(e => e.CompanyName).HasMaxLength(200);
@@ -504,9 +517,9 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasKey(e => e.Id);
 
                 entity.HasOne(e => e.Customer)
-                      .WithMany(e => e.PaymentAccounts)
-                      .HasForeignKey(e => e.CustomerId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                    .WithMany(e => e.PaymentAccounts)
+                    .HasForeignKey(e => e.CustomerId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 entity.Property(e => e.BankName).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.AccountNumber).IsRequired().HasMaxLength(50);
@@ -574,7 +587,8 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
                 entity.Property(e => e.UpdatedDate);
-                entity.HasOne(e => e.Customer).WithMany(e => e.Addresses).HasForeignKey(e => e.CustomerId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.Customer).WithMany(e => e.Addresses).HasForeignKey(e => e.CustomerId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             // ============ Order Configuration ============
@@ -586,7 +600,8 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
                 entity.Property(e => e.UpdatedDate);
 
-                entity.HasOne(e => e.Customer).WithMany(e => e.Orders).HasForeignKey(e => e.CustomerId).OnDelete(DeleteBehavior.SetNull);
+                entity.HasOne(e => e.Customer).WithMany(e => e.Orders).HasForeignKey(e => e.CustomerId)
+                    .OnDelete(DeleteBehavior.SetNull);
 
                 // Location relationships
                 entity.HasOne(e => e.Ward)
@@ -610,8 +625,10 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.TotalLineAmount).HasColumnType("decimal(18,2)");
-                entity.HasOne(e => e.Order).WithMany(e => e.OrderItems).HasForeignKey(e => e.OrderId).OnDelete(DeleteBehavior.Cascade);
-                entity.HasOne(e => e.ProductVariant).WithMany().HasForeignKey(e => e.ProductVariantId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(e => e.Order).WithMany(e => e.OrderItems).HasForeignKey(e => e.OrderId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.ProductVariant).WithMany().HasForeignKey(e => e.ProductVariantId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             // ============ OrderItemSnapshot Configuration ============
@@ -706,9 +723,9 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasOne(e => e.Customer)
-                      .WithMany()
-                      .HasForeignKey(e => e.CustomerId)
-                      .OnDelete(DeleteBehavior.SetNull);
+                    .WithMany()
+                    .HasForeignKey(e => e.CustomerId)
+                    .OnDelete(DeleteBehavior.SetNull);
 
                 // Indexes
                 entity.HasIndex(e => e.CustomerId);
@@ -731,19 +748,19 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasOne(e => e.ShoppingCart)
-                      .WithMany(e => e.CartItems)
-                      .HasForeignKey(e => e.ShoppingCartId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                    .WithMany(e => e.CartItems)
+                    .HasForeignKey(e => e.ShoppingCartId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(e => e.Product)
-                      .WithMany()
-                      .HasForeignKey(e => e.ProductId)
-                      .OnDelete(DeleteBehavior.Restrict);
+                    .WithMany()
+                    .HasForeignKey(e => e.ProductId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(e => e.ProductVariant)
-                      .WithMany()
-                      .HasForeignKey(e => e.ProductVariantId)
-                      .OnDelete(DeleteBehavior.Restrict);
+                    .WithMany()
+                    .HasForeignKey(e => e.ProductVariantId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
                 // Indexes
                 entity.HasIndex(e => e.ShoppingCartId);
@@ -818,17 +835,17 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasKey(x => new { x.ProductVariantId, x.StatusType });
 
                 entity.Property(x => x.StatusType)
-                       .HasConversion<int>()
-                       .IsRequired();
+                    .HasConversion<int>()
+                    .IsRequired();
 
                 entity.Property(x => x.StatusName)
-                       .HasMaxLength(50)
-                       .IsRequired();
+                    .HasMaxLength(50)
+                    .IsRequired();
 
                 entity.HasOne(x => x.ProductVariant)
-                       .WithMany()
-                       .HasForeignKey(x => x.ProductVariantId)
-                       .OnDelete(DeleteBehavior.Cascade);
+                    .WithMany()
+                    .HasForeignKey(x => x.ProductVariantId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             // ============ CustomerDocument Configuration ============
@@ -1015,45 +1032,45 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasKey(e => e.Id);
                 // Relationships
                 entity.HasOne(x => x.Order)
-                       .WithMany(o => o.PaymentTransactions)
-                       .HasForeignKey(x => x.OrderId)
-                       .OnDelete(DeleteBehavior.Restrict);
+                    .WithMany(o => o.PaymentTransactions)
+                    .HasForeignKey(x => x.OrderId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
                 // Fields
                 entity.Property(x => x.TransactionCode)
-                       .HasMaxLength(50);
+                    .HasMaxLength(50);
 
                 entity.HasIndex(x => x.TransactionCode)
-                       .IsUnique();
+                    .IsUnique();
 
                 entity.Property(x => x.VNPAYTransactionNo)
-                       .HasMaxLength(50);
+                    .HasMaxLength(50);
 
                 entity.Property(x => x.BankCode)
-                       .HasMaxLength(20);
+                    .HasMaxLength(20);
 
                 entity.Property(x => x.Amount)
-                       .HasColumnType("decimal(18,2)")
-                       .IsRequired();
+                    .HasColumnType("decimal(18,2)")
+                    .IsRequired();
 
                 entity.Property(x => x.PaymentGateway)
-                       .HasMaxLength(50)
-                       .HasDefaultValue("VNPAY");
+                    .HasMaxLength(50)
+                    .HasDefaultValue("VNPAY");
 
                 entity.Property(x => x.PaymentStatus)
-                       .IsRequired();
+                    .IsRequired();
 
                 entity.Property(x => x.ResponseCode)
-                       .HasMaxLength(10);
+                    .HasMaxLength(10);
 
                 entity.Property(x => x.Message)
-                       .HasMaxLength(500);
+                    .HasMaxLength(500);
 
                 entity.Property(x => x.CardType)
-                       .HasMaxLength(100);
+                    .HasMaxLength(100);
 
                 entity.Property(x => x.BankTranNo)
-                       .HasMaxLength(50);
+                    .HasMaxLength(50);
             });
 
             // ============ Campaign Configuration ============
