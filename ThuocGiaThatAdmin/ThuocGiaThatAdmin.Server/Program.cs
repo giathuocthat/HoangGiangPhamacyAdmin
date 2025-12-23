@@ -160,6 +160,9 @@ builder.Services.AddScoped<IGoodsReceiptRepository, GoodsReceiptRepository>();
 builder.Services.AddScoped<IGoodsReceiptItemRepository, GoodsReceiptItemRepository>();
 builder.Services.AddScoped<IBankRepository, BankRepository>();
 
+// Sales Region Repository
+builder.Services.AddScoped<ISalesRegionRepository, SalesRegionRepository>();
+
 // Generic Repository
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
@@ -213,6 +216,9 @@ builder.Services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
 builder.Services.AddScoped<IGoodsReceiptService, GoodsReceiptService>();
 builder.Services.AddScoped<IGoodsReceiptItemService, GoodsReceiptItemService>();
 builder.Services.AddScoped<IBankService, BankService>();
+
+// Sales Region Service
+builder.Services.AddScoped<ISalesRegionService, SalesRegionService>();
 
 
 // other

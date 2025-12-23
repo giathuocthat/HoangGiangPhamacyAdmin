@@ -82,5 +82,22 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
         /// <param name="verifiedByUserId">User ID who verified the customer</param>
         /// <returns>Success status, message, and the customer status</returns>
         Task<(bool Success, string Message, CustomerStatusDto? CustomerStatus)> VerifyCustomerAsync(int customerId, VerifyCustomerDto dto, string? verifiedByUserId = null);
+
+        // ========== Sales Hierarchy Methods ==========
+
+        /// <summary>
+        /// Lấy danh sách customers được assign cho một sale user
+        /// </summary>
+        Task<IEnumerable<CustomerResponseDto>> GetCustomersBySaleUserAsync(string saleUserId);
+
+        /// <summary>
+        /// Lấy danh sách customers của toàn bộ sales team (cho Sale Manager)
+        /// </summary>
+        Task<IEnumerable<CustomerResponseDto>> GetCustomersBySalesTeamAsync(string managerId);
+
+        /// <summary>
+        /// Assign customer cho sale user
+        /// </summary>
+        Task<bool> AssignSaleUserAsync(int customerId, string? saleUserId);
     }
 }

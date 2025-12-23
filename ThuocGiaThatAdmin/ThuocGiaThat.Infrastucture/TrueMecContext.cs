@@ -95,6 +95,8 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<GoodsReceipt> GoodsReceipts { get; set; }
         public DbSet<GoodsReceiptItem> GoodsReceiptItems { get; set; }
 
+        // Sales Region System
+        public DbSet<SalesRegion> SalesRegions { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -485,6 +487,15 @@ namespace ThuocGiaThat.Infrastucture
                     .WithMany()
                     .HasForeignKey(e => e.ApprovedByUserId)
                     .OnDelete(DeleteBehavior.Restrict);
+
+                // Sales Region relationship
+                entity.HasOne(e => e.Region)
+                    .WithMany(r => r.Customers)
+                    .HasForeignKey(e => e.RegionId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                // Index for region queries
+                entity.HasIndex(e => e.RegionId);
             });
 
             // ============ CustomerPaymentAccount Configuration ============
@@ -509,6 +520,52 @@ namespace ThuocGiaThat.Infrastucture
                 // Indexes for faster queries
                 entity.HasIndex(e => e.CustomerId);
                 entity.HasIndex(e => new { e.CustomerId, e.IsDefault });
+            });
+
+            // ============ SalesRegion Configuration ============
+            modelBuilder.Entity<SalesRegion>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Code).IsRequired().HasMaxLength(20);
+                entity.Property(e => e.Description).HasMaxLength(500);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+
+                // Unique constraint on Code
+                entity.HasIndex(e => e.Code).IsUnique();
+                entity.HasIndex(e => e.IsActive);
+
+                // Seed initial regions
+                entity.HasData(
+                    new SalesRegion
+                    {
+                        Id = 1,
+                        Name = "Miền Bắc",
+                        Code = "MB",
+                        Description = "Khu vực miền Bắc Việt Nam",
+                        IsActive = true,
+                        CreatedDate = DateTime.UtcNow
+                    },
+                    new SalesRegion
+                    {
+                        Id = 2,
+                        Name = "Miền Trung",
+                        Code = "MT",
+                        Description = "Khu vực miền Trung Việt Nam",
+                        IsActive = true,
+                        CreatedDate = DateTime.UtcNow
+                    },
+                    new SalesRegion
+                    {
+                        Id = 3,
+                        Name = "Miền Nam",
+                        Code = "MN",
+                        Description = "Khu vực miền Nam Việt Nam",
+                        IsActive = true,
+                        CreatedDate = DateTime.UtcNow
+                    }
+                );
             });
 
             // ============ Address Configuration ============
@@ -604,11 +661,35 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasIndex(e => e.FulfilledDate);
             });
 
+            // ============ ApplicationUser Configuration ============
             modelBuilder.Entity<ApplicationUser>(entity =>
             {
                 entity.ToTable(name: "Users");
                 entity.Property(u => u.FullName).HasMaxLength(200);
+
+                // Sales Hierarchy: Self-referencing relationship
+                entity.HasOne(u => u.Manager)
+                    .WithMany(u => u.SalesTeamMembers)
+                    .HasForeignKey(u => u.ManagerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Sales Hierarchy: Relationship with Customers
+                entity.HasMany(u => u.AssignedCustomers)
+                    .WithOne(c => c.SaleUser)
+                    .HasForeignKey(c => c.SaleUserId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                // Sales Region: Relationship with SalesRegion
+                entity.HasOne(u => u.Region)
+                    .WithMany(r => r.SalesUsers)
+                    .HasForeignKey(u => u.RegionId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                // Indexes for performance
+                entity.HasIndex(u => u.ManagerId);
+                entity.HasIndex(u => u.RegionId);
             });
+
 
             modelBuilder.Entity<ApplicationRole>().ToTable("Roles");
             modelBuilder.Entity<ApplicationRoleClaim>().ToTable("RoleClaims");
@@ -669,11 +750,6 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasIndex(e => e.ProductVariantId);
             });
 
-            modelBuilder.Entity<ApplicationUser>(entity =>
-            {
-                entity.ToTable(name: "Users");
-                entity.Property(u => u.FullName).HasMaxLength(200);
-            });
 
             //modelBuilder.Entity<IdentityRole>().ToTable("Roles");
             modelBuilder.Entity<IdentityUserRole<string>>().ToTable("UserRoles");

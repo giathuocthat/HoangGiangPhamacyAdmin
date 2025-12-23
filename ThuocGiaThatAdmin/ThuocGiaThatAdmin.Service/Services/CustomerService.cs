@@ -234,14 +234,14 @@ namespace ThuocGiaThatAdmin.Service.Services
         public async Task UpdateLicenses(IList<CustomerDocumentDto> documents)
         {
             var customerIds = documents.Select(x => x.CustomerId).Distinct().ToList();
-            var existingDocs = await _context.CustomerDocuments.Where(x =>  customerIds.Contains(x.CustomerId) && !x.IsDeleted).ToListAsync();
+            var existingDocs = await _context.CustomerDocuments.Where(x => customerIds.Contains(x.CustomerId) && !x.IsDeleted).ToListAsync();
 
             var existingDict = existingDocs.ToLookup(x => new { x.CustomerId, x.DocumentType });
 
             var newDocuments = new List<CustomerDocument>();
             var existingDocuments = new List<CustomerDocument>();
-            
-            foreach (var document in documents) 
+
+            foreach (var document in documents)
             {
                 var key = new { document.CustomerId, document.DocumentType };
                 var existingItem = existingDict[key].FirstOrDefault();
@@ -331,8 +331,8 @@ namespace ThuocGiaThatAdmin.Service.Services
         /// Upload a new document for a customer
         /// </summary>
         public async Task<(bool Success, string Message, CustomerDocumentDto? Document)> UploadCustomerDocumentAsync(
-            int customerId, 
-            UploadCustomerDocumentDto dto, 
+            int customerId,
+            UploadCustomerDocumentDto dto,
             string? uploadedByUserId = null)
         {
             // Verify customer exists
@@ -454,13 +454,13 @@ namespace ThuocGiaThatAdmin.Service.Services
             document.VerifiedByUserId = verifiedByUserId;
             document.VerifiedDate = DateTime.UtcNow;
             document.RejectionReason = dto.IsApproved ? null : dto.RejectionReason;
-            
+
             // Update notes if provided
             if (!string.IsNullOrWhiteSpace(dto.Notes))
             {
                 document.Notes = dto.Notes;
             }
-            
+
             document.UpdatedDate = DateTime.UtcNow;
 
             _context.CustomerDocuments.Update(document);
@@ -503,8 +503,8 @@ namespace ThuocGiaThatAdmin.Service.Services
                 CreatedDate = updatedDocument.CreatedDate
             };
 
-            var message = dto.IsApproved 
-                ? "Document verified successfully" 
+            var message = dto.IsApproved
+                ? "Document verified successfully"
                 : "Document rejected successfully";
 
             return (true, message, documentDto);
@@ -559,13 +559,13 @@ namespace ThuocGiaThatAdmin.Service.Services
 
             // Update customer status
             customer.Status = newStatus;
-            
+
             if (dto.IsApproved)
             {
                 customer.ApprovedDate = DateTime.UtcNow;
                 customer.ApprovedByUserId = verifiedByUserId;
             }
-            
+
             customer.UpdatedDate = DateTime.UtcNow;
 
             // Create CustomerVerification record
@@ -628,6 +628,72 @@ namespace ThuocGiaThatAdmin.Service.Services
                 : "Customer rejected successfully";
 
             return (true, message, customerStatusDto);
+        }
+
+        // ========== Sales Hierarchy Methods Implementation ==========
+
+        public async Task<IEnumerable<CustomerResponseDto>> GetCustomersBySaleUserAsync(string saleUserId)
+        {
+            if (string.IsNullOrWhiteSpace(saleUserId))
+                throw new ArgumentNullException(nameof(saleUserId));
+
+            var customers = await _context.Customers
+                .Include(c => c.BusinessType)
+                .Include(c => c.Addresses.Where(a => a.IsDefault))
+                    .ThenInclude(a => a.Ward)
+                .Include(c => c.Addresses.Where(a => a.IsDefault))
+                    .ThenInclude(a => a.Province)
+                .Where(c => c.SaleUserId == saleUserId && c.IsActive)
+                .ToListAsync();
+
+            return customers.Select(MapToResponseDto).ToList();
+        }
+
+        public async Task<IEnumerable<CustomerResponseDto>> GetCustomersBySalesTeamAsync(string managerId)
+        {
+            if (string.IsNullOrWhiteSpace(managerId))
+                throw new ArgumentNullException(nameof(managerId));
+
+            // Get all sale members under this manager
+            var salesTeamMemberIds = await _context.Users
+                .Where(u => u.ManagerId == managerId && u.IsActive)
+                .Select(u => u.Id)
+                .ToListAsync();
+
+            // Get customers assigned to any member of the sales team
+            var customers = await _context.Customers
+                .Include(c => c.BusinessType)
+                .Include(c => c.Addresses.Where(a => a.IsDefault))
+                    .ThenInclude(a => a.Ward)
+                .Include(c => c.Addresses.Where(a => a.IsDefault))
+                    .ThenInclude(a => a.Province)
+                .Where(c => c.SaleUserId != null && salesTeamMemberIds.Contains(c.SaleUserId) && c.IsActive)
+                .ToListAsync();
+
+            return customers.Select(MapToResponseDto).ToList();
+        }
+
+        public async Task<bool> AssignSaleUserAsync(int customerId, string? saleUserId)
+        {
+            var customer = await _context.Customers.FindAsync(customerId);
+            if (customer == null)
+                return false;
+
+            // Validate sale user exists if saleUserId is provided
+            if (!string.IsNullOrWhiteSpace(saleUserId))
+            {
+                var saleUser = await _context.Users.FindAsync(saleUserId);
+                if (saleUser == null || !saleUser.IsActive)
+                    return false;
+            }
+
+            customer.SaleUserId = saleUserId;
+            customer.UpdatedDate = DateTime.UtcNow;
+
+            _context.Customers.Update(customer);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
     }
 }
