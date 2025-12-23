@@ -47,6 +47,7 @@ namespace HoangGiangPhamacyAuthentication.Controllers
             {
                 return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
             }
+
             var roldeDetail = await _roleManager.FindByIdAsync(dto.Role.ToString());
 
             if (roldeDetail != null)
@@ -248,6 +249,17 @@ namespace HoangGiangPhamacyAuthentication.Controllers
         public async Task<IActionResult> GetSalesUsers()
         {
             var salesUsers = await _userService.GetSalesUsersAsync();
+            return Ok(salesUsers);
+        }
+
+        /// <summary>
+        /// GET: api/user/sales-users
+        /// Lấy danh sách tất cả Sales Users (để hiển thị trong dropdown)
+        /// </summary>
+        [HttpGet("sales-manager-users")]
+        public async Task<IActionResult> GetSalesManagerUsers()
+        {
+            var salesUsers = await _userService.GetSalesManagerUsersAsync();
             return Ok(salesUsers);
         }
     }

@@ -13,6 +13,10 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
         public string? Description { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedDate { get; set; }
+
+        // Sale Manager Information
+        public string? SaleManagerId { get; set; }
+        public string? SaleManagerName { get; set; }
     }
 
     /// <summary>

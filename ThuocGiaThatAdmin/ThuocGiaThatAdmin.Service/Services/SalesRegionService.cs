@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using ThuocGiaThat.Infrastucture;
 using ThuocGiaThat.Infrastucture.Repositories;
 using ThuocGiaThatAdmin.Contract.DTOs;
+using ThuocGiaThatAdmin.Domain.Constants;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Service.Interfaces;
 
@@ -26,14 +27,34 @@ namespace ThuocGiaThatAdmin.Service.Services
         {
             var regions = await _regionRepository.GetAllActiveAsync();
 
-            return regions.Select(r => new SalesRegionDto
+            // Get all region IDs
+            var regionIds = regions.Select(r => r.Id).ToList();
+
+            // Get Sale Managers for all regions (users with "Sale Manager" role in each region)
+            var saleManagers = await (from u in _context.Users
+                                      join ur in _context.UserRoles on u.Id equals ur.UserId
+                                      join r in _context.Roles on ur.RoleId equals r.Id
+                                      where u.RegionId.HasValue
+                                        && regionIds.Contains(u.RegionId.Value)
+                                        && r.Name == SaleManagerPermission.Role
+                                        && u.IsActive
+                                      select new { u.Id, u.FullName, u.RegionId })
+                                      .ToListAsync();
+
+            return regions.Select(r =>
             {
-                Id = r.Id,
-                Name = r.Name,
-                Code = r.Code,
-                Description = r.Description,
-                IsActive = r.IsActive,
-                CreatedDate = r.CreatedDate
+                var manager = saleManagers.FirstOrDefault(m => m.RegionId == r.Id);
+                return new SalesRegionDto
+                {
+                    Id = r.Id,
+                    Name = r.Name,
+                    Code = r.Code,
+                    Description = r.Description,
+                    IsActive = r.IsActive,
+                    CreatedDate = r.CreatedDate,
+                    SaleManagerId = manager?.Id,
+                    SaleManagerName = manager?.FullName
+                };
             });
         }
 
