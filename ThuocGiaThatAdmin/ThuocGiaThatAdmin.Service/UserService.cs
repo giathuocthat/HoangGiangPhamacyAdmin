@@ -309,6 +309,7 @@ namespace ThuocGiaThatAdmin.Service
             var salesUsers = await(from u in _context.Users
                                    join ur in _context.UserRoles on u.Id equals ur.UserId
                                    join r in _context.Roles on ur.RoleId equals r.Id
+                                   join reg in _context.SalesRegions on u.RegionId equals reg.Id
                                    where
                                      (r.Name == SaleManagerPermission.Role)
                                      && u.IsActive
