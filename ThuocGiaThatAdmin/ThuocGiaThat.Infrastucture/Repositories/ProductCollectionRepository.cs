@@ -17,7 +17,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         {
             return await _dbSet
                 .Include(c => c.Items)
-                .ThenInclude(i => i.Product)
+                .ThenInclude(i => i.ProductVariant.Product)
                 .FirstOrDefaultAsync(c => c.Slug == slug);
         }
 
@@ -36,20 +36,17 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         {
             return await _dbSet
                 .Include(c => c.Items)
-                .ThenInclude(i => i.Product)
+                .ThenInclude(i => i.ProductVariant.Product)
                 .ThenInclude(p => p.Images)
-                .Include(c => c.Items)
-                .ThenInclude(i => i.Product)
-                .ThenInclude(p => p.ProductVariants)
                 .FirstOrDefaultAsync(c => c.Id == id);
         }
 
-        public async Task AddProductToCollectionAsync(int collectionId, int productId, int displayOrder)
+        public async Task AddProductToCollectionAsync(int collectionId, int productVariantId, int displayOrder)
         {
             var item = new ProductCollectionItem
             {
                 ProductCollectionId = collectionId,
-                ProductId = productId,
+                ProductVariantId = productVariantId,
                 DisplayOrder = displayOrder,
                 AddedDate = DateTime.UtcNow
             };
@@ -61,7 +58,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         public async Task RemoveProductFromCollectionAsync(int collectionId, int productId)
         {
             var item = await _context.ProductCollectionItems
-                .FirstOrDefaultAsync(i => i.ProductCollectionId == collectionId && i.ProductId == productId);
+                .FirstOrDefaultAsync(i => i.ProductCollectionId == collectionId && i.ProductVariantId == productId);
 
             if (item != null)
             {
@@ -70,7 +67,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
             }
         }
 
-        public async Task<ProductCollection> AddAsync(ProductCollection collection)
+        public override async Task<ProductCollection> AddAsync(ProductCollection collection)
         {
             await _dbSet.AddAsync(collection);
             await _context.SaveChangesAsync();

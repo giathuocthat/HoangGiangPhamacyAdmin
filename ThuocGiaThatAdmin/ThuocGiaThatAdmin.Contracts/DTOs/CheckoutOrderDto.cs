@@ -25,6 +25,8 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
         public int? ProvinceId { get; set; }
         public string PaymentMethod { get; set; }
         public string? IpAddress { get; set; }
+        public bool ExportInvoice { get; set; }
+        public int? InvoiceId { get; set; }
 
     }
 

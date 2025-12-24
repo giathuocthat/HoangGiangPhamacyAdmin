@@ -195,7 +195,6 @@ namespace ThuocGiaThatAdmin.Service
         }
 
         // ========== Sales Hierarchy Methods Implementation ==========
-
         public async Task<IEnumerable<SalesTeamMemberDto>> GetSalesTeamMembersAsync(string managerId)
         {
             if (string.IsNullOrWhiteSpace(managerId))
@@ -221,7 +220,6 @@ namespace ThuocGiaThatAdmin.Service
                 RegionName = u.Region?.Name
             });
         }
-
         public async Task<bool> AssignManagerAsync(string userId, string? managerId)
         {
             if (string.IsNullOrWhiteSpace(userId))
