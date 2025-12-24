@@ -12,8 +12,8 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    [Migration("20251224014437_AddSalesManagerToSalesRegion")]
-    partial class AddSalesManagerToSalesRegion
+    [Migration("20251224043403_updateSaleRegion")]
+    partial class updateSaleRegion
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1813,6 +1813,9 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<int?>("CustomerId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("CustomerInvoiceInfoId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("DeliveredDate")
                         .HasColumnType("datetime2");
 
@@ -1831,6 +1834,9 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.Property<DateTime?>("EstimatedDeliveryDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("ExportInvoice")
+                        .HasColumnType("bit");
 
                     b.Property<bool?>("IsFulfilled")
                         .HasColumnType("bit");
@@ -1900,6 +1906,8 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("CustomerInvoiceInfoId");
 
                     b.HasIndex("OrderNumber")
                         .IsUnique();
@@ -2537,7 +2545,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<int>("ProductCollectionId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProductId")
+                    b.Property<int>("ProductVariantId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("AddedDate")
@@ -2549,9 +2557,14 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("int");
 
-                    b.HasKey("ProductCollectionId", "ProductId");
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProductCollectionId", "ProductVariantId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductVariantId");
 
                     b.ToTable("ProductCollectionItems");
                 });
@@ -3082,7 +3095,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         {
                             Id = 1,
                             Code = "MB",
-                            CreatedDate = new DateTime(2025, 12, 24, 1, 44, 35, 766, DateTimeKind.Utc).AddTicks(3433),
+                            CreatedDate = new DateTime(2025, 12, 24, 4, 34, 2, 192, DateTimeKind.Utc).AddTicks(7726),
                             Description = "Khu vực miền Bắc Việt Nam",
                             IsActive = true,
                             Name = "Miền Bắc"
@@ -3091,7 +3104,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         {
                             Id = 2,
                             Code = "MT",
-                            CreatedDate = new DateTime(2025, 12, 24, 1, 44, 35, 766, DateTimeKind.Utc).AddTicks(3441),
+                            CreatedDate = new DateTime(2025, 12, 24, 4, 34, 2, 192, DateTimeKind.Utc).AddTicks(7729),
                             Description = "Khu vực miền Trung Việt Nam",
                             IsActive = true,
                             Name = "Miền Trung"
@@ -3100,7 +3113,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         {
                             Id = 3,
                             Code = "MN",
-                            CreatedDate = new DateTime(2025, 12, 24, 1, 44, 35, 766, DateTimeKind.Utc).AddTicks(3443),
+                            CreatedDate = new DateTime(2025, 12, 24, 4, 34, 2, 192, DateTimeKind.Utc).AddTicks(7779),
                             Description = "Khu vực miền Nam Việt Nam",
                             IsActive = true,
                             Name = "Miền Nam"
@@ -4375,6 +4388,10 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.CustomerInvoiceInfo", null)
+                        .WithMany("Orders")
+                        .HasForeignKey("CustomerInvoiceInfoId");
+
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Province", "Province")
                         .WithMany()
                         .HasForeignKey("ProvinceId")
@@ -4538,15 +4555,19 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Product", "Product")
+                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Product", null)
                         .WithMany("CollectionItems")
-                        .HasForeignKey("ProductId")
+                        .HasForeignKey("ProductId");
+
+                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Product");
-
                     b.Navigation("ProductCollection");
+
+                    b.Navigation("ProductVariant");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductImage", b =>
@@ -4965,6 +4986,11 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("PaymentAccounts");
 
                     b.Navigation("VerificationHistory");
+                });
+
+            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.CustomerInvoiceInfo", b =>
+                {
+                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.GoodsReceipt", b =>

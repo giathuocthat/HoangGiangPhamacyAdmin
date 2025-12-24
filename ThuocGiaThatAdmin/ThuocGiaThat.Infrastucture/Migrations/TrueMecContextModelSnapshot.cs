@@ -3092,7 +3092,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         {
                             Id = 1,
                             Code = "MB",
-                            CreatedDate = new DateTime(2025, 12, 24, 1, 44, 35, 766, DateTimeKind.Utc).AddTicks(3433),
+                            CreatedDate = new DateTime(2025, 12, 24, 4, 34, 2, 192, DateTimeKind.Utc).AddTicks(7726),
                             Description = "Khu vực miền Bắc Việt Nam",
                             IsActive = true,
                             Name = "Miền Bắc"
@@ -3101,7 +3101,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         {
                             Id = 2,
                             Code = "MT",
-                            CreatedDate = new DateTime(2025, 12, 24, 1, 44, 35, 766, DateTimeKind.Utc).AddTicks(3441),
+                            CreatedDate = new DateTime(2025, 12, 24, 4, 34, 2, 192, DateTimeKind.Utc).AddTicks(7729),
                             Description = "Khu vực miền Trung Việt Nam",
                             IsActive = true,
                             Name = "Miền Trung"
@@ -3110,7 +3110,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         {
                             Id = 3,
                             Code = "MN",
-                            CreatedDate = new DateTime(2025, 12, 24, 1, 44, 35, 766, DateTimeKind.Utc).AddTicks(3443),
+                            CreatedDate = new DateTime(2025, 12, 24, 4, 34, 2, 192, DateTimeKind.Utc).AddTicks(7779),
                             Description = "Khu vực miền Nam Việt Nam",
                             IsActive = true,
                             Name = "Miền Nam"
