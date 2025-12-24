@@ -11,39 +11,39 @@ namespace ThuocGiaThat.Infrastucture.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_ProductActiveIngredient_ActiveIngredient_ActiveIngredientId",
-                table: "ProductActiveIngredient");
+            //migrationBuilder.DropForeignKey(
+            //    name: "FK_ProductActiveIngredients_ActiveIngredients_ActiveIngredientId",
+            //    table: "ProductActiveIngredient");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_ProductActiveIngredient_Products_ProductId",
-                table: "ProductActiveIngredient");
+            //migrationBuilder.DropForeignKey(
+            //    name: "FK_ProductActiveIngredient_Products_ProductId",
+            //    table: "ProductActiveIngredient");
 
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_ProductActiveIngredient",
-                table: "ProductActiveIngredient");
+            //migrationBuilder.DropPrimaryKey(
+            //    name: "PK_ProductActiveIngredient",
+            //    table: "ProductActiveIngredient");
 
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_ActiveIngredient",
-                table: "ActiveIngredient");
+            //migrationBuilder.DropPrimaryKey(
+            //    name: "PK_ActiveIngredient",
+            //    table: "ActiveIngredient");
 
-            migrationBuilder.RenameTable(
-                name: "ProductActiveIngredient",
-                newName: "ProductActiveIngredients");
+            //migrationBuilder.RenameTable(
+            //    name: "ProductActiveIngredient",
+            //    newName: "ProductActiveIngredients");
 
-            migrationBuilder.RenameTable(
-                name: "ActiveIngredient",
-                newName: "ActiveIngredients");
+            //migrationBuilder.RenameTable(
+            //    name: "ActiveIngredient",
+            //    newName: "ActiveIngredients");
 
-            migrationBuilder.RenameIndex(
-                name: "IX_ProductActiveIngredient_ProductId",
-                table: "ProductActiveIngredients",
-                newName: "IX_ProductActiveIngredients_ProductId");
+            //migrationBuilder.RenameIndex(
+            //    name: "IX_ProductActiveIngredient_ProductId",
+            //    table: "ProductActiveIngredients",
+            //    newName: "IX_ProductActiveIngredients_ProductId");
 
-            migrationBuilder.RenameIndex(
-                name: "IX_ProductActiveIngredient_ActiveIngredientId",
-                table: "ProductActiveIngredients",
-                newName: "IX_ProductActiveIngredients_ActiveIngredientId");
+            //migrationBuilder.RenameIndex(
+            //    name: "IX_ProductActiveIngredient_ActiveIngredientId",
+            //    table: "ProductActiveIngredients",
+            //    newName: "IX_ProductActiveIngredients_ActiveIngredientId");
 
             migrationBuilder.AddColumn<string>(
                 name: "SalesManagerId",
@@ -51,15 +51,15 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                 type: "nvarchar(450)",
                 nullable: true);
 
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_ProductActiveIngredients",
-                table: "ProductActiveIngredients",
-                column: "Id");
+            //migrationBuilder.AddPrimaryKey(
+            //    name: "PK_ProductActiveIngredients",
+            //    table: "ProductActiveIngredients",
+            //    column: "Id");
 
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_ActiveIngredients",
-                table: "ActiveIngredients",
-                column: "Id");
+            //migrationBuilder.AddPrimaryKey(
+            //    name: "PK_ActiveIngredients",
+            //    table: "ActiveIngredients",
+            //    column: "Id");
 
             migrationBuilder.UpdateData(
                 table: "SalesRegions",
@@ -87,21 +87,21 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                 table: "SalesRegions",
                 column: "SalesManagerId");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_ProductActiveIngredients_ActiveIngredients_ActiveIngredientId",
-                table: "ProductActiveIngredients",
-                column: "ActiveIngredientId",
-                principalTable: "ActiveIngredients",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+            //migrationBuilder.AddForeignKey(
+            //    name: "FK_ProductActiveIngredients_ActiveIngredients_ActiveIngredientId",
+            //    table: "ProductActiveIngredients",
+            //    column: "ActiveIngredientId",
+            //    principalTable: "ActiveIngredients",
+            //    principalColumn: "Id",
+            //    onDelete: ReferentialAction.Cascade);
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_ProductActiveIngredients_Products_ProductId",
-                table: "ProductActiveIngredients",
-                column: "ProductId",
-                principalTable: "Products",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+            //migrationBuilder.AddForeignKey(
+            //    name: "FK_ProductActiveIngredients_Products_ProductId",
+            //    table: "ProductActiveIngredients",
+            //    column: "ProductId",
+            //    principalTable: "Products",
+            //    principalColumn: "Id",
+            //    onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_SalesRegions_Users_SalesManagerId",
