@@ -12,8 +12,8 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    [Migration("20251224043403_updateSaleRegion")]
-    partial class updateSaleRegion
+    [Migration("20251224044536_upadtesaleregion")]
+    partial class upadtesaleregion
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -3095,7 +3095,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         {
                             Id = 1,
                             Code = "MB",
-                            CreatedDate = new DateTime(2025, 12, 24, 4, 34, 2, 192, DateTimeKind.Utc).AddTicks(7726),
+                            CreatedDate = new DateTime(2025, 12, 24, 4, 45, 35, 589, DateTimeKind.Utc).AddTicks(580),
                             Description = "Khu vực miền Bắc Việt Nam",
                             IsActive = true,
                             Name = "Miền Bắc"
@@ -3104,7 +3104,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         {
                             Id = 2,
                             Code = "MT",
-                            CreatedDate = new DateTime(2025, 12, 24, 4, 34, 2, 192, DateTimeKind.Utc).AddTicks(7729),
+                            CreatedDate = new DateTime(2025, 12, 24, 4, 45, 35, 589, DateTimeKind.Utc).AddTicks(582),
                             Description = "Khu vực miền Trung Việt Nam",
                             IsActive = true,
                             Name = "Miền Trung"
@@ -3113,7 +3113,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         {
                             Id = 3,
                             Code = "MN",
-                            CreatedDate = new DateTime(2025, 12, 24, 4, 34, 2, 192, DateTimeKind.Utc).AddTicks(7779),
+                            CreatedDate = new DateTime(2025, 12, 24, 4, 45, 35, 589, DateTimeKind.Utc).AddTicks(584),
                             Description = "Khu vực miền Nam Việt Nam",
                             IsActive = true,
                             Name = "Miền Nam"
