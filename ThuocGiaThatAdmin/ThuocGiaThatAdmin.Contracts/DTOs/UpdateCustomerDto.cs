@@ -36,5 +36,10 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
         [Phone(ErrorMessage = "Invalid phone number format")]
         [StringLength(20, ErrorMessage = "Address phone number cannot exceed 20 characters")]
         public string? AddressPhoneNumber { get; set; }
+
+        /// <summary>
+        /// ID của Sale User phụ trách khách hàng này
+        /// </summary>
+        public string? SaleUserId { get; set; }
     }
 }

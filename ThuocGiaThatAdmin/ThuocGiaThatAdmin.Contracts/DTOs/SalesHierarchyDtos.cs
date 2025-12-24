@@ -17,6 +17,9 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
         public string? ManagerName { get; set; }
         public int? RegionId { get; set; }
         public string? RegionName { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public int AssignedCustomerCount { get; set; }
+        public string RoleName { get; set; } = string.Empty;
     }
 
     /// <summary>

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ThuocGiaThat.Infrastucture;
 
@@ -11,9 +12,11 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    partial class TrueMecContextModelSnapshot : ModelSnapshot
+    [Migration("20251223090353_mig2")]
+    partial class mig2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -132,7 +135,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ActiveIngredients");
+                    b.ToTable("ActiveIngredient");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Address", b =>
@@ -294,9 +297,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("ManagerId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -314,9 +314,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("RegionId")
-                        .HasColumnType("int");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -329,8 +326,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ManagerId");
-
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -338,8 +333,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.HasIndex("RegionId");
 
                     b.ToTable("Users", (string)null);
                 });
@@ -1071,14 +1064,11 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("RegionId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("RewardPoints")
                         .HasColumnType("int");
 
-                    b.Property<string>("SaleUserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int?>("SaleUserId")
+                        .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -1099,10 +1089,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("Email")
                         .IsUnique()
                         .HasFilter("[Email] IS NOT NULL");
-
-                    b.HasIndex("RegionId");
-
-                    b.HasIndex("SaleUserId");
 
                     b.HasIndex("TaxCode");
 
@@ -2333,9 +2319,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<bool?>("IsPrescriptionDrug")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsPublished")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -2409,7 +2392,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductActiveIngredients");
+                    b.ToTable("ProductActiveIngredient");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductBatch", b =>
@@ -2542,7 +2525,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<int>("ProductCollectionId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProductVariantId")
+                    b.Property<int>("ProductId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("AddedDate")
@@ -2554,14 +2537,9 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ProductId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ProductCollectionId", "ProductVariantId");
+                    b.HasKey("ProductCollectionId", "ProductId");
 
                     b.HasIndex("ProductId");
-
-                    b.HasIndex("ProductVariantId");
 
                     b.ToTable("ProductCollectionItems");
                 });
@@ -3038,83 +3016,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("PurchaseOrderId");
 
                     b.ToTable("PurchaseOrderItems");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.SalesRegion", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("SalesManagerId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("SalesManagerId");
-
-                    b.ToTable("SalesRegions");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Code = "MB",
-                            CreatedDate = new DateTime(2025, 12, 24, 4, 45, 35, 589, DateTimeKind.Utc).AddTicks(580),
-                            Description = "Khu vực miền Bắc Việt Nam",
-                            IsActive = true,
-                            Name = "Miền Bắc"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Code = "MT",
-                            CreatedDate = new DateTime(2025, 12, 24, 4, 45, 35, 589, DateTimeKind.Utc).AddTicks(582),
-                            Description = "Khu vực miền Trung Việt Nam",
-                            IsActive = true,
-                            Name = "Miền Trung"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Code = "MN",
-                            CreatedDate = new DateTime(2025, 12, 24, 4, 45, 35, 589, DateTimeKind.Utc).AddTicks(584),
-                            Description = "Khu vực miền Nam Việt Nam",
-                            IsActive = true,
-                            Name = "Miền Nam"
-                        });
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ShoppingCart", b =>
@@ -4034,23 +3935,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ApplicationUser", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ApplicationUser", "Manager")
-                        .WithMany("SalesTeamMembers")
-                        .HasForeignKey("ManagerId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.SalesRegion", "Region")
-                        .WithMany("SalesUsers")
-                        .HasForeignKey("RegionId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Manager");
-
-                    b.Navigation("Region");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Banner", b =>
                 {
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Campaign", "Campaign")
@@ -4170,23 +4054,9 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .HasForeignKey("BusinessTypeId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.SalesRegion", "Region")
-                        .WithMany("Customers")
-                        .HasForeignKey("RegionId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ApplicationUser", "SaleUser")
-                        .WithMany("AssignedCustomers")
-                        .HasForeignKey("SaleUserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.Navigation("ApprovedByUser");
 
                     b.Navigation("BusinessType");
-
-                    b.Navigation("Region");
-
-                    b.Navigation("SaleUser");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.CustomerDocument", b =>
@@ -4552,19 +4422,15 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Product", null)
+                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Product", "Product")
                         .WithMany("CollectionItems")
-                        .HasForeignKey("ProductId");
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ProductVariant", "ProductVariant")
-                        .WithMany()
-                        .HasForeignKey("ProductVariantId")
+                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ProductCollection");
+                    b.Navigation("Product");
 
-                    b.Navigation("ProductVariant");
+                    b.Navigation("ProductCollection");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductImage", b =>
@@ -4696,15 +4562,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("ProductVariant");
 
                     b.Navigation("PurchaseOrder");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.SalesRegion", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ApplicationUser", "SalesManager")
-                        .WithMany()
-                        .HasForeignKey("SalesManagerId");
-
-                    b.Navigation("SalesManager");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ShoppingCart", b =>
@@ -4920,13 +4777,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("ProductActiveIngredients");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ApplicationUser", b =>
-                {
-                    b.Navigation("AssignedCustomers");
-
-                    b.Navigation("SalesTeamMembers");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Banner", b =>
                 {
                     b.Navigation("BannerAnalytics");
@@ -5072,13 +4922,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.PurchaseOrderItem", b =>
                 {
                     b.Navigation("GoodsReceiptItems");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.SalesRegion", b =>
-                {
-                    b.Navigation("Customers");
-
-                    b.Navigation("SalesUsers");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ShoppingCart", b =>

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using ThuocGiaThat.Infrastucture;
 using ThuocGiaThat.Infrastucture.Repositories;
 using ThuocGiaThatAdmin.Contract.DTOs;
-using ThuocGiaThatAdmin.Domain.Constants;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Service.Interfaces;
 
@@ -25,42 +24,39 @@ namespace ThuocGiaThatAdmin.Service.Services
 
         public async Task<IEnumerable<SalesRegionDto>> GetAllRegionsAsync()
         {
-            var regions = await _regionRepository.GetAllActiveAsync();
+            var regions = await _context.SalesRegions
+                .Include(r => r.SalesManager)
+                .Include(r => r.SalesUsers)
+                .Where(r => r.IsActive)
+                .ToListAsync();
 
-            // Get all region IDs
-            var regionIds = regions.Select(r => r.Id).ToList();
-
-            // Get Sale Managers for all regions (users with "Sale Manager" role in each region)
-            var saleManagers = await (from u in _context.Users
-                                      join ur in _context.UserRoles on u.Id equals ur.UserId
-                                      join r in _context.Roles on ur.RoleId equals r.Id
-                                      where u.RegionId.HasValue
-                                        && regionIds.Contains(u.RegionId.Value)
-                                        && r.Name == SaleManagerPermission.Role
-                                        && u.IsActive
-                                      select new { u.Id, u.FullName, u.RegionId })
-                                      .ToListAsync();
-
-            return regions.Select(r =>
+            return regions.Select(r => new SalesRegionDto
             {
-                var manager = saleManagers.FirstOrDefault(m => m.RegionId == r.Id);
-                return new SalesRegionDto
+                Id = r.Id,
+                Name = r.Name,
+                Code = r.Code,
+                Description = r.Description,
+                IsActive = r.IsActive,
+                CreatedDate = r.CreatedDate,
+                SaleManagerId = r.SalesManagerId,
+                SaleManagerName = r.SalesManager?.FullName,
+                SalesUsers = new List<SaleUsersDto>(r.SalesUsers.Select(u => new SaleUsersDto
                 {
-                    Id = r.Id,
-                    Name = r.Name,
-                    Code = r.Code,
-                    Description = r.Description,
-                    IsActive = r.IsActive,
-                    CreatedDate = r.CreatedDate,
-                    SaleManagerId = manager?.Id,
-                    SaleManagerName = manager?.FullName
-                };
+                    Id = u.Id,
+                    FullName = u.FullName,
+                    Email = u.Email,
+                    IsActive = u.IsActive
+                }))
             });
         }
 
         public async Task<SalesRegionDetailDto?> GetRegionByIdAsync(int id)
         {
-            var region = await _regionRepository.GetByIdAsync(id);
+            var region = await _context.SalesRegions
+                .Include(r => r.SalesManager)
+                .Include(r => r.SalesUsers) .Where(r => r.IsActive)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
             if (region == null)
                 return null;
 
@@ -89,10 +85,19 @@ namespace ThuocGiaThatAdmin.Service.Services
                 Description = region.Description,
                 IsActive = region.IsActive,
                 CreatedDate = region.CreatedDate,
+                SaleManagerId = region.SalesManagerId,
+                SaleManagerName = region.SalesManager?.FullName,
                 TotalSalesUsers = totalSalesUsers,
                 ActiveSalesUsers = activeSalesUsers,
                 TotalCustomers = totalCustomers,
-                ActiveCustomers = activeCustomers
+                ActiveCustomers = activeCustomers,
+                SalesUsers = region.SalesUsers.Select(u => new SaleUsersDto
+                {
+                    Id = u.Id,
+                    FullName = u.FullName,
+                    Email = u.Email,
+                    IsActive = u.IsActive
+                }).ToList()
             };
         }
 
@@ -104,17 +109,33 @@ namespace ThuocGiaThatAdmin.Service.Services
                 return (false, "Region code already exists", null);
             }
 
+            // Validate SalesManager exists if provided
+            if (!string.IsNullOrEmpty(dto.SalesManagerId))
+            {
+                var managerExists = await _context.Users.AnyAsync(u => u.Id == dto.SalesManagerId && u.IsActive);
+                if (!managerExists)
+                {
+                    return (false, "Sales Manager not found or inactive", null);
+                }
+            }
+
             var region = new SalesRegion
             {
                 Name = dto.Name,
                 Code = dto.Code.ToUpper(),
                 Description = dto.Description,
+                SalesManagerId = dto.SalesManagerId,
                 IsActive = true,
                 CreatedDate = DateTime.UtcNow
             };
 
             await _regionRepository.AddAsync(region);
             await _regionRepository.SaveChangesAsync();
+
+            // Load the manager info for response
+            var manager = !string.IsNullOrEmpty(region.SalesManagerId)
+                ? await _context.Users.FirstOrDefaultAsync(u => u.Id == region.SalesManagerId)
+                : null;
 
             var regionDto = new SalesRegionDto
             {
@@ -123,7 +144,9 @@ namespace ThuocGiaThatAdmin.Service.Services
                 Code = region.Code,
                 Description = region.Description,
                 IsActive = region.IsActive,
-                CreatedDate = region.CreatedDate
+                CreatedDate = region.CreatedDate,
+                SaleManagerId = region.SalesManagerId,
+                SaleManagerName = manager?.FullName
             };
 
             return (true, "Region created successfully", regionDto);
@@ -137,13 +160,29 @@ namespace ThuocGiaThatAdmin.Service.Services
                 return (false, "Region not found", null);
             }
 
+            // Validate SalesManager exists if provided
+            if (!string.IsNullOrEmpty(dto.SalesManagerId))
+            {
+                var managerExists = await _context.Users.AnyAsync(u => u.Id == dto.SalesManagerId && u.IsActive);
+                if (!managerExists)
+                {
+                    return (false, "Sales Manager not found or inactive", null);
+                }
+            }
+
             region.Name = dto.Name;
             region.Description = dto.Description;
             region.IsActive = dto.IsActive;
+            region.SalesManagerId = dto.SalesManagerId;
             region.UpdatedDate = DateTime.UtcNow;
 
             _regionRepository.Update(region);
             await _regionRepository.SaveChangesAsync();
+
+            // Load the manager info for response
+            var manager = !string.IsNullOrEmpty(region.SalesManagerId)
+                ? await _context.Users.FirstOrDefaultAsync(u => u.Id == region.SalesManagerId)
+                : null;
 
             var regionDto = new SalesRegionDto
             {
@@ -152,7 +191,9 @@ namespace ThuocGiaThatAdmin.Service.Services
                 Code = region.Code,
                 Description = region.Description,
                 IsActive = region.IsActive,
-                CreatedDate = region.CreatedDate
+                CreatedDate = region.CreatedDate,
+                SaleManagerId = region.SalesManagerId,
+                SaleManagerName = manager?.FullName
             };
 
             return (true, "Region updated successfully", regionDto);

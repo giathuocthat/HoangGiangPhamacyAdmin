@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using ThuocGiaThat.Infrastucture;
 using ThuocGiaThat.Infrastucture.Repositories;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
@@ -17,13 +18,16 @@ namespace ThuocGiaThatAdmin.Service.Services
     {
         private readonly IWarehousePickingRepository _pickingRepository;
         private readonly ILogger<WarehousePickingService> _logger;
+        private readonly TrueMecContext _context;
 
         public WarehousePickingService(
             IWarehousePickingRepository pickingRepository,
-            ILogger<WarehousePickingService> logger)
+            ILogger<WarehousePickingService> logger,
+            TrueMecContext context)
         {
             _pickingRepository = pickingRepository;
             _logger = logger;
+            _context = context;
         }
 
         public async Task<ProcessPickingResponseDto> ProcessPickingAsync(
@@ -81,6 +85,21 @@ namespace ThuocGiaThatAdmin.Service.Services
 
                 // Lưu tất cả thay đổi
                 await _pickingRepository.SaveChangesAsync();
+
+                // Cập nhật order status thành ReadyToShip nếu picking thành công
+                if (request.OrderId.HasValue && response.FailedMovements == 0 && response.SuccessfulMovements > 0)
+                {
+                    var order = await _context.Orders.FindAsync(request.OrderId.Value);
+                    if (order != null)
+                    {
+                        order.DeliveryStatus = "ReadyToShip";
+                        order.UpdatedDate = DateTime.Now;
+                        _context.Orders.Update(order);
+                        await _context.SaveChangesAsync();
+
+                        _logger.LogInformation($"Order {request.OrderId} status updated to ReadyToShip");
+                    }
+                }
 
                 _logger.LogInformation($"Picking completed: {response.SuccessfulMovements} successful, {response.FailedMovements} failed");
 

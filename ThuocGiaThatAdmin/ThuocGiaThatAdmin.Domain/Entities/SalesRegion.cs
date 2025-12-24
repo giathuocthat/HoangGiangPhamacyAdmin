@@ -28,7 +28,17 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         /// </summary>
         public bool IsActive { get; set; } = true;
 
+        /// <summary>
+        /// ID của Sales Manager quản lý vùng này
+        /// </summary>
+        public string? SalesManagerId { get; set; }
+
         // ========== Navigation Properties ==========
+
+        /// <summary>
+        /// Sales Manager quản lý vùng này
+        /// </summary>
+        public ApplicationUser? SalesManager { get; set; }
 
         /// <summary>
         /// Danh sách Sales Users thuộc vùng này

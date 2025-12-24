@@ -12,6 +12,17 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
         public int? BusinessTypeId { get; set; }
         public string? BusinessTypeName { get; set; }
         public AddressDto? Address { get; set; }
+
+        /// <summary>
+        /// ID của Sale User phụ trách khách hàng này
+        /// </summary>
+        public string? SaleUserId { get; set; }
+
+        /// <summary>
+        /// Tên của Sale User phụ trách
+        /// </summary>
+        public string? SaleUserName { get; set; }
+
         public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
     }
