@@ -252,12 +252,12 @@ namespace ThuocGiaThatAdmin.Service
         {
             // Get Sale Managers for all regions (users with "Sale Manager" role in each region)
             var salesUsers = await (from u in _context.Users
-                                      join ur in _context.UserRoles on u.Id equals ur.UserId
-                                      join r in _context.Roles on ur.RoleId equals r.Id
-                                      where 
-                                        (r.Name == SaleManagerPermission.Role || r.Name == SaleMemberPermissions.Role)
-                                        && u.IsActive
-                                      select new { u.Id, u.FullName, u.Email, u.PhoneNumber, u.IsActive, u.Manager, u.ManagerId, u.Region, u.RegionId })
+                                    join ur in _context.UserRoles on u.Id equals ur.UserId
+                                    join r in _context.Roles on ur.RoleId equals r.Id
+                                    where
+                                      (r.Name == SaleManagerPermission.Role || r.Name == SaleMemberPermissions.Role)
+                                      && u.IsActive
+                                    select new { u.Id, u.FullName, u.Email, u.PhoneNumber, u.IsActive, u.Manager, u.ManagerId, u.Region, u.RegionId })
                                       .ToListAsync();
 
             return salesUsers.Select(u => new SalesUserDto
@@ -304,14 +304,14 @@ namespace ThuocGiaThatAdmin.Service
         public async Task<IEnumerable<SalesUserDto>> GetSalesManagerUsersAsync()
         {
             // Get Sale Managers for all regions (users with "Sale Manager" role in each region)
-            var salesUsers = await(from u in _context.Users
-                                   join ur in _context.UserRoles on u.Id equals ur.UserId
-                                   join r in _context.Roles on ur.RoleId equals r.Id
-                                   join reg in _context.SalesRegions on u.RegionId equals reg.Id
-                                   where
-                                     (r.Name == SaleManagerPermission.Role)
-                                     && u.IsActive
-                                   select new { u.Id, u.FullName, u.Email, u.PhoneNumber, u.IsActive, u.Manager, u.ManagerId, u.Region, u.RegionId, r.Name })
+            var salesUsers = await (from u in _context.Users
+                                    join ur in _context.UserRoles on u.Id equals ur.UserId
+                                    join r in _context.Roles on ur.RoleId equals r.Id
+                                    join reg in _context.SalesRegions on u.RegionId equals reg.Id
+                                    where
+                                      (r.Name == SaleManagerPermission.Role)
+                                      && u.IsActive
+                                    select new { u.Id, u.FullName, u.Email, u.PhoneNumber, u.IsActive, u.Manager, u.ManagerId, u.Region, u.RegionId, r.Name })
                                       .ToListAsync();
 
             return salesUsers.Select(u => new SalesUserDto
@@ -327,6 +327,29 @@ namespace ThuocGiaThatAdmin.Service
                 RegionName = u.Region?.Name,
                 RoleName = u.Name
             });
+        }
+
+        public async Task<IEnumerable<SalesUserDto>> GetUsersByRegionAsync(int regionId)
+        {
+            var users = await _context.Users
+                .Where(u => u.RegionId == regionId && u.IsActive)
+                .Include(u => u.Region)
+                .Include(u => u.Manager)
+                .OrderBy(u => u.FullName)
+                .ToListAsync();
+
+            return users.Select(u => new SalesUserDto
+            {
+                Id = u.Id,
+                FullName = u.FullName ?? u.UserName ?? string.Empty,
+                Email = u.Email ?? string.Empty,
+                PhoneNumber = u.PhoneNumber ?? string.Empty,
+                IsActive = u.IsActive,
+                ManagerId = u.ManagerId,
+                ManagerName = u.Manager?.FullName,
+                RegionId = u.RegionId,
+                RegionName = u.Region?.Name
+            }).ToList();
         }
     }
 }
