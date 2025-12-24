@@ -19,10 +19,6 @@ using ThuocGiaThatAdmin.Server.Extensions;
 using ThuocGiaThatAdmin.Service;
 using ThuocGiaThatAdmin.Service.Interfaces;
 using ThuocGiaThatAdmin.Service.Services;
-using ThuocGiaThatAdmin.Common.Interfaces;
-using ThuocGiaThatAdmin.Queries;
-using ThuocGiaThatAdmin.Commands;
-using ThuocGiaThatAdmin.Contract.Models;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);

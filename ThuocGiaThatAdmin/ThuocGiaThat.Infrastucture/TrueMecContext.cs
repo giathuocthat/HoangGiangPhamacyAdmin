@@ -798,17 +798,17 @@ namespace ThuocGiaThat.Infrastucture
             // ============ ProductCollectionItem Configuration ============
             modelBuilder.Entity<ProductCollectionItem>(entity =>
             {
-                entity.HasKey(e => new { e.ProductCollectionId, e.ProductId });
+                entity.HasKey(e => new { e.ProductCollectionId, e.ProductVariantId });
 
                 entity.HasOne(e => e.ProductCollection)
                     .WithMany(c => c.Items)
                     .HasForeignKey(e => e.ProductCollectionId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasOne(e => e.Product)
-                    .WithMany(p => p.CollectionItems)
-                    .HasForeignKey(e => e.ProductId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                //entity.HasOne(e => e.Product)
+                //    .WithMany(p => p.CollectionItems)
+                //    .HasForeignKey(e => e.ProductId)
+                //    .OnDelete(DeleteBehavior.Cascade);
             });
 
             // ============ ProductMaxOrderConfig Configuration ============
