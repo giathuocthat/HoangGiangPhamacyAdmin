@@ -521,7 +521,9 @@ namespace ThuocGiaThatAdmin.Service.Services
                     })
                     .ToList(),
                 SubTotal = orderDto.SubTotal,
-                ShippingPhone = orderDto.ShippingPhone
+                ShippingPhone = orderDto.ShippingPhone,
+                ExportInvoice = orderDto.ExportInvoice,
+                CustomerInvoiceInfoId = orderDto.InvoiceId,
             };
 
             // Create snapshots for all order items (using navigation property, not ID)
@@ -536,7 +538,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 // Save everything in one transaction
                 await _context.SaveChangesAsync();
 
-                return order.Id;
+                return new { orderId = order.Id };
             }
             else
             {
@@ -566,7 +568,7 @@ namespace ThuocGiaThatAdmin.Service.Services
 
                 var paymentUrl = _vnPayService.CreatePaymentUrl(paymentInfo, orderDto.IpAddress);
 
-                return paymentUrl;
+                return new { orderId = order.Id, paymentUrl };
             }
         }
 
@@ -695,5 +697,10 @@ namespace ThuocGiaThatAdmin.Service.Services
                 throw;
             }
         }
+
+        public async Task<int> GetTotalItemsInCart(int customerId)
+        {
+            return await _context.ShoppingCarts.Where(x => x.CustomerId == customerId).Select(x => x.TotalItems).FirstOrDefaultAsync();
+        }        
     }
 }
