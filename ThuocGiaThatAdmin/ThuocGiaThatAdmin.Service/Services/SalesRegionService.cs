@@ -54,6 +54,7 @@ namespace ThuocGiaThatAdmin.Service.Services
         {
             var region = await _context.SalesRegions
                 .Include(r => r.SalesManager)
+                .Include(r => r.SalesUsers) .Where(r => r.IsActive)
                 .FirstOrDefaultAsync(r => r.Id == id);
 
             if (region == null)
@@ -89,7 +90,14 @@ namespace ThuocGiaThatAdmin.Service.Services
                 TotalSalesUsers = totalSalesUsers,
                 ActiveSalesUsers = activeSalesUsers,
                 TotalCustomers = totalCustomers,
-                ActiveCustomers = activeCustomers
+                ActiveCustomers = activeCustomers,
+                SalesUsers = region.SalesUsers.Select(u => new SaleUsersDto
+                {
+                    Id = u.Id,
+                    FullName = u.FullName,
+                    Email = u.Email,
+                    IsActive = u.IsActive
+                }).ToList()
             };
         }
 

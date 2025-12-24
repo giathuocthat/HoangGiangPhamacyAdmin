@@ -50,6 +50,7 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
         public int TotalCustomers { get; set; }
         public int ActiveSalesUsers { get; set; }
         public int ActiveCustomers { get; set; }
+        public List<SaleUsersDto> SalesUsers { get; set; } = new List<SaleUsersDto>();
     }
 
     /// <summary>
