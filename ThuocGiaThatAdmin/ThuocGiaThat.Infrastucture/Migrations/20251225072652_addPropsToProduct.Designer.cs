@@ -12,8 +12,8 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    [Migration("20251225024639_addPropsForProduct")]
-    partial class addPropsForProduct
+    [Migration("20251225072652_addPropsToProduct")]
+    partial class addPropsToProduct
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2551,7 +2551,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<int>("ProductCollectionId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProductId")
+                    b.Property<int>("ProductVariantId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("AddedDate")
@@ -2563,9 +2563,14 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("int");
 
-                    b.HasKey("ProductCollectionId", "ProductId");
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProductCollectionId", "ProductVariantId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductVariantId");
 
                     b.ToTable("ProductCollectionItems");
                 });
@@ -3083,6 +3088,9 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("SalesManagerId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
@@ -3093,6 +3101,8 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("IsActive");
 
+                    b.HasIndex("SalesManagerId");
+
                     b.ToTable("SalesRegions");
 
                     b.HasData(
@@ -3100,7 +3110,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         {
                             Id = 1,
                             Code = "MB",
-                            CreatedDate = new DateTime(2025, 12, 25, 2, 46, 37, 519, DateTimeKind.Utc).AddTicks(474),
+                            CreatedDate = new DateTime(2025, 12, 25, 7, 26, 50, 433, DateTimeKind.Utc).AddTicks(9929),
                             Description = "Khu vực miền Bắc Việt Nam",
                             IsActive = true,
                             Name = "Miền Bắc"
@@ -3109,7 +3119,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         {
                             Id = 2,
                             Code = "MT",
-                            CreatedDate = new DateTime(2025, 12, 25, 2, 46, 37, 519, DateTimeKind.Utc).AddTicks(478),
+                            CreatedDate = new DateTime(2025, 12, 25, 7, 26, 50, 433, DateTimeKind.Utc).AddTicks(9932),
                             Description = "Khu vực miền Trung Việt Nam",
                             IsActive = true,
                             Name = "Miền Trung"
@@ -3118,7 +3128,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         {
                             Id = 3,
                             Code = "MN",
-                            CreatedDate = new DateTime(2025, 12, 25, 2, 46, 37, 519, DateTimeKind.Utc).AddTicks(480),
+                            CreatedDate = new DateTime(2025, 12, 25, 7, 26, 50, 433, DateTimeKind.Utc).AddTicks(9934),
                             Description = "Khu vực miền Nam Việt Nam",
                             IsActive = true,
                             Name = "Miền Nam"
@@ -4560,15 +4570,19 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Product", "Product")
+                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Product", null)
                         .WithMany("CollectionItems")
-                        .HasForeignKey("ProductId")
+                        .HasForeignKey("ProductId");
+
+                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Product");
-
                     b.Navigation("ProductCollection");
+
+                    b.Navigation("ProductVariant");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductImage", b =>
@@ -4700,6 +4714,15 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("ProductVariant");
 
                     b.Navigation("PurchaseOrder");
+                });
+
+            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.SalesRegion", b =>
+                {
+                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ApplicationUser", "SalesManager")
+                        .WithMany()
+                        .HasForeignKey("SalesManagerId");
+
+                    b.Navigation("SalesManager");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ShoppingCart", b =>
