@@ -2,20 +2,24 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ThuocGiaThat.Infrastucture;
 using ThuocGiaThat.Infrastucture.Repositories;
+using ThuocGiaThatAdmin.Contract.DTOs;
+using ThuocGiaThatAdmin.Contracts.Responses;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Service.Interfaces;
-using ThuocGiaThatAdmin.Contracts.Responses;
 
 namespace ThuocGiaThatAdmin.Service
 {
     public class CategoryService : ICategoryService
     {
         private readonly ICategoryRepository _repo;
+        private readonly TrueMecContext _context;
 
-        public CategoryService(ICategoryRepository repo)
+        public CategoryService(ICategoryRepository repo, TrueMecContext context)
         {
             _repo = repo ?? throw new ArgumentNullException(nameof(repo));
+            _context = context;
         }
 
         public async Task<(IEnumerable<Category> Items, int TotalCount)> GetCategoriesAsync(int pageNumber = 1, int pageSize = 10)
@@ -48,10 +52,17 @@ namespace ThuocGiaThatAdmin.Service
             return await _repo.SearchByNameAsync(searchTerm);
         }
 
-        public async Task<IEnumerable<Category>> GetRootCategoriesAsync()
+        public async Task<IEnumerable<CategoryRootDto>> GetRootCategoriesAsync()
         {
-            var all = await _repo.GetAllAsync();
-            return all.Where(c => c.ParentId == null && c.IsActive).OrderBy(c => c.DisplayOrder);
+            var result = _context.Categories.Where(c => c.ParentId == null && c.IsActive).OrderBy(c => c.DisplayOrder)
+                .Select(x => new CategoryRootDto
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Slug = x.Slug,
+                });
+
+            var ids = string.Join(",", result.Select)
         }
 
         public async Task<IEnumerable<Category>> GetAllChildrenAsync()
