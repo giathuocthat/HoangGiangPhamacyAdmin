@@ -20,15 +20,17 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public string? ThumbnailUrl { get; set; }
 
         // Pharma Specifics
-        public string? Ingredients { get; set; }
-        public string? UsageInstructions { get; set; }
-        public string? Contraindications { get; set; }
-        public string? StorageInstructions { get; set; }
+        public string? Ingredients { get; set; } // Thành phần
+        public string? UsageInstructions { get; set; } // Liều lượng - cách dùng
+        public string? Contraindications { get; set; } // Chống chỉ định
+        public string? StorageInstructions { get; set; } // Bảo quản
         public string? RegistrationNumber { get; set; }
-        public string? DrugEfficacy { get; set; }
-        public string? DosageInstructions { get; set; }
+        public string? DrugEfficacy { get; set; } // Tương tác thuốc
+        public string? DosageInstructions { get; set; } 
         public string? Specification { get; set; } // Quy cách đóng gói (vd: Hộp 30 viên, Chai 100ml)
         public bool? IsPrescriptionDrug { get; set; } = false;
+        public string? Indication { get; set; } // Chỉ định
+        public string? Overdose { get; set; }
 
         // Metadata
         public bool IsActive { get; set; } = true;

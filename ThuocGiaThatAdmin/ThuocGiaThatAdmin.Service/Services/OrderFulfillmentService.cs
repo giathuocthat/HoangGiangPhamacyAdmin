@@ -193,16 +193,16 @@ namespace ThuocGiaThatAdmin.Service.Services
             return orderDetail;
         }
 
-        public async Task<OrderFulfillmentDetailsResponseDto> GetOrderFulfillmentDetailsAsync(int orderId, int warehouseId)
+        public async Task<OrderFulfillmentDetailsResponseDto> GetOrderFulfillmentDetailsAsync(string orderIdentifier, int warehouseId)
         {
             try
             {
-                // Lấy order với fulfillments
-                var order = await _fulfillmentRepository.GetOrderFulfillmentDetailsAsync(orderId);
+                // Lấy order với fulfillments (support both ID and OrderNumber)
+                var order = await _fulfillmentRepository.GetOrderFulfillmentDetailsByIdentifierAsync(orderIdentifier);
 
                 if (order == null)
                 {
-                    throw new Exception($"Order {orderId} not found");
+                    throw new Exception($"Order {orderIdentifier} not found");
                 }
 
                 var response = new OrderFulfillmentDetailsResponseDto
@@ -260,7 +260,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error getting order fulfillment details for order {orderId}");
+                _logger.LogError(ex, $"Error getting order fulfillment details for order {orderIdentifier}");
                 throw;
             }
         }
