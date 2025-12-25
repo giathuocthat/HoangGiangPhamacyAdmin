@@ -559,7 +559,7 @@ namespace ThuocGiaThat.Infrastucture
                         Code = "MB",
                         Description = "Khu vực miền Bắc Việt Nam",
                         IsActive = true,
-                        CreatedDate = DateTime.UtcNow
+                        CreatedDate = new DateTime(2025, 12, 1)
                     },
                     new SalesRegion
                     {
@@ -568,7 +568,7 @@ namespace ThuocGiaThat.Infrastucture
                         Code = "MT",
                         Description = "Khu vực miền Trung Việt Nam",
                         IsActive = true,
-                        CreatedDate = DateTime.UtcNow
+                        CreatedDate = new DateTime(2025, 12, 1)
                     },
                     new SalesRegion
                     {
@@ -577,7 +577,7 @@ namespace ThuocGiaThat.Infrastucture
                         Code = "MN",
                         Description = "Khu vực miền Nam Việt Nam",
                         IsActive = true,
-                        CreatedDate = DateTime.UtcNow
+                        CreatedDate = new DateTime(2025, 12, 1)
                     }
                 );
             });
