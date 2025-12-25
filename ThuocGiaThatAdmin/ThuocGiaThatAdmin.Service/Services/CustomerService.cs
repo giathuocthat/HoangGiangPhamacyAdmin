@@ -58,6 +58,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 PhoneNumber = dto.PhoneNumber,
                 Email = dto.Email,
                 BusinessTypeId = dto.BusinessTypeId,
+                SaleUserId = dto.SaleUserId,
                 PasswordHash = string.Empty, // Password is nullable for admin-created customers
                 CreatedDate = DateTime.UtcNow
             };
@@ -126,6 +127,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             customer.PhoneNumber = dto.PhoneNumber;
             customer.Email = dto.Email;
             customer.BusinessTypeId = dto.BusinessTypeId;
+            customer.SaleUserId = dto.SaleUserId;
             customer.UpdatedDate = DateTime.UtcNow;
 
             // Update or create default address
@@ -214,6 +216,8 @@ namespace ThuocGiaThatAdmin.Service.Services
                 PhoneNumber = customer.PhoneNumber,
                 BusinessTypeId = customer.BusinessTypeId,
                 BusinessTypeName = customer.BusinessType?.Name,
+                SaleUserId = customer.SaleUserId,
+                SaleUserName = customer.SaleUser?.FullName,
                 Address = defaultAddress != null ? new AddressDto
                 {
                     Id = defaultAddress.Id,

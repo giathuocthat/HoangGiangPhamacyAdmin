@@ -63,7 +63,7 @@ namespace ThuocGiaThatAdmin.Service.Services
         {
             var collection = await _context.ProductCollections
                 .Include(c => c.Items)
-                    .ThenInclude(i => i.Product)
+                    .ThenInclude(i => i.ProductVariant.Product)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (collection == null)
@@ -75,8 +75,8 @@ namespace ThuocGiaThatAdmin.Service.Services
                 .OrderBy(i => i.DisplayOrder)
                 .Select(i => new ProductCollectionItemDto
                 {
-                    ProductId = i.ProductId,
-                    ProductName = i.Product?.Name,
+                    ProductId = i.ProductVariantId,
+                    ProductName = i.ProductVariant.Product?.Name,
                     DisplayOrder = i.DisplayOrder
                 })
                 .ToList();
@@ -140,7 +140,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 {
                     collection.Items.Add(new ProductCollectionItem
                     {
-                        ProductId = item.ProductId,
+                        ProductVariantId = item.ProductId,
                         DisplayOrder = item.DisplayOrder,
                         AddedDate = DateTime.Now
                     });
@@ -175,10 +175,10 @@ namespace ThuocGiaThatAdmin.Service.Services
             {
                 // Smart sync items
                 var dtoItems = dto.Items;
-                var dtoProductIds = dtoItems.Select(i => i.ProductId).ToList();
+                var dtoProductIds = dtoItems.Select(i => i.ProductVariantId).ToList();
 
                 // 1. Remove items not in DTO
-                var itemsToRemove = collection.Items.Where(i => !dtoProductIds.Contains(i.ProductId)).ToList();
+                var itemsToRemove = collection.Items.Where(i => !dtoProductIds.Contains(i.ProductVariantId)).ToList();
                 foreach (var item in itemsToRemove)
                 {
                     collection.Items.Remove(item);
@@ -187,7 +187,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 // 2. Update existing and Add new
                 foreach (var dtoItem in dtoItems)
                 {
-                    var existingItem = collection.Items.FirstOrDefault(i => i.ProductId == dtoItem.ProductId);
+                    var existingItem = collection.Items.FirstOrDefault(i => i.ProductVariantId == dtoItem.ProductVariantId);
                     if (existingItem != null)
                     {
                         // Update
@@ -198,7 +198,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                         // Add
                         collection.Items.Add(new ProductCollectionItem
                         {
-                            ProductId = dtoItem.ProductId,
+                            ProductVariantId = dtoItem.ProductVariantId,
                             DisplayOrder = dtoItem.DisplayOrder,
                             AddedDate = DateTime.UtcNow
                         });
@@ -222,7 +222,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             foreach (var productId in productIds)
             {
                 // Check if already exists
-                var exists = collection?.Items.Any(i => i.ProductId == productId) ?? false;
+                var exists = collection?.Items.Any(i => i.ProductVariantId == productId) ?? false;
                 if (!exists)
                 {
                     currentMaxOrder++;
@@ -390,12 +390,8 @@ namespace ThuocGiaThatAdmin.Service.Services
         {
             var collection = await _context.ProductCollections
                 .Include(c => c.Items)
-                .ThenInclude(i => i.Product)
-                    .ThenInclude(p => p.ProductVariants)
-                .Include(c => c.Items)
-                    .ThenInclude(i => i.Product)
-                .Include(c => c.Items)
-                    .ThenInclude(i => i.Product)
+                .ThenInclude(i => i.ProductVariant)
+                    .ThenInclude(p => p.Product)
                         .ThenInclude(p => p.Images)
                 .FirstOrDefaultAsync(c => c.Slug == slugOrName || c.Name == slugOrName);
 
@@ -408,7 +404,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 .OrderBy(i => i.DisplayOrder)
                 .Select(i =>
                 {
-                    var product = i.Product;
+                    var product = i.ProductVariant.Product;
                     var firstVariant = product.ProductVariants.FirstOrDefault(v => v.IsActive) 
                                        ?? product.ProductVariants.FirstOrDefault();
 
@@ -439,16 +435,16 @@ namespace ThuocGiaThatAdmin.Service.Services
                 .OrderBy(i => i.DisplayOrder)
                 .Select(i => new CollectionProductResponseDto
                 {
-                    Id = i.Product.Id,
-                    Name = i.Product.Name,
-                    Slug = i.Product.Slug,
-                    ThumbnailUrl = i.Product.ThumbnailUrl,
-                    ProductVariantId = i.Product.ProductVariants.Select(y => y.Id).FirstOrDefault(),
-                    OriginalPrice = i.Product.ProductVariants.Select(y => y.OriginalPrice).FirstOrDefault(),
-                    Price = i.Product.ProductVariants.Select(y => y.Price).FirstOrDefault(),
-                    Specification = i.Product.Specification,
-                    MaxQuantityPerOrder = i.Product.MaxOrderConfig == null ? null : i.Product.MaxOrderConfig.MaxQuantityPerOrder,
-                    ShortDescription = i.Product.ShortDescription,
+                    Id = i.ProductVariant.Product.Id,
+                    Name = i.ProductVariant.Product.Name,
+                    Slug = i.ProductVariant.Product.Slug,
+                    ThumbnailUrl = i.ProductVariant.Product.ThumbnailUrl,
+                    ProductVariantId = i.ProductVariantId,
+                    OriginalPrice = i.ProductVariant.OriginalPrice,
+                    Price = i.ProductVariant.Price,
+                    Specification = i.ProductVariant.Product.Specification,
+                    MaxQuantityPerOrder = i.ProductVariant.MaxSalesQuantity,
+                    ShortDescription = i.ProductVariant.Product.ShortDescription,
                     DisplayOrder = i.DisplayOrder,
                 })
                 .ToListAsync();

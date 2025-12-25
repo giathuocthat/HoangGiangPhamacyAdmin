@@ -262,5 +262,16 @@ namespace HoangGiangPhamacyAuthentication.Controllers
             var salesUsers = await _userService.GetSalesManagerUsersAsync();
             return Ok(salesUsers);
         }
+
+        /// <summary>
+        /// GET: api/user/by-region/{regionId}
+        /// Lấy danh sách users theo regionId
+        /// </summary>
+        [HttpGet("by-region/{regionId}")]
+        public async Task<IActionResult> GetUsersByRegion(int regionId)
+        {
+            var users = await _userService.GetUsersByRegionAsync(regionId);
+            return Ok(users);
+        }
     }
 }

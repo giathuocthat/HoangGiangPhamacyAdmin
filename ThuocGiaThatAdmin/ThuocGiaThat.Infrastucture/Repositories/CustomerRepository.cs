@@ -20,6 +20,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         {
             return await _dbSet
                 .Include(c => c.BusinessType)
+                .Include(c => c.SaleUser)
                 .Include(c => c.Addresses)
                 .ThenInclude(a => a.Province)
                 .Include(c => c.Addresses)
@@ -40,6 +41,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
 
             var query = _dbSet
                 .Include(c => c.BusinessType)
+                .Include(c => c.SaleUser)
                 .Include(c => c.Addresses)
                     .ThenInclude(a => a.Province)
                 .Include(c => c.Addresses)
@@ -102,6 +104,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
 
             return await _dbSet
                 .Include(c => c.BusinessType)
+                .Include(c => c.SaleUser)
                 .Include(c => c.Addresses)
                     .ThenInclude(a => a.Province)
                 .Include(c => c.Addresses)
