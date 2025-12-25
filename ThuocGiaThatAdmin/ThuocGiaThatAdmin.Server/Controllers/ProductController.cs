@@ -67,14 +67,16 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     product.UpdatedDate,
                     product.DrugEfficacy,
                     product.DosageInstructions,
-                    Brand = new {
+                    Brand = new
+                    {
                         product.Brand?.Id,
                         product.Brand?.Name,
                         product.Brand?.Slug,
                         product.Brand?.CountryOfOrigin,
                         product.Brand?.LogoUrl
                     },
-                    Category = new {
+                    Category = new
+                    {
                         product.Category.Id,
                         product.Category.Name,
                         product.Category.Slug,
@@ -134,7 +136,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     product.Name,
                     product.Slug,
                     product.ShortDescription,
-                    fullDescription = product.FullDescription?.Replace("\\n",""),
+                    fullDescription = product.FullDescription?.Replace("\\n", ""),
                     product.ThumbnailUrl,
                     // Pharma specifics
                     product.Ingredients,
@@ -336,7 +338,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                         CategoryName = product.Category?.Name,
                         price = product.ProductVariants.FirstOrDefault()?.Price,
                         originalPrice = product.ProductVariants.FirstOrDefault()?.OriginalPrice,
-                        productVariantId = product.ProductVariants.FirstOrDefault()?.Id
+                        productVariantId = product.ProductVariants.FirstOrDefault()?.Id,
+                        product.Specification
                     }),
                     Pagination = new
                     {
@@ -371,7 +374,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             try
             {
                 var (products, totalCount) = await _productService.GetStoreProductsAsync(pageNumber, pageSize);
-                
+
                 var response = new
                 {
                     Data = products,
@@ -383,7 +386,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                         TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
                     }
                 };
-                
+
                 return Ok(response);
             }
             catch (ArgumentException ex)
@@ -481,7 +484,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         public async Task<ActionResult<ProductStatusMapResponseDto>> CreateProductStatusMap([FromBody] CreateProductStatusMapDto dto)
         {
             var result = await _productService.CreateProductStatusMapAsync(dto);
-            return Ok(result);     
+            return Ok(result);
         }
 
         [HttpPost("cart")]
@@ -554,6 +557,153 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             {
                 Logger.LogError(ex, "Error getting product variants");
                 return StatusCode(500, new { message = "An error occurred while retrieving product variants", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Get product by ID
+        /// </summary>
+        /// <param name="id">Product ID</param>
+        /// <returns>Product details</returns>
+        [HttpGet("detail/{slug}")]
+        public async Task<ActionResult<dynamic>> GetProductBySlugAsync(string slug)
+        {
+            try
+            {
+                var product = await _productService.GetProductBySlugAsync(slug);
+                if (product == null)
+                    return NotFound(new { message = $"Product with slug {slug} not found" });
+
+                var sumMaxSalesQuantity = product.ProductVariants.Sum(x => x.MaxSalesQuantity);
+                var sumAvailableStock = product.ProductVariants.Sum(x => x.Inventories.Sum(x => x.QuantityAvailable) + x.OverSaleNumber.GetValueOrDefault());
+                var maxOrderQuantity = sumMaxSalesQuantity >= sumAvailableStock ? sumMaxSalesQuantity : sumAvailableStock;
+
+                // Shape data specifically for product detail page
+                var response = new
+                {
+                    // Basic info
+                    product.Id,
+                    product.Name,
+                    product.Slug,
+                    product.ShortDescription,
+                    fullDescription = product.FullDescription?.Replace("\\n", ""),
+                    product.ThumbnailUrl,
+                    // Pharma specifics
+                    product.Ingredients,
+                    product.UsageInstructions,
+                    product.Contraindications,
+                    product.StorageInstructions,
+                    product.RegistrationNumber,
+                    product.Specification,
+                    product.IsPrescriptionDrug,
+                    product.DrugEfficacy,
+                    product.DosageInstructions,
+
+                    // Metadata
+                    product.IsActive,
+                    product.IsFeatured,
+                    product.CreatedDate,
+                    product.UpdatedDate,
+
+                    // IDs for editing
+                    product.CategoryId,
+                    product.BrandId,
+
+                    // Category
+                    Category = product.Category == null
+                        ? null
+                        : new
+                        {
+                            product.Category.Id,
+                            product.Category.Name,
+                            product.Category.Slug,
+                            product.Category.ParentId
+                        },
+
+                    // Brand
+                    Brand = product.Brand == null
+                        ? null
+                        : new
+                        {
+                            product.Brand.Id,
+                            product.Brand.Name,
+                            product.Brand.Slug,
+                            product.Brand.CountryOfOrigin,
+                            product.Brand.LogoUrl
+                        },
+
+                    // Images
+                    Images = product.Images
+                        .OrderBy(i => i.DisplayOrder)
+                        .Select(i => new
+                        {
+                            i.Id,
+                            i.ImageUrl,
+                            i.DisplayOrder,
+                            i.AltText
+                        }),
+
+                    // Product options & values
+                    ProductOptions = product.ProductOptions
+                        .OrderBy(o => o.DisplayOrder)
+                        .Select(o => new
+                        {
+                            o.Id,
+                            o.Name,
+                            o.DisplayOrder,
+                            Values = o.ProductOptionValues
+                                .OrderBy(v => v.DisplayOrder)
+                                .Select(v => new
+                                {
+                                    v.Id,
+                                    v.Value,
+                                    v.DisplayOrder
+                                })
+                        }),
+
+                    // Variants & their option values
+                    ProductVariants = product.ProductVariants
+                        .Where(v => v.IsActive)
+                        .Select(v => new
+                        {
+                            v.Id,
+                            v.SKU,
+                            v.Barcode,
+                            v.Price,
+                            v.OriginalPrice,
+                            v.StockQuantity,
+                            v.MaxSalesQuantity,
+                            v.Weight,
+                            v.Dimensions,
+                            v.ImageUrl,
+                            v.IsActive,
+                            OptionValues = v.VariantOptionValues.Select(vov => new
+                            {
+                                OptionValueId = vov.ProductOptionValueId,
+                                OptionValue = vov.ProductOptionValue.Value,
+                                OptionId = vov.ProductOptionValue.ProductOption.Id,
+                                OptionName = vov.ProductOptionValue.ProductOption.Name
+                            }),
+                            v.OverSaleNumber,
+                            v.RatePrice,
+                            v.RatePriceUnit,
+                            QuantityAvailable = v.Inventories.Sum(x => x.QuantityAvailable)
+                        }),
+                    product.Overdose,
+                    product.Indication,
+                    MaxOrderQuantity = maxOrderQuantity,                    
+                };
+
+                return Ok(response);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error getting product by slug");
+                return StatusCode(500, new { message = "An error occurred while retrieving the product", error = ex.Message });
             }
         }
     }

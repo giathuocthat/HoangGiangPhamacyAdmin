@@ -10,7 +10,7 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
                 
         [EmailAddress(ErrorMessage = "Invalid email format")]
         [StringLength(255)]
-        public string Email { get; set; } = string.Empty;
+        public string? Email { get; set; }
 
         [Required(ErrorMessage = "Phone number is required")]
         [Phone(ErrorMessage = "Invalid phone number format")]

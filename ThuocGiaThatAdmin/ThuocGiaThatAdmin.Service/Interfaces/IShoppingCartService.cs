@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ThuocGiaThatAdmin.Contract.Requests;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 
 namespace ThuocGiaThatAdmin.Service.Interfaces
@@ -43,7 +44,7 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
         /// <param name="customerId"></param>
         /// <param name="sessionId"></param>
         /// <returns></returns>
-        Task RemoveCartItemsAsync(HashSet<int> cartItemIds, int? customerId, string? sessionId);
+        Task<int> RemoveCartItemsAsync(HashSet<int> cartItemIds, int? customerId, string? sessionId);
 
         /// <summary>
         /// 
@@ -52,5 +53,13 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
         /// <param name="customerId"></param>
         /// <returns></returns>
         Task<int> ClearItemsInCart(int orderId, int customerId);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <param name="productVariantId"></param>
+        /// <returns></returns>
+        Task<CartItem?> GetCartItem(int customerId, int productVariantId);
     }
 }

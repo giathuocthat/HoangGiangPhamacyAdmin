@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ThuocGiaThat.Infrastucture;
 using ThuocGiaThat.Infrastucture.Repositories;
+using ThuocGiaThatAdmin.Contract.Requests;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Service.Interfaces;
@@ -170,7 +171,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             return MapToDto(cart);
         }
 
-        public async Task RemoveCartItemsAsync(HashSet<int> cartItemIds, int? customerId, string? sessionId)
+        public async Task<int> RemoveCartItemsAsync(HashSet<int> cartItemIds, int? customerId, string? sessionId)
         {
             var cart = await GetCartAsync(customerId, sessionId);
             if (cart == null)
@@ -179,7 +180,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             if (cart.CartItems.All(x => cartItemIds.Contains(x.Id)))
             {
                 await ClearCartAsync(customerId, sessionId);
-                return;
+                return 0;
             }
 
             var items = cart.CartItems.Where(i => cartItemIds.Contains(i.Id)).ToList();
@@ -198,7 +199,7 @@ namespace ThuocGiaThatAdmin.Service.Services
 
             await _cartRepository.SaveChangesAsync();
 
-            return;
+            return cart.TotalItems;
         }
 
         public async Task ClearCartAsync(int? customerId, string? sessionId)
@@ -409,6 +410,18 @@ namespace ThuocGiaThatAdmin.Service.Services
             await _context.SaveChangesAsync();
 
             return cart.TotalItems;
+        }
+
+        public async Task<CartItem?> GetCartItem(int customerId, int productVariantId)
+        {
+            return await _context.ShoppingCartItems.Where(x => x.ShoppingCart.CustomerId == customerId && x.ProductVariantId == productVariantId)
+                            .Select(x => new CartItem
+                            {
+                                Id = x.Id,
+                                Quantity = x.Quantity,
+                                ProductVariantId = x.ProductVariantId,
+
+                            }).FirstOrDefaultAsync();
         }
     }
 }

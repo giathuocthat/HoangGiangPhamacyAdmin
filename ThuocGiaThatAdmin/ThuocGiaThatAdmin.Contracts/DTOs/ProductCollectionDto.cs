@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ThuocGiaThatAdmin.Contract.Enums;
 using ThuocGiaThatAdmin.Domain.Entities;
 
 namespace ThuocGiaThatAdmin.Contracts.DTOs
@@ -10,7 +11,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public string Name { get; set; } = string.Empty;
         public string Slug { get; set; } = string.Empty;
         public string? Description { get; set; }
-        public CollectionType Type { get; set; }
+        public ProductCollectionTypeEnum Type { get; set; }
         public bool IsActive { get; set; }
         public int DisplayOrder { get; set; }
         public DateTime? StartDate { get; set; }

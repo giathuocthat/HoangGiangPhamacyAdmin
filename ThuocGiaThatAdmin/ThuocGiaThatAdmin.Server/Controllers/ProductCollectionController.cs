@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using ThuocGiaThatAdmin.Contract.Enums;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Service.Services;
 
@@ -172,6 +173,13 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 return Ok(new { message = "Max order config updated successfully" });
             }, "Set Max Order Config");
         }
-        
+
+        [HttpGet("productsByCollectionType/{type}")]
+        public async Task<IActionResult> GetProductsByCollectionType(ProductCollectionTypeEnum type, int pageSize = 20)
+        {
+            var result = await _service.GetCollectionProductsByTypeAsync(type, pageSize);
+
+            return Ok(result);
+        }
     }
 }
