@@ -352,5 +352,22 @@ namespace ThuocGiaThatAdmin.Service
                 RegionName = u.Region?.Name
             }).ToList();
         }
+
+        public async IAsyncEnumerable<ApplicationRoleClaim> GetPermissions(string userId)
+        {
+            var userDetail = await _userManager.FindByIdAsync(userId);
+            var roles = await _userManager.GetRolesAsync(userDetail);
+
+            foreach (var item in roles)
+            {
+                var roleDetail = await _roleManager.FindByNameAsync(item);
+                var permissions = _context.RoleClaims.Where(x => x.RoleId == roleDetail.Id).ToList();
+
+                foreach (var permission in permissions)
+                {
+                    yield return permission;
+                }
+            }
+        }
     }
 }

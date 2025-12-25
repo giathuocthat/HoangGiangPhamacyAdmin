@@ -273,5 +273,13 @@ namespace HoangGiangPhamacyAuthentication.Controllers
             var users = await _userService.GetUsersByRegionAsync(regionId);
             return Ok(users);
         }
+
+
+        [HttpGet("{userId}/permissions")]
+        public async Task<IActionResult> GetUsersByRegion(string userId)
+        {
+            var permissions = _userService.GetPermissions(userId);
+            return Ok(permissions);
+        }
     }
 }

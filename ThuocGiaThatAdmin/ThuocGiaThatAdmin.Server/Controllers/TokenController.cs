@@ -51,14 +51,15 @@ namespace HoangGiangPhamacyAuthentication.Controllers
             var valid = await _userManager.CheckPasswordAsync(user, model.Password);
             if (!valid) return Unauthorized(new { error = "invalid_credentials" });
 
-            var (accessToken, refreshToken, expiresUtc) = await _tokenService.GenerateTokenAsync(user);
+            var (accessToken, refreshToken, expiresUtc, userId) = await _tokenService.GenerateTokenAsync(user);
 
             var response = new TokenResponse
             {
                 Token = accessToken,
                 RefreshToken = refreshToken,
                 ExpiresUtc = expiresUtc,
-                TokenType = "Bearer"
+                TokenType = "Bearer",
+                UserId = userId
             };
 
             return Ok(response);
