@@ -257,7 +257,7 @@ namespace ThuocGiaThatAdmin.Service
                                     where
                                       (r.Name == SaleManagerPermission.Role || r.Name == SaleMemberPermissions.Role)
                                       && u.IsActive
-                                    select new { u.Id, u.FullName, u.Email, u.PhoneNumber, u.IsActive, u.Manager, u.ManagerId, u.Region, u.RegionId })
+                                    select new { u.Id, u.FullName, u.Email, u.PhoneNumber, u.IsActive, u.Manager, u.ManagerId, u.Region, u.RegionId, r.Name })
                                       .ToListAsync();
 
             return salesUsers.Select(u => new SalesUserDto
@@ -270,7 +270,8 @@ namespace ThuocGiaThatAdmin.Service
                 ManagerId = u.ManagerId,
                 ManagerName = u.Manager?.FullName,
                 RegionId = u.RegionId,
-                RegionName = u.Region?.Name
+                RegionName = u.Region?.Name,
+                RoleName = u.Name
             });
         }
 

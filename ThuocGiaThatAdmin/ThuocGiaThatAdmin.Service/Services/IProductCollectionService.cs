@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ThuocGiaThatAdmin.Contract.Enums;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
 
@@ -23,6 +24,9 @@ namespace ThuocGiaThatAdmin.Service.Services
         
         // Max order config
         Task<List<ProductDto>> GetProductsWithMaxOrderAsync();
+
         Task SetMaxOrderConfigAsync(int productId, SetMaxOrderDto dto);
+
+        Task<List<CollectionProductResponseDto>> GetCollectionProductsByTypeAsync(ProductCollectionTypeEnum type, int pageSize);
     }
 }

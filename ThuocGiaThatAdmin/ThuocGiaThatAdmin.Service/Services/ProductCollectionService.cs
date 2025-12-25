@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using ThuocGiaThat.Infrastucture;
 using ThuocGiaThat.Infrastucture.Repositories;
+using ThuocGiaThatAdmin.Contract.Enums;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
 
@@ -125,7 +126,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 Name = dto.Name,
                 Slug = GenerateSlug(dto.Name),
                 Description = dto.Description,
-                Type = CollectionType.Manual,
+                Type = (int)CollectionType.Manual,
                 DisplayOrder = dto.DisplayOrder,
                 StartDate = dto.StartDate,
                 EndDate = dto.EndDate,
@@ -163,7 +164,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             collection.Name = dto.Name;
             collection.Slug = GenerateSlug(dto.Name);
             collection.Description = dto.Description;
-            collection.Type = CollectionType.Manual;
+            collection.Type = (int)CollectionType.Manual;
             collection.DisplayOrder = dto.DisplayOrder;
             collection.StartDate = dto.StartDate;
             collection.EndDate = dto.EndDate;
@@ -347,7 +348,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 Name = collection.Name,
                 Slug = collection.Slug,
                 Description = collection.Description,
-                Type = collection.Type,
+                Type = (ProductCollectionTypeEnum)collection.Type,
                 IsActive = collection.IsActive,
                 DisplayOrder = collection.DisplayOrder,
                 StartDate = collection.StartDate,
@@ -423,6 +424,30 @@ namespace ThuocGiaThatAdmin.Service.Services
                     };
                 })
                 .ToList();
+
+            return dtos;
+        }
+
+        public async Task<List<CollectionProductResponseDto>> GetCollectionProductsByTypeAsync(ProductCollectionTypeEnum type, int pageSize)
+        {
+            var dtos = await _context.ProductCollections.Where(x => x.Type == (int)type && (!x.StartDate.HasValue || x.StartDate.Value <= DateTime.Now) && (!x.EndDate.HasValue || x.EndDate.Value >= DateTime.Now))
+                .SelectMany(x => x.Items)
+                .OrderBy(i => i.DisplayOrder)
+                .Select(i => new CollectionProductResponseDto
+                {
+                    Id = i.ProductVariant.Product.Id,
+                    Name = i.ProductVariant.Product.Name,
+                    Slug = i.ProductVariant.Product.Slug,
+                    ThumbnailUrl = i.ProductVariant.Product.ThumbnailUrl,
+                    ProductVariantId = i.ProductVariantId,
+                    OriginalPrice = i.ProductVariant.OriginalPrice,
+                    Price = i.ProductVariant.Price,
+                    Specification = i.ProductVariant.Product.Specification,
+                    MaxQuantityPerOrder = i.ProductVariant.MaxSalesQuantity,
+                    ShortDescription = i.ProductVariant.Product.ShortDescription,
+                    DisplayOrder = i.DisplayOrder,
+                })
+                .ToListAsync();
 
             return dtos;
         }

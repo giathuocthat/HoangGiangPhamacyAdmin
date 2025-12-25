@@ -43,5 +43,12 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         /// <param name="pageSize"></param>
         /// <returns></returns>
         Task<(IList<Product> products, int TotalCount)> GetPagedProductsAsync(int pageNumber, int pageSize);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="slug"></param>
+        /// <returns></returns>
+        Task<Product?> GetProductWithCategoryAsync(string slug);
     }
 }

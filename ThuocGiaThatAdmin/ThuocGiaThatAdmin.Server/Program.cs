@@ -259,16 +259,16 @@ builder.Services.AddScoped<IWarehousePickingService, WarehousePickingService>();
 builder.Services.AddScoped<IWarehousePickingRepository, WarehousePickingRepository>();
 
 // Add CORS to allow frontend to call this API
-var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? throw new Exception("Cors:AllowedOrigins is missing"); ;
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrigins",
+    options.AddPolicy("AllowSpecificOrigins",
         policy =>
         {
-            policy.AllowAnyOrigin() // Allows requests from any origin
+            policy.WithOrigins(allowedOrigins)
                   .AllowAnyMethod() // Allows any HTTP method (GET, POST, PUT, DELETE, etc.)
-                  .AllowAnyHeader();
-                // .AllowCredentials(); // Allows any header in the request
+                  .AllowAnyHeader()
+                  .AllowCredentials(); // Allows any header in the request
         });
 });
 
@@ -329,7 +329,7 @@ using (var scope = app.Services.CreateScope())
 // ============================================================
 // Middleware Pipeline
 // ============================================================
-app.UseCors("AllowAllOrigins");
+app.UseCors("AllowSpecificOrigins");
 
 // Add global exception handler middleware
 app.UseMiddleware<ThuocGiaThatAdmin.Server.Middleware.GlobalExceptionHandlerMiddleware>();
@@ -346,6 +346,8 @@ app.UseHttpsRedirection();
 
 // Serve static files from wwwroot/uploads
 app.UseStaticFiles();
+
+
 
 app.UseAuthentication();
 app.UseAuthorization();
