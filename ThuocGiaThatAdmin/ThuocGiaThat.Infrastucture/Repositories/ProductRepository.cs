@@ -113,5 +113,31 @@ namespace ThuocGiaThat.Infrastucture.Repositories
 
             return (products, totalCount);
         }
+
+        /// <summary>
+        /// Get Product By slug
+        /// </summary>
+        /// <param name="slug"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public async Task<Product?> GetProductWithCategoryAsync(string slug)
+        {
+            if (string.IsNullOrEmpty(slug))
+                throw new ArgumentException("slug empty");
+
+            return await _dbSet
+                .Include(p => p.Category)
+                .Include(p => p.Brand)
+                .Include(p => p.Images)
+                .Include(p => p.ProductOptions)
+                    .ThenInclude(o => o.ProductOptionValues)
+                .Include(p => p.ProductVariants)
+                    .ThenInclude(v => v.VariantOptionValues)
+                        .ThenInclude(vov => vov.ProductOptionValue)
+                            .ThenInclude(pov => pov.ProductOption)
+                .Include(p => p.ProductVariants)
+                    .ThenInclude(v => v.Inventories)
+                .FirstOrDefaultAsync(p => p.Slug.Equals(slug));
+        }
     }
 }

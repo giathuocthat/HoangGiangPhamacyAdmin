@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ThuocGiaThat.Infrastucture;
 
@@ -11,9 +12,11 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    partial class TrueMecContextModelSnapshot : ModelSnapshot
+    [Migration("20251225024639_addPropsForProduct")]
+    partial class addPropsForProduct
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2548,7 +2551,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<int>("ProductCollectionId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProductVariantId")
+                    b.Property<int>("ProductId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("AddedDate")
@@ -2560,14 +2563,9 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ProductId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ProductCollectionId", "ProductVariantId");
+                    b.HasKey("ProductCollectionId", "ProductId");
 
                     b.HasIndex("ProductId");
-
-                    b.HasIndex("ProductVariantId");
 
                     b.ToTable("ProductCollectionItems");
                 });
@@ -3085,9 +3083,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("SalesManagerId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
@@ -3098,8 +3093,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("IsActive");
 
-                    b.HasIndex("SalesManagerId");
-
                     b.ToTable("SalesRegions");
 
                     b.HasData(
@@ -3107,7 +3100,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         {
                             Id = 1,
                             Code = "MB",
-                            CreatedDate = new DateTime(2025, 12, 24, 4, 45, 35, 589, DateTimeKind.Utc).AddTicks(580),
+                            CreatedDate = new DateTime(2025, 12, 25, 2, 46, 37, 519, DateTimeKind.Utc).AddTicks(474),
                             Description = "Khu vực miền Bắc Việt Nam",
                             IsActive = true,
                             Name = "Miền Bắc"
@@ -3116,7 +3109,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         {
                             Id = 2,
                             Code = "MT",
-                            CreatedDate = new DateTime(2025, 12, 24, 4, 45, 35, 589, DateTimeKind.Utc).AddTicks(582),
+                            CreatedDate = new DateTime(2025, 12, 25, 2, 46, 37, 519, DateTimeKind.Utc).AddTicks(478),
                             Description = "Khu vực miền Trung Việt Nam",
                             IsActive = true,
                             Name = "Miền Trung"
@@ -3125,7 +3118,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         {
                             Id = 3,
                             Code = "MN",
-                            CreatedDate = new DateTime(2025, 12, 24, 4, 45, 35, 589, DateTimeKind.Utc).AddTicks(584),
+                            CreatedDate = new DateTime(2025, 12, 25, 2, 46, 37, 519, DateTimeKind.Utc).AddTicks(480),
                             Description = "Khu vực miền Nam Việt Nam",
                             IsActive = true,
                             Name = "Miền Nam"
@@ -4567,19 +4560,15 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Product", null)
+                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Product", "Product")
                         .WithMany("CollectionItems")
-                        .HasForeignKey("ProductId");
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ProductVariant", "ProductVariant")
-                        .WithMany()
-                        .HasForeignKey("ProductVariantId")
+                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ProductCollection");
+                    b.Navigation("Product");
 
-                    b.Navigation("ProductVariant");
+                    b.Navigation("ProductCollection");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductImage", b =>
@@ -4711,15 +4700,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("ProductVariant");
 
                     b.Navigation("PurchaseOrder");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.SalesRegion", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ApplicationUser", "SalesManager")
-                        .WithMany()
-                        .HasForeignKey("SalesManagerId");
-
-                    b.Navigation("SalesManager");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ShoppingCart", b =>
