@@ -102,6 +102,7 @@ namespace ThuocGiaThat.Infrastucture
         // Sales Region System
         public DbSet<SalesRegion> SalesRegions { get; set; }
         public DbSet<CustomerInvoiceInfo> CustomerInvoiceInfos { get; set; }
+        public DbSet<FavouriteProduct> FavouriteProducts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -1410,6 +1411,28 @@ namespace ThuocGiaThat.Infrastucture
             });
 
             modelBuilder.Entity<CustomerInvoiceInfo>().ToTable("CustomerInvoiceInfo");
+
+            // ============ FavouriteProduct Configuration ============
+            modelBuilder.Entity<FavouriteProduct>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+
+                entity.HasOne(e => e.Customer)
+                    .WithMany()
+                    .HasForeignKey(e => e.CustomerId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.ProductVariant)
+                    .WithMany()
+                    .HasForeignKey(e => e.ProductVariantId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(e => new { e.CustomerId, e.ProductVariantId }).IsUnique();
+                entity.HasIndex(e => e.CustomerId);
+                entity.HasIndex(e => e.ProductVariantId);
+            });
         }
     }
 }

@@ -17,9 +17,9 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
         /// Lấy order fulfillment details cho warehouse picking
         /// Bao gồm thông tin batches đã fulfill và suggested locations
         /// </summary>
-        /// <param name="orderId">ID của Order</param>
+        /// <param name="orderIdentifier">ID hoặc OrderNumber của Order (e.g., "123" hoặc "ORD-20251219-357203")</param>
         /// <param name="warehouseId">ID của Warehouse</param>
         /// <returns>Order fulfillment details với suggested locations</returns>
-        Task<OrderFulfillmentDetailsResponseDto> GetOrderFulfillmentDetailsAsync(int orderId, int warehouseId);
+        Task<OrderFulfillmentDetailsResponseDto> GetOrderFulfillmentDetailsAsync(string orderIdentifier, int warehouseId);
     }
 }
