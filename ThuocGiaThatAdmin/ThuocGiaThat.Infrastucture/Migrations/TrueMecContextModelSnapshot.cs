@@ -1368,40 +1368,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.ToTable("CustomerVerifications");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.FavouriteProduct", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProductVariantId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("ProductVariantId");
-
-                    b.HasIndex("CustomerId", "ProductVariantId")
-                        .IsUnique();
-
-                    b.ToTable("FavouriteProducts");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.GoodsReceipt", b =>
                 {
                     b.Property<int>("Id")
@@ -3141,7 +3107,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         {
                             Id = 1,
                             Code = "MB",
-                            CreatedDate = new DateTime(2025, 12, 25, 7, 33, 53, 553, DateTimeKind.Utc).AddTicks(592),
+                            CreatedDate = new DateTime(2025, 12, 25, 7, 45, 36, 683, DateTimeKind.Utc).AddTicks(3576),
                             Description = "Khu vực miền Bắc Việt Nam",
                             IsActive = true,
                             Name = "Miền Bắc"
@@ -3150,7 +3116,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         {
                             Id = 2,
                             Code = "MT",
-                            CreatedDate = new DateTime(2025, 12, 25, 7, 33, 53, 553, DateTimeKind.Utc).AddTicks(595),
+                            CreatedDate = new DateTime(2025, 12, 25, 7, 45, 36, 683, DateTimeKind.Utc).AddTicks(3580),
                             Description = "Khu vực miền Trung Việt Nam",
                             IsActive = true,
                             Name = "Miền Trung"
@@ -3159,7 +3125,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         {
                             Id = 3,
                             Code = "MN",
-                            CreatedDate = new DateTime(2025, 12, 25, 7, 33, 53, 553, DateTimeKind.Utc).AddTicks(597),
+                            CreatedDate = new DateTime(2025, 12, 25, 7, 45, 36, 683, DateTimeKind.Utc).AddTicks(3584),
                             Description = "Khu vực miền Nam Việt Nam",
                             IsActive = true,
                             Name = "Miền Nam"
@@ -4308,25 +4274,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("Customer");
 
                     b.Navigation("ProcessedByUser");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.FavouriteProduct", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Customer", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ProductVariant", "ProductVariant")
-                        .WithMany()
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("ProductVariant");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.GoodsReceipt", b =>
