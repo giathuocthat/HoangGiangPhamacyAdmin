@@ -68,6 +68,8 @@ namespace ThuocGiaThat.Infrastucture.Repositories
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
                 .Include(p => p.Images)
+                .Include(p => p.ProductActiveIngredients)
+                    .ThenInclude(i => i.ActiveIngredient)
                 .Include(p => p.ProductOptions)
                     .ThenInclude(o => o.ProductOptionValues)
                 .Include(p => p.ProductVariants)
