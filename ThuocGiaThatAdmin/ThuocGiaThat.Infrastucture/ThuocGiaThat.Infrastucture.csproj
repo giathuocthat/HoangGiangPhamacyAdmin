@@ -32,6 +32,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Scripts\department.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Scripts\campaign.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
