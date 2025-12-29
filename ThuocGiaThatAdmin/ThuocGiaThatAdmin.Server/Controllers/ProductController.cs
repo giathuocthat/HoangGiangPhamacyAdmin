@@ -319,11 +319,11 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// <param name="pageSize"></param>
         /// <returns></returns>
         [HttpGet("getPagedProducts")]
-        public async Task<ActionResult<dynamic>> GetPagedProducts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<ActionResult<dynamic>> GetPagedProducts([FromQuery] string? category, string? price, int? type, string? sort, int page = 1, [FromQuery] int pageSize = 20)
         {
             try
             {
-                var (products, totalCount) = await _productService.GetPagedProductsAsync(pageNumber, pageSize);
+                var (products, totalCount) = await _productService.GetPagedProductsAsync(category, price, type, sort, page, pageSize);
                 var response = new
                 {
                     Data = products.Select(product => new
@@ -357,7 +357,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     }),
                     Pagination = new
                     {
-                        PageNumber = pageNumber,
+                        PageNumber = page,
                         PageSize = pageSize,
                         TotalCount = totalCount,
                         TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)

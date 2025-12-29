@@ -31,6 +31,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public bool? IsPrescriptionDrug { get; set; } = false;
         public string? Indication { get; set; } // Chỉ định
         public string? Overdose { get; set; }
+        public int? ProductType { get; set; }
 
         // Metadata
         public bool IsActive { get; set; } = true;
