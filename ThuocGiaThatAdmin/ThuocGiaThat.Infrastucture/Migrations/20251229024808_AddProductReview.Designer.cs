@@ -12,7 +12,7 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    [Migration("20251229021206_AddProductReview")]
+    [Migration("20251229024808_AddProductReview")]
     partial class AddProductReview
     {
         /// <inheritdoc />
