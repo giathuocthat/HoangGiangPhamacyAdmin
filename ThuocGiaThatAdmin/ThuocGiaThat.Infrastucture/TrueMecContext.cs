@@ -101,6 +101,7 @@ namespace ThuocGiaThat.Infrastucture
 
         // Sales Region System
         public DbSet<SalesRegion> SalesRegions { get; set; }
+        public DbSet<Department> Departments { get; set; }
         public DbSet<CustomerInvoiceInfo> CustomerInvoiceInfos { get; set; }
         public DbSet<FavouriteProduct> FavouriteProducts { get; set; }
         public DbSet<ProductReview> ProductReviews { get; set; }
@@ -583,6 +584,29 @@ namespace ThuocGiaThat.Infrastucture
                 );
             });
 
+            // ============ Department Configuration ============
+            modelBuilder.Entity<Department>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Code).IsRequired().HasMaxLength(20);
+                entity.Property(e => e.Description).HasMaxLength(500);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+
+                // Unique constraint on Code
+                entity.HasIndex(e => e.Code).IsUnique();
+                entity.HasIndex(e => e.IsActive);
+
+                // Relationship with ApplicationUser (Manager)
+                entity.HasOne(e => e.Manager)
+                    .WithMany()
+                    .HasForeignKey(e => e.ManagerId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasIndex(e => e.ManagerId);
+            });
+
             // ============ Address Configuration ============
             modelBuilder.Entity<Address>(entity =>
             {
@@ -705,9 +729,16 @@ namespace ThuocGiaThat.Infrastucture
                     .HasForeignKey(u => u.RegionId)
                     .OnDelete(DeleteBehavior.SetNull);
 
+                // Department: Relationship with Department
+                entity.HasOne(u => u.Department)
+                    .WithMany(d => d.Users)
+                    .HasForeignKey(u => u.DepartmentId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
                 // Indexes for performance
                 entity.HasIndex(u => u.ManagerId);
                 entity.HasIndex(u => u.RegionId);
+                entity.HasIndex(u => u.DepartmentId);
             });
 
 
