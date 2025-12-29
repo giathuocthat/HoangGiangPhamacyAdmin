@@ -12,8 +12,8 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    [Migration("20251225072652_addPropsToProduct")]
-    partial class addPropsToProduct
+    [Migration("20251225074538_addprops")]
+    partial class addprops
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -3110,7 +3110,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         {
                             Id = 1,
                             Code = "MB",
-                            CreatedDate = new DateTime(2025, 12, 25, 7, 26, 50, 433, DateTimeKind.Utc).AddTicks(9929),
+                            CreatedDate = new DateTime(2025, 12, 25, 7, 45, 36, 683, DateTimeKind.Utc).AddTicks(3576),
                             Description = "Khu vực miền Bắc Việt Nam",
                             IsActive = true,
                             Name = "Miền Bắc"
@@ -3119,7 +3119,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         {
                             Id = 2,
                             Code = "MT",
-                            CreatedDate = new DateTime(2025, 12, 25, 7, 26, 50, 433, DateTimeKind.Utc).AddTicks(9932),
+                            CreatedDate = new DateTime(2025, 12, 25, 7, 45, 36, 683, DateTimeKind.Utc).AddTicks(3580),
                             Description = "Khu vực miền Trung Việt Nam",
                             IsActive = true,
                             Name = "Miền Trung"
@@ -3128,7 +3128,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         {
                             Id = 3,
                             Code = "MN",
-                            CreatedDate = new DateTime(2025, 12, 25, 7, 26, 50, 433, DateTimeKind.Utc).AddTicks(9934),
+                            CreatedDate = new DateTime(2025, 12, 25, 7, 45, 36, 683, DateTimeKind.Utc).AddTicks(3584),
                             Description = "Khu vực miền Nam Việt Nam",
                             IsActive = true,
                             Name = "Miền Nam"

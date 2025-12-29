@@ -15,7 +15,6 @@ namespace ThuocGiaThatAdmin.Domain.Constants
         public const string Description = "Permissions related to Sale management.";
         public const string Category = "Sales Management";
 
-
         public static class Sale
         {
             public const string Create = "SaleManager.Sale.Create";
@@ -49,39 +48,6 @@ namespace ThuocGiaThatAdmin.Domain.Constants
             public const string Export = "SaleManager.Order.Export";
         }
 
-        public static class Product
-        {
-            public const string Create = "SaleManager.Product.Create";
-            public const string Update = "SaleManager.Product.Update";
-            public const string Delete = "SaleManager.Product.Delete";
-            public const string View = "SaleManager.Product.View";
-
-            public const string Import = "SaleManager.Product.Import";
-            public const string Export = "SaleManager.Product.Export";
-        }
-
-        public static class ProductCollection
-        {
-            public const string Create = "SaleManager.ProductCollection.Create";
-            public const string Update = "SaleManager.ProductCollection.Update";
-            public const string Delete = "SaleManager.ProductCollection.Delete";
-            public const string View = "SaleManager.ProductCollection.View";
-
-            public const string Import = "SaleManager.ProductCollection.Import";
-            public const string Export = "SaleManager.ProductCollection.Export";
-        }
-
-        public static class CustomerBusiness
-        {
-            public const string Create = "SaleManager.CustomerBusiness.Create";
-            public const string Update = "SaleManager.CustomerBusiness.Update";
-            public const string Delete = "SaleManager.CustomerBusiness.Delete";
-            public const string View = "SaleManager.CustomerBusiness.View";
-
-            public const string Import = "SaleManager.CustomerBusiness.Import";
-            public const string Export = "SaleManager.CustomerBusiness.Export";
-        }
-
         /// <summary>
         /// Returns all permission values as a list.
         /// </summary>
@@ -93,16 +59,14 @@ namespace ThuocGiaThatAdmin.Domain.Constants
                 Customer.Create, Customer.Update, Customer.Delete, Customer.View,
                 // Order
                 Order.Create, Order.Update, Order.Delete, Order.View,
+                Sale.Create, Sale.Update, Sale.Delete, Sale.View
                 // Brand
                 // Category
                 // Product
-                Product.Create, Product.Update, Product.Delete, Product.View,
                 // Inventory
                 // Product Collection
-                ProductCollection.Create, ProductCollection.Update,ProductCollection.Delete, ProductCollection.View,
                 // WareHouse Collection
                 // Customer Business
-                CustomerBusiness.Create, CustomerBusiness.Update, CustomerBusiness.Delete, CustomerBusiness.View
             };
         }
     }

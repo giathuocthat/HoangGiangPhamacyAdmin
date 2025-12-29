@@ -4,12 +4,15 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 using System.Text;
+using System.Threading.RateLimiting;
 using ThuocGiaThat.Infrastucture.Data;
 using ThuocGiaThat.Infrastucture.Interfaces;
 using ThuocGiaThat.Infrastucture.Repositories;
 using ThuocGiaThat.Infrastucture.Utils;
 using ThuocGiaThatAdmin.Commands;
+using ThuocGiaThatAdmin.Common;
 using ThuocGiaThatAdmin.Common.Interfaces;
 using ThuocGiaThatAdmin.Contract.Models;
 using ThuocGiaThatAdmin.Contracts.Models;
@@ -19,7 +22,6 @@ using ThuocGiaThatAdmin.Server.Extensions;
 using ThuocGiaThatAdmin.Service;
 using ThuocGiaThatAdmin.Service.Interfaces;
 using ThuocGiaThatAdmin.Service.Services;
-using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -64,6 +66,12 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
+// configure RedisCache
+string redisConnectionString = builder.Configuration["Redis:Connection"];
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+    ConnectionMultiplexer.Connect(redisConnectionString));
+builder.Services.AddScoped<ICacheService, RedisCache>();
 
 // Configure DbContext
 // Update the connection string as needed
@@ -165,6 +173,7 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 // Register Services (Legacy - for backward compatibility)
 // ============================================================
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<FavouriteProductService>();
 builder.Services.AddScoped<ActiveIngredientService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<ProductOptionService>();

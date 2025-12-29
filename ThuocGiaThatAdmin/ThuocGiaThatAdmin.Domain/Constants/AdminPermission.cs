@@ -95,6 +95,46 @@ namespace ThuocGiaThatAdmin.Domain.Constants
             public const string View = "Admin.SystemUser.View";
         }
 
+        public static class PurchaseOrder
+        {
+            public const string Create = "Admin.PurchaseOrder.Create";
+            public const string Update = "Admin.PurchaseOrder.Update";
+            public const string Delete = "Admin.PurchaseOrder.Delete";
+            public const string View = "Admin.PurchaseOrder.View";
+        }
+
+        public static class GoodsReceipt
+        {
+            public const string Create = "Admin.GoodsReceipt.Create";
+            public const string Update = "Admin.GoodsReceipt.Update";
+            public const string Delete = "Admin.GoodsReceipt.Delete";
+            public const string View = "Admin.GoodsReceipt.View";
+        }
+
+        public static class Coupon
+        {
+            public const string Create = "Admin.Coupon.Create";
+            public const string Update = "Admin.Coupon.Update";
+            public const string Delete = "Admin.Coupon.Delete";
+            public const string View = "Admin.Coupon.View";
+        }
+
+        public static class Warranty
+        {
+            public const string Create = "Admin.Warranty.Create";
+            public const string Update = "Admin.Warranty.Update";
+            public const string Delete = "Admin.Warranty.Delete";
+            public const string View = "Admin.Warranty.View";
+        }
+
+        public static class SaleRegion
+        {
+            public const string Create = "Admin.SaleRegion.Create";
+            public const string Update = "Admin.SaleRegion.Update";
+            public const string Delete = "Admin.SaleRegion.Delete";
+            public const string View = "Admin.SaleRegion.View";
+        }
+
         /// <summary>
         /// Returns all permission values as a list.
         /// </summary>
@@ -116,7 +156,13 @@ namespace ThuocGiaThatAdmin.Domain.Constants
                 Inventory.Create, Inventory.Update, Inventory.Delete, Inventory.View,
                 ProductCollection.Create, ProductCollection.Update,ProductCollection.Delete, ProductCollection.View,
                 WareHouseCollection.Create, WareHouseCollection.Update, WareHouseCollection.Delete, WareHouseCollection.View,
-                CustomerBusiness.Create, CustomerBusiness.Update, CustomerBusiness.Delete, CustomerBusiness.View
+                CustomerBusiness.Create, CustomerBusiness.Update, CustomerBusiness.Delete, CustomerBusiness.View,
+                PurchaseOrder.Create, PurchaseOrder.Update, PurchaseOrder.Delete, PurchaseOrder.View,
+                GoodsReceipt.Create, GoodsReceipt.Update, GoodsReceipt.Delete, GoodsReceipt.View,
+                Warranty.Create, Warranty.Update, Warranty.Delete, Warranty.View,
+                Coupon.Create, Coupon.Update, Coupon.Delete, Coupon.View,
+                SystemUser.Create, SystemUser.Update, SystemUser.Delete, SystemUser.View,
+                SaleRegion.Create, SaleRegion.Update, SaleRegion.Delete, SaleRegion.View
             };
         }
     }

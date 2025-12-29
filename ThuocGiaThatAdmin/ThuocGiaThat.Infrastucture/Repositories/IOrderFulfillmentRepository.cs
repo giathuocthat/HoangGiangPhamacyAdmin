@@ -40,6 +40,14 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         /// <param name="orderId">ID của Order</param>
         /// <returns>Order với OrderItems và Fulfillments details</returns>
         Task<Order?> GetOrderFulfillmentDetailsAsync(int orderId);
+
+        /// <summary>
+        /// Lấy order fulfillment details cho warehouse picking (by ID hoặc OrderNumber)
+        /// Bao gồm thông tin batches đã fulfill và locations available
+        /// </summary>
+        /// <param name="orderIdentifier">ID hoặc OrderNumber của Order</param>
+        /// <returns>Order với OrderItems và Fulfillments details</returns>
+        Task<Order?> GetOrderFulfillmentDetailsByIdentifierAsync(string orderIdentifier);
         
         /// <summary>
         /// Lấy danh sách locations có batch này trong warehouse

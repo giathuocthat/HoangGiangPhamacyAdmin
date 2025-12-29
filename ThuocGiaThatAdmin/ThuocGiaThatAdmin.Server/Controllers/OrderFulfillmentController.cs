@@ -55,17 +55,17 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// Lấy order fulfillment details cho warehouse picking
         /// Bao gồm thông tin batches đã fulfill và suggested locations
         /// </summary>
-        /// <param name="orderId">ID của Order</param>
+        /// <param name="orderIdentifier">ID hoặc OrderNumber của Order (e.g., "123" hoặc "ORD-20251219-357203")</param>
         /// <param name="warehouseId">ID của Warehouse</param>
         /// <returns>Order fulfillment details với suggested locations</returns>
-        [HttpGet("order/{orderId}")]
-        public async Task<IActionResult> GetOrderFulfillmentDetails(int orderId, [FromQuery] int warehouseId)
+        [HttpGet("order/{orderIdentifier}")]
+        public async Task<IActionResult> GetOrderFulfillmentDetails(string orderIdentifier, [FromQuery] int warehouseId)
         {
             return await ExecuteActionAsync(async () =>
             {
-                if (orderId <= 0)
+                if (string.IsNullOrWhiteSpace(orderIdentifier))
                 {
-                    return BadRequestResponse("Invalid order ID");
+                    return BadRequestResponse("Order identifier is required");
                 }
 
                 if (warehouseId <= 0)
@@ -73,9 +73,9 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     return BadRequestResponse("Invalid warehouse ID");
                 }
 
-                Logger.LogInformation($"Getting fulfillment details for order {orderId} in warehouse {warehouseId}");
+                Logger.LogInformation($"Getting fulfillment details for order {orderIdentifier} in warehouse {warehouseId}");
 
-                var result = await _fulfillmentService.GetOrderFulfillmentDetailsAsync(orderId, warehouseId);
+                var result = await _fulfillmentService.GetOrderFulfillmentDetailsAsync(orderIdentifier, warehouseId);
 
                 return Success(result, "Order fulfillment details retrieved successfully");
             }, "Get Order Fulfillment Details");
