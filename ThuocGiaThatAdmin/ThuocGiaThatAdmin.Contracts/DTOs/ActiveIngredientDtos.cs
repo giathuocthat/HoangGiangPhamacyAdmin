@@ -16,6 +16,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
     /// </summary>
     public class ProductActiveIngredientDto
     {
+        public int? Id { get; set; } // Id of ProductActiveIngredient record (null for new)
         public int? ActiveIngredientId { get; set; }
         public string? ActiveIngredientName { get; set; } // For creating new ingredient
         public string? Quantity { get; set; }

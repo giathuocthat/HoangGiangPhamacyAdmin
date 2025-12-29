@@ -545,27 +545,65 @@ namespace ThuocGiaThatAdmin.Service.Services
                 }
             }
 
-            // Update Product Active Ingredients
-            // Remove all existing ingredients
-            var existingIngredients = _context.ProductActiveIngredients
-                .Where(pai => pai.ProductId == id)
-                .ToList();
-            _context.ProductActiveIngredients.RemoveRange(existingIngredients);
-
-            // Add new ingredients from DTO
+            // Update Product Active Ingredients - Smart update logic
             if (dto.ProductActiveIngredients != null && dto.ProductActiveIngredients.Any())
             {
+                // Get all existing ingredients for this product
+                var existingIngredients = await _context.ProductActiveIngredients
+                    .Where(pai => pai.ProductId == id)
+                    .ToListAsync();
+
+                // Get IDs of ingredients in the DTO
+                var dtoIngredientIds = dto.ProductActiveIngredients
+                    .Where(i => i.Id.HasValue && i.Id.Value > 0)
+                    .Select(i => i.Id.Value)
+                    .ToList();
+
+                // Remove ingredients that are not in the DTO
+                var ingredientsToRemove = existingIngredients
+                    .Where(ei => !dtoIngredientIds.Contains(ei.Id))
+                    .ToList();
+
+                _context.ProductActiveIngredients.RemoveRange(ingredientsToRemove);
+
+                // Process each ingredient from DTO
                 foreach (var ingredientDto in dto.ProductActiveIngredients)
                 {
-                    _context.ProductActiveIngredients.Add(new ProductActiveIngredient
+                    if (!ingredientDto.Id.HasValue || ingredientDto.Id.Value == 0)
                     {
-                        ProductId = id,
-                        ActiveIngredientId = ingredientDto.ActiveIngredientId ?? 0,
-                        Quantity = ingredientDto.Quantity,
-                        DisplayOrder = ingredientDto.DisplayOrder,
-                        IsMainIngredient = ingredientDto.IsMainIngredient
-                    });
+                        // Create new ingredient
+                        _context.ProductActiveIngredients.Add(new ProductActiveIngredient
+                        {
+                            ProductId = id,
+                            ActiveIngredientId = ingredientDto.ActiveIngredientId ?? 0,
+                            Quantity = ingredientDto.Quantity,
+                            DisplayOrder = ingredientDto.DisplayOrder,
+                            IsMainIngredient = ingredientDto.IsMainIngredient
+                        });
+                    }
+                    else
+                    {
+                        // Update existing ingredient
+                        var existingIngredient = existingIngredients
+                            .FirstOrDefault(ei => ei.Id == ingredientDto.Id.Value);
+
+                        if (existingIngredient != null)
+                        {
+                            existingIngredient.ActiveIngredientId = ingredientDto.ActiveIngredientId ?? 0;
+                            existingIngredient.Quantity = ingredientDto.Quantity;
+                            existingIngredient.DisplayOrder = ingredientDto.DisplayOrder;
+                            existingIngredient.IsMainIngredient = ingredientDto.IsMainIngredient;
+                        }
+                    }
                 }
+            }
+            else
+            {
+                // If no ingredients in DTO, remove all existing ingredients
+                var existingIngredients = _context.ProductActiveIngredients
+                    .Where(pai => pai.ProductId == id)
+                    .ToList();
+                _context.ProductActiveIngredients.RemoveRange(existingIngredients);
             }
 
             return await _context.SaveChangesAsync();

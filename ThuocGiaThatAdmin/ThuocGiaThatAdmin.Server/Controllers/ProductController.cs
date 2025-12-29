@@ -161,6 +161,18 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     product.CategoryId,
                     product.BrandId,
 
+                    // active ingredient
+                    ProductActiveIngredients = product.ProductActiveIngredients.OrderBy(i => i.DisplayOrder)
+                        .Select(i => new
+                        {
+                            i.Id,
+                            ActiveIngredientId = i.ActiveIngredientId,
+                            Name = i.ActiveIngredient.Name,
+                            i.Quantity,
+                            i.IsMainIngredient,
+                            i.DisplayOrder
+                        }),
+
                     // Category
                     Category = product.Category == null
                         ? null
