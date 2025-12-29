@@ -59,6 +59,8 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public bool IsPublished { get; set; } = false;
         public string? DrugEfficacy { get; set; }
         public string? DosageInstructions { get; set; }
+        public string? Indication { get; set; }
+        public string? Overdose { get; set; }
 
         // Related entities
         public List<ProductImageDto> Images { get; set; } = new List<ProductImageDto>();

@@ -148,6 +148,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     product.IsPrescriptionDrug,
                     product.DrugEfficacy,
                     product.DosageInstructions,
+                    product.Indication,
+                    product.Overdose,
 
                     // Metadata
                     product.IsActive,
@@ -158,6 +160,18 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     // IDs for editing
                     product.CategoryId,
                     product.BrandId,
+
+                    // active ingredient
+                    ProductActiveIngredients = product.ProductActiveIngredients.OrderBy(i => i.DisplayOrder)
+                        .Select(i => new
+                        {
+                            i.Id,
+                            ActiveIngredientId = i.ActiveIngredientId,
+                            Name = i.ActiveIngredient.Name,
+                            i.Quantity,
+                            i.IsMainIngredient,
+                            i.DisplayOrder
+                        }),
 
                     // Category
                     Category = product.Category == null
@@ -598,6 +612,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     product.IsPrescriptionDrug,
                     product.DrugEfficacy,
                     product.DosageInstructions,
+                    product.Indication,
+                    product.Overdose,
 
                     // Metadata
                     product.IsActive,
@@ -689,8 +705,6 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                             v.RatePriceUnit,
                             QuantityAvailable = v.Inventories.Sum(x => x.QuantityAvailable)
                         }),
-                    product.Overdose,
-                    product.Indication,
                     MaxOrderQuantity = maxOrderQuantity,                    
                 };
 

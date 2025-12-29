@@ -102,8 +102,10 @@ namespace ThuocGiaThat.Infrastucture
 
         // Sales Region System
         public DbSet<SalesRegion> SalesRegions { get; set; }
+        public DbSet<Department> Departments { get; set; }
         public DbSet<CustomerInvoiceInfo> CustomerInvoiceInfos { get; set; }
         public DbSet<FavouriteProduct> FavouriteProducts { get; set; }
+        public DbSet<ProductReview> ProductReviews { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -583,6 +585,29 @@ namespace ThuocGiaThat.Infrastucture
                 );
             });
 
+            // ============ Department Configuration ============
+            modelBuilder.Entity<Department>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Code).IsRequired().HasMaxLength(20);
+                entity.Property(e => e.Description).HasMaxLength(500);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+
+                // Unique constraint on Code
+                entity.HasIndex(e => e.Code).IsUnique();
+                entity.HasIndex(e => e.IsActive);
+
+                // Relationship with ApplicationUser (Manager)
+                entity.HasOne(e => e.Manager)
+                    .WithMany()
+                    .HasForeignKey(e => e.ManagerId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasIndex(e => e.ManagerId);
+            });
+
             // ============ Address Configuration ============
             modelBuilder.Entity<Address>(entity =>
             {
@@ -705,9 +730,16 @@ namespace ThuocGiaThat.Infrastucture
                     .HasForeignKey(u => u.RegionId)
                     .OnDelete(DeleteBehavior.SetNull);
 
+                // Department: Relationship with Department
+                entity.HasOne(u => u.Department)
+                    .WithMany(d => d.Users)
+                    .HasForeignKey(u => u.DepartmentId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
                 // Indexes for performance
                 entity.HasIndex(u => u.ManagerId);
                 entity.HasIndex(u => u.RegionId);
+                entity.HasIndex(u => u.DepartmentId);
             });
 
 
@@ -1433,6 +1465,31 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasIndex(e => new { e.CustomerId, e.ProductVariantId }).IsUnique();
                 entity.HasIndex(e => e.CustomerId);
                 entity.HasIndex(e => e.ProductVariantId);
+            });
+
+            // ============ ProductReview Configuration ============
+            modelBuilder.Entity<ProductReview>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.ReviewText).IsRequired().HasMaxLength(2000);
+                entity.Property(e => e.IsApproved).HasDefaultValue(false);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+
+                entity.HasOne(e => e.Customer)
+                    .WithMany()
+                    .HasForeignKey(e => e.CustomerId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Product)
+                    .WithMany()
+                    .HasForeignKey(e => e.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.CustomerId);
+                entity.HasIndex(e => e.ProductId);
+                entity.HasIndex(e => e.IsApproved);
+                entity.HasIndex(e => e.CreatedDate);
             });
 
             modelBuilder.Entity<CategoryRootCountProductsDto>().HasNoKey();

@@ -28,6 +28,12 @@ namespace ThuocGiaThatAdmin.Domain.Entities
 
         public int? IsStatus { get; set; }
 
+        /// <summary>
+        /// Miền: B (Bắc), T (Trung), N (Nam)
+        /// </summary>
+        [MaxLength(1)]
+        public string? Region { get; set; }
+
         // Navigation properties
         public Country Country { get; set; }
         public ICollection<Ward> Wards { get; set; }

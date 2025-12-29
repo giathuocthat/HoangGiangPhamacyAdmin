@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ThuocGiaThat.Infrastucture;
 
@@ -11,9 +12,11 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    partial class TrueMecContextModelSnapshot : ModelSnapshot
+    [Migration("20251229024808_AddProductReview")]
+    partial class AddProductReview
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -101,25 +104,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("UserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Contract.DTOs.CategoryRootCountProductsDto", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Slug")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("TotalProducts")
-                        .HasColumnType("int");
-
-                    b.ToTable("CategoryRootCountProductsDto");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ActiveIngredient", b =>
@@ -293,9 +277,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("DepartmentId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -350,8 +331,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DepartmentId");
 
                     b.HasIndex("ManagerId");
 
@@ -1392,54 +1371,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.ToTable("CustomerVerifications");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Department", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("ManagerId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("ManagerId");
-
-                    b.ToTable("Departments");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.FavouriteProduct", b =>
                 {
                     b.Property<int>("Id")
@@ -1536,7 +1467,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int?>("WarehouseId")
+                    b.Property<int>("WarehouseId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -2453,9 +2384,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<string>("Overdose")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ProductType")
-                        .HasColumnType("int");
-
                     b.Property<string>("RegistrationNumber")
                         .HasColumnType("nvarchar(max)");
 
@@ -2968,10 +2896,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.Property<string>("PhoneCode")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Region")
-                        .HasMaxLength(1)
-                        .HasColumnType("nvarchar(1)");
 
                     b.Property<int>("SortOrder")
                         .HasColumnType("int");
@@ -4209,11 +4133,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ApplicationUser", b =>
                 {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Department", "Department")
-                        .WithMany("Users")
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ApplicationUser", "Manager")
                         .WithMany("SalesTeamMembers")
                         .HasForeignKey("ManagerId")
@@ -4223,8 +4142,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .WithMany("SalesUsers")
                         .HasForeignKey("RegionId")
                         .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Department");
 
                     b.Navigation("Manager");
 
@@ -4441,16 +4358,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("ProcessedByUser");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Department", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ApplicationUser", "Manager")
-                        .WithMany()
-                        .HasForeignKey("ManagerId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Manager");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.FavouriteProduct", b =>
                 {
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Customer", "Customer")
@@ -4481,7 +4388,8 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Warehouse", "Warehouse")
                         .WithMany()
                         .HasForeignKey("WarehouseId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("PurchaseOrder");
 
@@ -5215,11 +5123,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.CustomerInvoiceInfo", b =>
                 {
                     b.Navigation("Orders");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Department", b =>
-                {
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.GoodsReceipt", b =>

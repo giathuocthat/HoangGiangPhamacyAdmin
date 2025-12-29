@@ -701,6 +701,42 @@ namespace ThuocGiaThatAdmin.Service.Services
         public async Task<int> GetTotalItemsInCart(int customerId)
         {
             return await _context.ShoppingCarts.Where(x => x.CustomerId == customerId).Select(x => x.TotalItems).FirstOrDefaultAsync();
-        }        
+        }
+
+        public async Task<dynamic> GetEstimatedDeliveryTime(int provinceId, int wardId)
+        {
+            var province = await _context.Provinces.FindAsync(provinceId);
+            if (province == null) 
+                 throw new ArgumentException("Province not found");
+
+            int days = 4; // Default to max (North/Remote)
+
+            // Normalize name for checking
+            string provinceName = province.Name?.ToLower() ?? "";
+            
+            // Special case for Ho Chi Minh City
+            if (provinceName.Contains("hồ chí minh") || province.Code == "79")
+            {
+                days = 1;
+            }
+            else if (province.Region == "N") // Mien Nam
+            {
+                days = 2;
+            }
+            else if (province.Region == "T") // Mien Trung
+            {
+                days = 3;
+            }
+            else if (province.Region == "B") // Mien Bac
+            {
+                days = 4;
+            }
+
+            return new
+            {
+                NumberOfDays = days,
+                EstimatedDate = DateTime.Now.AddDays(days)
+            };
+        }
     }
 }

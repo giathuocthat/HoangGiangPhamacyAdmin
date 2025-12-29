@@ -174,6 +174,7 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 // ============================================================
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<FavouriteProductService>();
+builder.Services.AddScoped<ProductReviewService>();
 builder.Services.AddScoped<ActiveIngredientService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<ProductOptionService>();
@@ -225,6 +226,10 @@ builder.Services.AddScoped<IBankService, BankService>();
 // Sales Region Service
 builder.Services.AddScoped<ISalesRegionService, SalesRegionService>();
 
+// Department Repository and Service
+builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+builder.Services.AddScoped<IDepartmentService, DepartmentService>();
+
 
 
 // other
@@ -273,7 +278,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigins",
         policy =>
         {
-            policy.WithOrigins(allowedOrigins)
+            policy.WithOrigins(allowedOrigins) // Allows requests from any origin
                   .AllowAnyMethod() // Allows any HTTP method (GET, POST, PUT, DELETE, etc.)
                   .AllowAnyHeader()
                   .AllowCredentials(); // Allows any header in the request
@@ -331,6 +336,7 @@ using (var scope = app.Services.CreateScope())
     CategoryMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     CamPaignMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     BankMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
+    DepartmentMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
 
 }
 
