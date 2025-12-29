@@ -41,7 +41,7 @@ namespace ThuocGiaThatAdmin.Service
         /// Returns (AccessToken, RefreshToken, ExpiresUtc).
         /// Requires Jwt:Key, Jwt:Issuer, Jwt:Audience, Jwt:ExpiresMinutes in configuration.
         /// </summary>
-        public async Task<(string AccessToken, string RefreshToken, DateTime ExpiresUtc)> GenerateTokenAsync(ApplicationUser user)
+        public async Task<(string AccessToken, string RefreshToken, DateTime ExpiresUtc, string UserId)> GenerateTokenAsync(ApplicationUser user)
         {
             if (user == null) throw new ArgumentNullException(nameof(user));
 
@@ -110,7 +110,7 @@ namespace ThuocGiaThatAdmin.Service
 
             var refreshToken = GenerateRefreshToken();
 
-            return (AccessToken: accessToken, RefreshToken: refreshToken, ExpiresUtc: expires);
+            return (AccessToken: accessToken, RefreshToken: refreshToken, ExpiresUtc: expires, UserId: user.Id);
         }
 
         private static string GenerateRefreshToken()

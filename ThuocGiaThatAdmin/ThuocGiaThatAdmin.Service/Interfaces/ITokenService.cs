@@ -9,6 +9,6 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
 {
     public interface ITokenService
     {
-        Task<(string AccessToken, string RefreshToken, DateTime ExpiresUtc)> GenerateTokenAsync(ApplicationUser user);
+        Task<(string AccessToken, string RefreshToken, DateTime ExpiresUtc, string UserId)> GenerateTokenAsync(ApplicationUser user);
     }
 }

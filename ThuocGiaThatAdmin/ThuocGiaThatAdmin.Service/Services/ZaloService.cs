@@ -33,7 +33,7 @@ namespace ThuocGiaThatAdmin.Service.Services
 
         public async Task<bool> SendOtpMessageAsync(OtpRequest otpRequest)
         {
-            var otp = NumberGenerator.GenernateNumbersString(4);
+            var otp = "1234"; //NumberGenerator.GenernateNumbersString(4);
 
             if (string.IsNullOrEmpty(otpRequest.PhoneNumber)) throw new ArgumentNullException("Phone number is required");
 
@@ -46,6 +46,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             };
             _context.OtpCodes.Add(otpCode);
             await _context.SaveChangesAsync();
+            return true;
 
             var body = new ZaloZNSRequest
             {
