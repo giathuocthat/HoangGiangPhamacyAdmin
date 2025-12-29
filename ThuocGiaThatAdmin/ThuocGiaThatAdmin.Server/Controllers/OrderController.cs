@@ -306,5 +306,15 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             var total = await _orderService.GetTotalItemsInCart(User.GetCustomerId());
             return Ok(total);
         }
+
+        [HttpGet("estimated-delivery")]
+        public async Task<IActionResult> GetEstimatedDelivery([FromQuery] int provinceId, [FromQuery] int wardId)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var result = await _orderService.GetEstimatedDeliveryTime(provinceId, wardId);
+                return Success(result, "Get Estimated Delivery Time successfully");
+            }, "Get Estimated Delivery Time");
+        }
     }
 }
