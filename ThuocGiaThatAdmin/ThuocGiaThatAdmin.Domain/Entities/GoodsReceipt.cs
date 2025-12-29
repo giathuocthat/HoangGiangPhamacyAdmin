@@ -24,7 +24,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         /// <summary>
         /// Kho nhận hàng
         /// </summary>
-        public int WarehouseId { get; set; }
+        public int? WarehouseId { get; set; }
 
         /// <summary>
         /// Trạng thái phiếu nhập
