@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
+using ThuocGiaThatAdmin.Contract.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
 
 namespace ThuocGiaThat.Infrastucture
@@ -1433,6 +1434,8 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasIndex(e => e.CustomerId);
                 entity.HasIndex(e => e.ProductVariantId);
             });
+
+            modelBuilder.Entity<CategoryRootCountProductsDto>().HasNoKey();
         }
     }
 }

@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using ThuocGiaThatAdmin.Domain.Entities;
+using ThuocGiaThatAdmin.Contract.DTOs;
 using ThuocGiaThatAdmin.Contracts.Responses;
+using ThuocGiaThatAdmin.Domain.Entities;
 
 namespace ThuocGiaThatAdmin.Service.Interfaces
 {
@@ -11,7 +12,8 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
         Task<Category?> GetByIdAsync(int id);
         Task<Category?> GetByNameAsync(string name);
         Task<IEnumerable<Category>> SearchByNameAsync(string searchTerm);
-        Task<IEnumerable<Category>> GetRootCategoriesAsync();
+        //Task<IEnumerable<Category>> GetRootCategoriesAsync();
+        Task<IEnumerable<CategoryRootCountProductsDto>> GetCategoryRootCountProductsAsync();
         Task<IEnumerable<Category>> GetChildCategoriesAsync(int parentId);
         Task<IEnumerable<CategoryNodeResponse>> GetCategoryHierarchyAsync();
         Task<IEnumerable<CategoryFlatResponse>> GetCategoryFlatAsync();
@@ -19,5 +21,6 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
         Task<int> UpdateAsync(Category entity);
         Task<int> DeleteAsync(int id);
         Task<IEnumerable<Category>> GetAllChildrenAsync();
+        Task<IList<CategoryDto>> GetRootCategoriesAsync();
     }
 }

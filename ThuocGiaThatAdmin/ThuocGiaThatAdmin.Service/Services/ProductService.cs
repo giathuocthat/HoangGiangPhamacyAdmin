@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Azure;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,8 +11,9 @@ using ThuocGiaThatAdmin.Contract.DTOs;
 using ThuocGiaThatAdmin.Contract.Requests;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 using ThuocGiaThatAdmin.Domain.Enums;
+using static ThuocGiaThatAdmin.Domain.Constants.AdminPermission;
+using Product = ThuocGiaThatAdmin.Domain.Entities.Product;
 
 namespace ThuocGiaThatAdmin.Service.Services
 {
@@ -77,16 +80,15 @@ namespace ThuocGiaThatAdmin.Service.Services
         /// <param name="pageNumber">Page number (1-based)</param>
         /// <param name="pageSize">Number of items per page</param>
         /// <returns>Tuple containing list of products and total count</returns>
-        public async Task<(IEnumerable<Product> products, int TotalCount)> GetPagedProductsAsync(int pageNumber = 1,
-            int pageSize = 10)
+        public async Task<(IEnumerable<Product> products, int TotalCount)> GetPagedProductsAsync(string? category, string? price, int? type, string? sort, int page = 1, int pageSize = 20)
         {
-            if (pageNumber <= 0)
-                throw new ArgumentException("Page number must be greater than 0", nameof(pageNumber));
+            if (page <= 0)
+                throw new ArgumentException("Page number must be greater than 0", nameof(page));
 
             if (pageSize <= 0 || pageSize > 100)
                 throw new ArgumentException("Page size must be between 1 and 100", nameof(pageSize));
 
-            return await _productRepository.GetPagedProductsAsync(pageNumber, pageSize);
+            return await _productRepository.GetPagedProductsAsync(category, price, type, sort, page, pageSize);
         }
 
         #endregion
