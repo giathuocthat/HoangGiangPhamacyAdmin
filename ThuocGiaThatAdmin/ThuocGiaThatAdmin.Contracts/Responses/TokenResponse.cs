@@ -12,5 +12,6 @@ namespace ThuocGiaThatAdmin.Contract.Responses
         public string RefreshToken { get; set; } = null!;
         public DateTime ExpiresUtc { get; set; }
         public string TokenType { get; set; } = "Bearer";
+        public string UserId { get; set; }
     }
 }

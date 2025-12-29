@@ -78,6 +78,28 @@ namespace ThuocGiaThat.Infrastucture.Repositories
                 .FirstOrDefaultAsync(o => o.Id == orderId);
         }
 
+        public async Task<Order?> GetOrderFulfillmentDetailsByIdentifierAsync(string orderIdentifier)
+        {
+            // Detect if orderIdentifier is a numeric ID or an OrderNumber string
+            if (int.TryParse(orderIdentifier, out int orderId))
+            {
+                // Numeric: Search by ID
+                return await GetOrderFulfillmentDetailsAsync(orderId);
+            }
+            else
+            {
+                // String: Search by OrderNumber
+                return await _context.Orders
+                    .Include(o => o.OrderItems)
+                        .ThenInclude(oi => oi.ProductVariant)
+                            .ThenInclude(pv => pv.Product)
+                    .Include(o => o.OrderItems)
+                        .ThenInclude(oi => oi.Fulfillments)
+                            .ThenInclude(f => f.InventoryBatch)
+                    .FirstOrDefaultAsync(o => o.OrderNumber == orderIdentifier);
+            }
+        }
+
         public async Task<List<BatchLocationStock>> GetBatchLocationsAsync(int inventoryBatchId, int warehouseId)
         {
             return await _context.BatchLocationStocks

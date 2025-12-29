@@ -25,6 +25,11 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public bool IsActive { get; set; } = true;
         // Dates inherited
 
+        public decimal? RatePrice { get; set; } 
+        public int? RatePriceUnit { get; set; }
+        
+        public int? OverSaleNumber { get; set; }
+
         public Product Product { get; set; } = null!;
         public ICollection<VariantOptionValue> VariantOptionValues { get; set; } = new List<VariantOptionValue>();
         public ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();

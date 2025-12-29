@@ -805,7 +805,8 @@ namespace ThuocGiaThatAdmin.Service.Services
                 OriginalPrice = x.OriginalPrice,
                 Name = x.Product.Name,
                 MaxSalesQuantity = x.MaxSalesQuantity,
-                thumbnailUrl = x.ImageUrl
+                thumbnailUrl = x.ImageUrl,
+                Slug = x.Product.Slug
             }).ToListAsync();
         }
 
@@ -938,6 +939,16 @@ namespace ThuocGiaThatAdmin.Service.Services
             }).ToList();
 
             return (result, totalCount);
+        }
+
+        /// <summary>
+        /// Get product by ID
+        /// </summary>
+        public async Task<Product?> GetProductBySlugAsync(string slug)
+        {
+            if(string.IsNullOrEmpty(slug)) throw  new ArgumentNullException("slug");
+
+            return await _productRepository.GetProductWithCategoryAsync(slug);
         }
     }
 }

@@ -20,7 +20,6 @@ namespace ThuocGiaThat.Infrastucture.Data
         {
             using var scope = serviceProvider.CreateScope();
             var services = scope.ServiceProvider;
-
             var logger = services.GetRequiredService<ILoggerFactory>().CreateLogger("RoleClaimsMigration");
             var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
 
@@ -28,9 +27,19 @@ namespace ThuocGiaThat.Infrastucture.Data
             {
                 var childRoles = new List<string>()
                 {
-                    SaleManagerPermission.Role,
-                    SaleMemberPermissions.Role,
-                    SaleManagerPermission.Role
+                    "Giám Đốc",
+                    "Marketing",
+                    "Kinh Doanh",
+                    "Thua Mua",
+                    "Kế Toán",
+                    "Nghiên Cứu SP",
+                    "Công Nghệ",
+                    "Nhân Sự",
+                    "Pháp Lý",
+                    "Thầu",
+                    "Thị Trường Quốc Tế",
+                    "Kho",
+                    "Giao Nhận"
                 };
 
                 foreach (var item in childRoles)

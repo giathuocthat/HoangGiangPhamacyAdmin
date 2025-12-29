@@ -117,8 +117,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             return await ExecuteActionAsync(async () =>
             {
                 var customerId = GetCustomerId();
-                await _cartService.RemoveCartItemsAsync(ids, customerId, sessionId);
-                return Success("Item removed from cart successfully");
+                var result = await _cartService.RemoveCartItemsAsync(ids, customerId, sessionId);
+                return Success(result, "Item removed from cart successfully");
             }, "Remove Cart Item");
         }
 
@@ -150,6 +150,14 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         private int? GetCustomerId()
         {
             return User.GetCustomerId();
+        }
+
+        [HttpGet("QuantityInCart/{productVariantId}")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> GetQuantityInCart(int productVariantId)
+        {
+            var item = await _cartService.GetCartItem(User.GetCustomerId(), productVariantId);
+            return Ok(item);
         }
 
         #endregion
