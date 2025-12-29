@@ -174,6 +174,7 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 // ============================================================
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<FavouriteProductService>();
+builder.Services.AddScoped<ProductReviewService>();
 builder.Services.AddScoped<ActiveIngredientService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<ProductOptionService>();
@@ -273,10 +274,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigins",
         policy =>
         {
-            policy.WithOrigins(allowedOrigins)
+            policy.AllowAnyOrigin() // Allows requests from any origin
                   .AllowAnyMethod() // Allows any HTTP method (GET, POST, PUT, DELETE, etc.)
-                  .AllowAnyHeader()
-                  .AllowCredentials(); // Allows any header in the request
+                  .AllowAnyHeader();
+            // .AllowCredentials(); // Allows any header in the request
         });
 });
 

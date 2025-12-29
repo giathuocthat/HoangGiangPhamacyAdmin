@@ -12,7 +12,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public string ReceiptNumber { get; set; } = string.Empty;
         public int PurchaseOrderId { get; set; }
         public string PurchaseOrderNumber { get; set; } = string.Empty;
-        public int WarehouseId { get; set; }
+        public int? WarehouseId { get; set; }
         public string WarehouseName { get; set; } = string.Empty;
         public GoodsReceiptStatus Status { get; set; }
         public DateTime? ScheduledDate { get; set; }
@@ -36,7 +36,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
     public class CreateGoodsReceiptDto
     {
         public int PurchaseOrderId { get; set; }
-        public int WarehouseId { get; set; }
+        public int? WarehouseId { get; set; }
         public DateTime? ScheduledDate { get; set; }
         public string? ShippingCarrier { get; set; }
         public string? TrackingNumber { get; set; }

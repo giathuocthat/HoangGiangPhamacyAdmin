@@ -162,7 +162,9 @@ namespace ThuocGiaThatAdmin.Service.Services
                 IsActive = dto.IsActive,
                 IsFeatured = dto.IsFeatured,
                 DrugEfficacy = dto.DrugEfficacy,
-                DosageInstructions = dto.DosageInstructions
+                DosageInstructions = dto.DosageInstructions,
+                Indication = dto.Indication,
+                Overdose = dto.Overdose
             };
 
             // Map Images
@@ -367,6 +369,8 @@ namespace ThuocGiaThatAdmin.Service.Services
             existingProduct.IsFeatured = dto.IsFeatured;
             existingProduct.DrugEfficacy = dto.DrugEfficacy;
             existingProduct.DosageInstructions = dto.DosageInstructions;
+            existingProduct.Indication = dto.Indication;
+            existingProduct.Overdose = dto.Overdose;
 
             // Update Images - Smart update logic
             if (dto.Images != null && dto.Images.Any())

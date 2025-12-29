@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThat.Infrastucture.Repositories;
+using ThuocGiaThatAdmin.Common.Interfaces;
 
 namespace ThuocGiaThatAdmin.Server.Controllers
 {
@@ -12,20 +13,28 @@ namespace ThuocGiaThatAdmin.Server.Controllers
     {
         private readonly IRepository<Ward> _wardRepo;
         private readonly IRepository<Province> _provinceRepo;
+        private readonly ICacheService _cacheService;
 
-        public WardController(IRepository<Ward> wardRepo, IRepository<Province> provinceRepo)
+        public WardController(IRepository<Ward> wardRepo, IRepository<Province> provinceRepo, ICacheService cacheService)
         {
             _wardRepo = wardRepo;
             _provinceRepo = provinceRepo;
+            _cacheService = cacheService;
         }
 
         // GET: api/ward
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var wards = await _wardRepo.GetAllAsync();
-            var result = wards.Select(w => new WardListDto(w.Id, w.Name, w.Code, w.ProvinceId)).ToList();
-            return Ok(result);
+            string key = "wards:all";
+
+            var data = await _cacheService.GetOrSetAsync(key, async () =>
+            {
+                var wards = await _wardRepo.GetAllAsync();
+                return wards.Select(w => new WardListDto(w.Id, w.Name, w.Code, w.ProvinceId)).ToList();
+            });
+
+            return Ok(data);
         }
 
         // GET: api/ward/5

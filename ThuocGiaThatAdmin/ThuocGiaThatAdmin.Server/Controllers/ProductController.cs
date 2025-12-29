@@ -148,6 +148,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     product.IsPrescriptionDrug,
                     product.DrugEfficacy,
                     product.DosageInstructions,
+                    product.Indication,
+                    product.Overdose,
 
                     // Metadata
                     product.IsActive,
@@ -598,6 +600,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     product.IsPrescriptionDrug,
                     product.DrugEfficacy,
                     product.DosageInstructions,
+                    product.Indication,
+                    product.Overdose,
 
                     // Metadata
                     product.IsActive,
@@ -689,8 +693,6 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                             v.RatePriceUnit,
                             QuantityAvailable = v.Inventories.Sum(x => x.QuantityAvailable)
                         }),
-                    product.Overdose,
-                    product.Indication,
                     MaxOrderQuantity = maxOrderQuantity,                    
                 };
 
