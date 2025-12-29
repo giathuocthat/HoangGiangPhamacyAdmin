@@ -45,5 +45,16 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         /// Navigation property đến Sales Region
         /// </summary>
         public SalesRegion? Region { get; set; }
+
+        // ========== Department ==========
+        /// <summary>
+        /// ID của phòng ban mà user này thuộc về
+        /// </summary>
+        public int? DepartmentId { get; set; }
+
+        /// <summary>
+        /// Navigation property đến Department
+        /// </summary>
+        public Department? Department { get; set; }
     }
 }
