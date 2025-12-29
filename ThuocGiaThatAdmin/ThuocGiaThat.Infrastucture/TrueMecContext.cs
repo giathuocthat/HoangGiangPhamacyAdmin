@@ -103,6 +103,7 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<SalesRegion> SalesRegions { get; set; }
         public DbSet<CustomerInvoiceInfo> CustomerInvoiceInfos { get; set; }
         public DbSet<FavouriteProduct> FavouriteProducts { get; set; }
+        public DbSet<ProductReview> ProductReviews { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -1432,6 +1433,31 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasIndex(e => new { e.CustomerId, e.ProductVariantId }).IsUnique();
                 entity.HasIndex(e => e.CustomerId);
                 entity.HasIndex(e => e.ProductVariantId);
+            });
+
+            // ============ ProductReview Configuration ============
+            modelBuilder.Entity<ProductReview>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.ReviewText).IsRequired().HasMaxLength(2000);
+                entity.Property(e => e.IsApproved).HasDefaultValue(false);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+
+                entity.HasOne(e => e.Customer)
+                    .WithMany()
+                    .HasForeignKey(e => e.CustomerId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Product)
+                    .WithMany()
+                    .HasForeignKey(e => e.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.CustomerId);
+                entity.HasIndex(e => e.ProductId);
+                entity.HasIndex(e => e.IsApproved);
+                entity.HasIndex(e => e.CreatedDate);
             });
         }
     }
