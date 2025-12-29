@@ -86,6 +86,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// <param name="searchText">Search by phone, email, or order number</param>
         /// <returns>Paginated list of orders</returns>
         [HttpGet("list")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetOrders(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10,
@@ -98,7 +99,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     return BadRequestResponse("Page size cannot exceed 100");
                 }
 
-                var (orders, totalCount) = await _orderService.GetOrdersAsync(pageNumber, pageSize, searchText);
+                var (orders, totalCount) = await _orderService.GetOrdersAsync(pageNumber, pageSize, searchText, User.GetCustomerId());
 
                 var response = new
                 {
