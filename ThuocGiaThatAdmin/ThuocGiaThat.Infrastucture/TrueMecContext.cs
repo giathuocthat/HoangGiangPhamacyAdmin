@@ -192,7 +192,7 @@ namespace ThuocGiaThat.Infrastucture
 
                 entity.HasOne(e => e.Product).WithMany(e => e.ProductVariants).HasForeignKey(e => e.ProductId)
                     .OnDelete(DeleteBehavior.Cascade);
-                entity.HasIndex(e => e.SKU).IsUnique();
+                entity.HasIndex(e => e.SKU).IsUnique();                
             });
 
             // ============ VariantOptionValue Configuration ============
@@ -1488,11 +1488,11 @@ namespace ThuocGiaThat.Infrastucture
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(e => e.ProductVariant)
-                    .WithMany()
+                    .WithMany(e => e.FavouriteProducts)
                     .HasForeignKey(e => e.ProductVariantId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasIndex(e => new { e.CustomerId, e.ProductVariantId }).IsUnique();
+                entity.HasIndex(e => new { e.CustomerId, e.ProductVariantId, e.Type }).IsUnique();
                 entity.HasIndex(e => e.CustomerId);
                 entity.HasIndex(e => e.ProductVariantId);
             });

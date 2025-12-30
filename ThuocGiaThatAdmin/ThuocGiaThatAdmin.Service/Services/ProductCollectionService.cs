@@ -9,6 +9,7 @@ using ThuocGiaThatAdmin.Contract.Enums;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Common;
+using ThuocGiaThatAdmin.Domain.Enums;
 
 namespace ThuocGiaThatAdmin.Service.Services
 {
@@ -448,6 +449,30 @@ namespace ThuocGiaThatAdmin.Service.Services
                     MaxQuantityPerOrder = i.ProductVariant.MaxSalesQuantity,
                     ShortDescription = i.ProductVariant.Product.ShortDescription,
                     DisplayOrder = i.DisplayOrder,
+                })
+                .ToListAsync();
+
+            return dtos;
+        }
+
+        public async Task<List<CollectionProductResponseDto>> GetFavoriteProductsByTypeAsync(FavouriteProductType type, int pageSize, int customerId)
+        {
+            var dtos = await _context.FavouriteProducts.Where(x => x.CustomerId == customerId && x.Type == type)                
+                .OrderBy(i => i.CreatedDate)
+                .Take(pageSize)
+                .Select(i => new CollectionProductResponseDto
+                {
+                    Id = i.ProductVariant.Product.Id,
+                    Name = i.ProductVariant.Product.Name,
+                    Slug = i.ProductVariant.Product.Slug,
+                    ThumbnailUrl = i.ProductVariant.Product.ThumbnailUrl,
+                    ProductVariantId = i.ProductVariantId,
+                    OriginalPrice = i.ProductVariant.OriginalPrice,
+                    Price = i.ProductVariant.Price,
+                    Specification = i.ProductVariant.Product.Specification,
+                    MaxQuantityPerOrder = i.ProductVariant.MaxSalesQuantity,
+                    ShortDescription = i.ProductVariant.Product.ShortDescription,
+                    IsFavorite = i.ProductVariant.FavouriteProducts.Any(x => x.CustomerId == customerId && x.Type == type)
                 })
                 .ToListAsync();
 
