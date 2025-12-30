@@ -340,7 +340,7 @@ namespace ThuocGiaThatAdmin.Service.Services
         /// <summary>
         /// Update order status
         /// </summary>
-        public async Task<OrderResponseDto> UpdateOrderStatusAsync(int orderId, string newStatusString)
+        public async Task<OrderResponseDto> UpdateOrderStatusAsync(int orderId, string newStatusString, Guid? changedByUserId = null, string? notes = null)
         {
             var order = await _context.Orders
                 .Include(o => o.Customer)
@@ -364,8 +364,28 @@ namespace ThuocGiaThatAdmin.Service.Services
                     $"Cannot transition from {currentStatus} to {newStatus}. Valid transitions are: {validStatuses}");
             }
 
+            // Store old status for history
+            var oldStatus = order.OrderStatus;
+
             // Update status
             order.OrderStatus = newStatus.ToStatusString();
+
+            // Create status history record
+            if (changedByUserId.HasValue)
+            {
+                var statusHistory = new OrderStatusHistory
+                {
+                    OrderId = orderId,
+                    OldStatus = oldStatus,
+                    NewStatus = newStatus.ToStatusString(),
+                    ChangedByUserId = changedByUserId.Value.ToString(),
+                    ChangedDate = DateTime.UtcNow,
+                    Notes = notes
+                };
+
+                _context.Set<OrderStatusHistory>().Add(statusHistory);
+            }
+
             await _context.SaveChangesAsync();
 
             // Return updated order
