@@ -353,6 +353,29 @@ namespace ThuocGiaThatAdmin.Service
             }).ToList();
         }
 
+        public async Task<IEnumerable<SalesUserDto>> GetUsersByDepartmentAsync(int departmentId)
+        {
+            var users = await _context.Users
+                .Where(u => u.DepartmentId == departmentId && u.IsActive)
+                .Include(u => u.Department)
+                .Include(u => u.Manager)
+                .OrderBy(u => u.FullName)
+                .ToListAsync();
+
+            return users.Select(u => new SalesUserDto
+            {
+                Id = u.Id,
+                FullName = u.FullName ?? u.UserName ?? string.Empty,
+                Email = u.Email ?? string.Empty,
+                PhoneNumber = u.PhoneNumber ?? string.Empty,
+                IsActive = u.IsActive,
+                ManagerId = u.ManagerId,
+                ManagerName = u.Manager?.FullName,
+                RegionId = u.RegionId,
+                RegionName = u.Region?.Name
+            }).ToList();
+        }
+
         public async IAsyncEnumerable<ApplicationRoleClaim> GetPermissions(string userId)
         {
             var userDetail = await _userManager.FindByIdAsync(userId);

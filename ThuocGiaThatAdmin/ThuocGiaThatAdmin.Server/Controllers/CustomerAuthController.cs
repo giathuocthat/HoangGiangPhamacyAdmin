@@ -107,9 +107,9 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = false, //todo
-                    SameSite = SameSiteMode.Lax,
-                    Path = "/", ///api/customer/auth/refreshToken",
+                    Secure = true,                  // Chỉ gửi qua HTTPS (set false nếu dev với HTTP)
+                    SameSite = SameSiteMode.None,   // Cho phép cross-site requests
+                    Path = "/",
                     MaxAge = TimeSpan.FromDays(dto.RememberMe == true ? 7 : 1)
                 });
 
@@ -157,9 +157,9 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 Response.Cookies.Delete("refresh_token", new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = false, //todo
-                    SameSite = SameSiteMode.Lax,
-                    Path = "/", ///api/customer/auth/refreshToken",
+                    Secure = true,                  // Chỉ gửi qua HTTPS (set false nếu dev với HTTP)
+                    SameSite = SameSiteMode.None,   // Cho phép cross-site requests
+                    Path = "/",
                 });
 
                 return Success("Logout successful");
@@ -242,7 +242,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         public async Task<IActionResult> VerifyPhoneAndEmail(string phone, string email)
         {
             (bool success, Dictionary<string, string> errors) = await _customerAuthService.VerifyRegister(phone, email);
-            if(success)
+            if (success)
                 return Ok();
             return BadRequest(new ApiErrorResponse { Detail = "", Errors = errors });
         }
@@ -257,7 +257,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             return await ExecuteActionAsync(async () =>
             {
-                var (success, message, token, expiresAt, customer) = await _customerAuthService.LoginByOtpAsync(dto.PhoneNumber, OtpCodeTypeEnum.Login ,dto.Otp);        
+                var (success, message, token, expiresAt, customer) = await _customerAuthService.LoginByOtpAsync(dto.PhoneNumber, OtpCodeTypeEnum.Login, dto.Otp);
 
                 if (!success)
                 {
@@ -313,7 +313,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             var result = await _customerAuthService.CheckExisting(request);
             return Ok(result);
-            
+
         }
     }
 }
