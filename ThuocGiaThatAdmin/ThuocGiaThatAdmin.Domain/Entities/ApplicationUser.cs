@@ -56,5 +56,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         /// Navigation property đến Department
         /// </summary>
         public Department? Department { get; set; }
+
+        public string? AvatarUrl { get; set; }
     }
 }
