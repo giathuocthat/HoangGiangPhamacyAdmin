@@ -44,5 +44,10 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         /// Danh sách nhân viên thuộc phòng ban này
         /// </summary>
         public ICollection<ApplicationUser> Users { get; set; } = new List<ApplicationUser>();
+
+        /// <summary>
+        /// Danh sách roles được định nghĩa cho phòng ban này
+        /// </summary>
+        public ICollection<DepartmentRole> DepartmentRoles { get; set; } = new List<DepartmentRole>();
     }
 }
