@@ -174,7 +174,18 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             return await ExecuteActionAsync(async () =>
             {
-                var order = await _orderService.UpdateOrderStatusAsync(id, dto.NewStatus);
+                // Get user ID from claims (for admin users)
+                Guid? userId = null;
+                try
+                {
+                    userId = User.GetUserId();
+                }
+                catch
+                {
+                    // If user ID is not available (e.g., system update), proceed without it
+                }
+
+                var order = await _orderService.UpdateOrderStatusAsync(id, dto.NewStatus, userId, dto.Notes);
                 return Success(order, "Order status updated successfully");
             }, "Update Order Status");
         }

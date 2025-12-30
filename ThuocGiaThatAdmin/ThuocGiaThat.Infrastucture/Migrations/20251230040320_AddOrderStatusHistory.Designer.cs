@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ThuocGiaThat.Infrastucture;
 
@@ -11,9 +12,11 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    partial class TrueMecContextModelSnapshot : ModelSnapshot
+    [Migration("20251230040320_AddOrderStatusHistory")]
+    partial class AddOrderStatusHistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -101,25 +104,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("UserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Contract.DTOs.CategoryRootCountProductsDto", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Slug")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("TotalProducts")
-                        .HasColumnType("int");
-
-                    b.ToTable("CategoryRootCountProductsDto");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ActiveIngredient", b =>
@@ -2495,9 +2479,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.Property<string>("Overdose")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("ProductType")
-                        .HasColumnType("int");
 
                     b.Property<string>("RegistrationNumber")
                         .HasColumnType("nvarchar(max)");

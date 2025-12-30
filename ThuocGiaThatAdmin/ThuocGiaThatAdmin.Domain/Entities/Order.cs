@@ -58,6 +58,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
         public bool ExportInvoice { get; set; } = true;
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
         public ICollection<PaymentTransaction> PaymentTransactions { get; set; }
+        public ICollection<OrderStatusHistory> StatusHistory { get; set; } = new List<OrderStatusHistory>();
         public int? CustomerInvoiceInfoId { get; set; }
 
     }
