@@ -9,6 +9,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
 {
     public class ApplicationRole : IdentityRole
     {
+        public string? Code { get; set; }
         public string? DisplayName { get; set; }
         public DateTime CreatedDate { get; set; }
         public string? Description { get; set; }

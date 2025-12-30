@@ -156,11 +156,7 @@ builder.Services.AddAuthentication(options =>
         {
             OnMessageReceived = context =>
             {
-                // Th? l?y token t? Cookie có tên là "accessToken"
-                // (Tên này ph?i kh?p v?i tên b?n ?ã ??t khi Response.Cookies.Append)
                 var accessToken = context.Request.Cookies["accessToken"];
-
-                // N?u tìm th?y cookie, gán nó vào context ?? Framework x? lý ti?p
                 if (!string.IsNullOrEmpty(accessToken))
                 {
                     context.Token = accessToken;
@@ -380,7 +376,7 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<ThuocGiaThat.Infrastucture.TrueMecContext>();
     db.Database.Migrate();
     // seed admin user and roles (reads AdminUser:* from configuration)
-    ChildrenRoleMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
+    RoleMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     UserMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     // seed role claims (permissions) for admin role
     AdminPermissionMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
