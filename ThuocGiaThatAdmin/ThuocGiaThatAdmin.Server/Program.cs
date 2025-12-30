@@ -156,7 +156,7 @@ builder.Services.AddAuthentication(options =>
         {
             OnMessageReceived = context =>
             {
-                var accessToken = context.Request.Cookies["accessToken"];
+                var accessToken = context.Request.Cookies["adminAccessToken"];
                 if (!string.IsNullOrEmpty(accessToken))
                 {
                     context.Token = accessToken;

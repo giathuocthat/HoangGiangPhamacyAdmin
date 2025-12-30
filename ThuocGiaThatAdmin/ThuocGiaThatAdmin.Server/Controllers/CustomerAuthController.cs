@@ -104,6 +104,15 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     });
                 }
 
+                Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,                  // Chỉ gửi qua HTTPS (set false nếu dev với HTTP)
+                    SameSite = SameSiteMode.None,   // Cho phép cross-site requests
+                    Path = "/",
+                    MaxAge = TimeSpan.FromDays(dto.RememberMe == true ? 7 : 1)
+                });
+
                 var response = new
                 {
                     accessToken = accessToken,
