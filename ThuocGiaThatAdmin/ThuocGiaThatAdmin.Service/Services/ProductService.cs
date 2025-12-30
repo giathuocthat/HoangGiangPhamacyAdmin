@@ -689,7 +689,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 .ThenInclude(v => v.VariantOptionValues)
                 .ThenInclude(vov => vov.ProductOptionValue)
                 .ThenInclude(pov => pov.ProductOption)
-                .OrderByDescending(p => p.CreatedDate)
+                .OrderByDescending(p => p.Id)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .AsNoTracking()

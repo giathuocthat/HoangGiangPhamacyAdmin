@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using ThuocGiaThat.Infrastucture;
 using ThuocGiaThat.Infrastucture.Common;
 using ThuocGiaThatAdmin.Domain.Entities;
+using ThuocGiaThatAdmin.Domain.Enums;
 
 namespace ThuocGiaThatAdmin.Service.Services
 {
@@ -17,27 +18,28 @@ namespace ThuocGiaThatAdmin.Service.Services
             _context = context;
         }
 
-        public async Task AddFavoriteAsync(int customerId, int productVariantId)
+        public async Task AddFavoriteAsync(int customerId, int productVariantId, FavouriteProductType type)
         {
             var exists = await _context.FavouriteProducts
-                .AnyAsync(f => f.CustomerId == customerId && f.ProductVariantId == productVariantId);
+                .AnyAsync(f => f.CustomerId == customerId && f.ProductVariantId == productVariantId && f.Type == type);
 
             if (!exists)
             {
                 var favorite = new FavouriteProduct
                 {
                     CustomerId = customerId,
-                    ProductVariantId = productVariantId
+                    ProductVariantId = productVariantId,
+                    Type = type
                 };
                 _context.FavouriteProducts.Add(favorite);
                 await _context.SaveChangesAsync();
             }
         }
 
-        public async Task RemoveFavoriteAsync(int customerId, int productVariantId)
+        public async Task RemoveFavoriteAsync(int customerId, int productVariantId, FavouriteProductType type)
         {
             var favorite = await _context.FavouriteProducts
-                .FirstOrDefaultAsync(f => f.CustomerId == customerId && f.ProductVariantId == productVariantId);
+                .FirstOrDefaultAsync(f => f.CustomerId == customerId && f.ProductVariantId == productVariantId && f.Type == type);
 
             if (favorite != null)
             {
@@ -46,12 +48,18 @@ namespace ThuocGiaThatAdmin.Service.Services
             }
         }
 
-        public async Task<PagedResult<FavouriteProduct>> GetFavoritesAsync(int customerId, int pageNumber, int pageSize)
+        public async Task<PagedResult<FavouriteProduct>> GetFavoritesAsync(int customerId, FavouriteProductType? type, int pageNumber, int pageSize)
         {
             var query = _context.FavouriteProducts
-                .Where(f => f.CustomerId == customerId)
-                .Include(f => f.ProductVariant)
-                .OrderByDescending(f => f.CreatedDate);
+                .Where(f => f.CustomerId == customerId);
+
+            if (type.HasValue)
+            {
+                query = query.Where(f => f.Type == type.Value);
+            }
+
+            query = query.Include(f => f.ProductVariant)
+                         .OrderByDescending(f => f.CreatedDate);
 
             var totalCount = await query.CountAsync();
             var items = await query
