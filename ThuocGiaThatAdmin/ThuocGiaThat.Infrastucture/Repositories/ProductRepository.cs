@@ -68,6 +68,8 @@ namespace ThuocGiaThat.Infrastucture.Repositories
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
                 .Include(p => p.Images)
+                .Include(p => p.ProductActiveIngredients)
+                    .ThenInclude(i => i.ActiveIngredient)
                 .Include(p => p.ProductOptions)
                     .ThenInclude(o => o.ProductOptionValues)
                 .Include(p => p.ProductVariants)
@@ -93,7 +95,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         /// <summary>
         /// Get brands with pagination
         /// </summary>
-        public async Task<(IList<Product> products, int TotalCount)> GetPagedProductsAsync(int pageNumber, int pageSize)
+        public async Task<(IList<Product> products, int TotalCount)> GetPagedProductsAsync(string? category, string? price, int? type, string? sort, int page = 1, int pageSize = 20)
         {
             var query = _context.Set<Product>()
                 .Include(x => x.Brand)
@@ -102,12 +104,69 @@ namespace ThuocGiaThat.Infrastucture.Repositories
                 .AsQueryable()
                 .AsNoTracking();
 
+            if(!string.IsNullOrEmpty(category))
+            {
+                var categoryId = await _context.Set<Category>().Where(x => x.Slug == category).Select(x => x.Id).FirstOrDefaultAsync();
+                if (categoryId != 0)
+                {
+                    query = query.Where(x => x.CategoryId == categoryId);
+                }
+            }
+
+            if (!string.IsNullOrEmpty(price))
+            {
+                switch(price)
+                {
+                    case "lt_100k":
+                        query = query.Where(x => x.ProductVariants.Any(y => y.Price <= 100000));
+                        break;
+                    case "100k_200k":
+                        query = query.Where(x => x.ProductVariants.Any(y => y.Price > 100000 && y.Price <= 200000));
+                        break;
+                    case "200k_300k":
+                        query = query.Where(x => x.ProductVariants.Any(y => y.Price > 200000 && y.Price <= 300000));
+                        break;
+                    case "gt_300k":
+                        query.Where(x => x.ProductVariants.Any(y => y.Price > 300000));
+                        break;
+                }
+            }
+
+            if (type.HasValue)
+            {
+                query = query.Where(x => !x.ProductType.HasValue || x.ProductType.Value == type);
+            }
+
+            if (!string.IsNullOrEmpty(sort))
+            {
+                switch (sort)
+                {
+                    case "price_asc":
+                        query = query.OrderBy(p => p.ProductVariants.Min(v => v.Price));
+                        break;
+                    case "price_desc":
+                        query = query.OrderByDescending(p => p.ProductVariants.Max(v => v.Price));
+                        break;
+                    case "name_asc":
+                        query = query.OrderBy(p => p.Name);
+                        break;
+                    case "name_desc":
+                        query = query.OrderByDescending(p => p.Name);
+                        break;
+                    case "newest":
+                        query = query.OrderByDescending(p => p.CreatedDate);
+                        break;
+                    default:
+                        query = query.OrderBy(p => p.Id);
+                        break;
+                }
+            }
+
             var totalCount = await query.CountAsync();
 
             var products = await query
-                .Include(p => p.ProductVariants.Take(1))
-                .OrderByDescending(b => b.Id)
-                .Skip((pageNumber - 1) * pageSize)
+                .Include(p => p.ProductVariants.Take(1))                
+                .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 

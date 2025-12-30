@@ -298,7 +298,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigins",
         policy =>
         {
-            policy.WithOrigins(allowedOrigins) 
+            policy.WithOrigins(allowedOrigins) // Allows requests from any origin
                   .AllowAnyMethod() // Allows any HTTP method (GET, POST, PUT, DELETE, etc.)
                   .AllowAnyHeader()
                   .AllowCredentials(); // Allows any header in the request

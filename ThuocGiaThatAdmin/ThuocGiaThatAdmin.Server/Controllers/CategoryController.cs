@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
@@ -101,18 +102,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             try
             {
-                var items = await _service.GetRootCategoriesAsync();
-                var response = items.Select(c => new
-                {
-                    c.Id,
-                    c.Name,
-                    c.Slug,
-                    c.Description,
-                    c.DisplayOrder,
-                    c.IsActive,
-                    c.CreatedDate
-                });
-                return Ok(response);
+                var items = await _service.GetRootCategoriesAsync();                
+                return Ok(items);
             }
             catch (Exception ex)
             {
@@ -120,6 +111,25 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 return StatusCode(500, new { message = "An error occurred while retrieving root categories", error = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Get root categories (parent categories only)
+        /// </summary>
+        [HttpGet("rootCountProducts")]
+        public async Task<IActionResult> GeCategoryRootCountProducts()
+        {
+            try
+            {
+                var items = await _service.GetCategoryRootCountProductsAsync();
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting root categories");
+                return StatusCode(500, new { message = "An error occurred while retrieving root categories", error = ex.Message });
+            }
+        }
+
 
         /// <summary>
         /// Get child categories by parent ID

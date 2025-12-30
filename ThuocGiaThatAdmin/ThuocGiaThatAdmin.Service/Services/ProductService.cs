@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Azure;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,8 +11,9 @@ using ThuocGiaThatAdmin.Contract.DTOs;
 using ThuocGiaThatAdmin.Contract.Requests;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 using ThuocGiaThatAdmin.Domain.Enums;
+using static ThuocGiaThatAdmin.Domain.Constants.AdminPermission;
+using Product = ThuocGiaThatAdmin.Domain.Entities.Product;
 
 namespace ThuocGiaThatAdmin.Service.Services
 {
@@ -77,16 +80,15 @@ namespace ThuocGiaThatAdmin.Service.Services
         /// <param name="pageNumber">Page number (1-based)</param>
         /// <param name="pageSize">Number of items per page</param>
         /// <returns>Tuple containing list of products and total count</returns>
-        public async Task<(IEnumerable<Product> products, int TotalCount)> GetPagedProductsAsync(int pageNumber = 1,
-            int pageSize = 10)
+        public async Task<(IEnumerable<Product> products, int TotalCount)> GetPagedProductsAsync(string? category, string? price, int? type, string? sort, int page = 1, int pageSize = 20)
         {
-            if (pageNumber <= 0)
-                throw new ArgumentException("Page number must be greater than 0", nameof(pageNumber));
+            if (page <= 0)
+                throw new ArgumentException("Page number must be greater than 0", nameof(page));
 
             if (pageSize <= 0 || pageSize > 100)
                 throw new ArgumentException("Page size must be between 1 and 100", nameof(pageSize));
 
-            return await _productRepository.GetPagedProductsAsync(pageNumber, pageSize);
+            return await _productRepository.GetPagedProductsAsync(category, price, type, sort, page, pageSize);
         }
 
         #endregion
@@ -545,27 +547,65 @@ namespace ThuocGiaThatAdmin.Service.Services
                 }
             }
 
-            // Update Product Active Ingredients
-            // Remove all existing ingredients
-            var existingIngredients = _context.ProductActiveIngredients
-                .Where(pai => pai.ProductId == id)
-                .ToList();
-            _context.ProductActiveIngredients.RemoveRange(existingIngredients);
-
-            // Add new ingredients from DTO
+            // Update Product Active Ingredients - Smart update logic
             if (dto.ProductActiveIngredients != null && dto.ProductActiveIngredients.Any())
             {
+                // Get all existing ingredients for this product
+                var existingIngredients = await _context.ProductActiveIngredients
+                    .Where(pai => pai.ProductId == id)
+                    .ToListAsync();
+
+                // Get IDs of ingredients in the DTO
+                var dtoIngredientIds = dto.ProductActiveIngredients
+                    .Where(i => i.Id.HasValue && i.Id.Value > 0)
+                    .Select(i => i.Id.Value)
+                    .ToList();
+
+                // Remove ingredients that are not in the DTO
+                var ingredientsToRemove = existingIngredients
+                    .Where(ei => !dtoIngredientIds.Contains(ei.Id))
+                    .ToList();
+
+                _context.ProductActiveIngredients.RemoveRange(ingredientsToRemove);
+
+                // Process each ingredient from DTO
                 foreach (var ingredientDto in dto.ProductActiveIngredients)
                 {
-                    _context.ProductActiveIngredients.Add(new ProductActiveIngredient
+                    if (!ingredientDto.Id.HasValue || ingredientDto.Id.Value == 0)
                     {
-                        ProductId = id,
-                        ActiveIngredientId = ingredientDto.ActiveIngredientId ?? 0,
-                        Quantity = ingredientDto.Quantity,
-                        DisplayOrder = ingredientDto.DisplayOrder,
-                        IsMainIngredient = ingredientDto.IsMainIngredient
-                    });
+                        // Create new ingredient
+                        _context.ProductActiveIngredients.Add(new ProductActiveIngredient
+                        {
+                            ProductId = id,
+                            ActiveIngredientId = ingredientDto.ActiveIngredientId ?? 0,
+                            Quantity = ingredientDto.Quantity,
+                            DisplayOrder = ingredientDto.DisplayOrder,
+                            IsMainIngredient = ingredientDto.IsMainIngredient
+                        });
+                    }
+                    else
+                    {
+                        // Update existing ingredient
+                        var existingIngredient = existingIngredients
+                            .FirstOrDefault(ei => ei.Id == ingredientDto.Id.Value);
+
+                        if (existingIngredient != null)
+                        {
+                            existingIngredient.ActiveIngredientId = ingredientDto.ActiveIngredientId ?? 0;
+                            existingIngredient.Quantity = ingredientDto.Quantity;
+                            existingIngredient.DisplayOrder = ingredientDto.DisplayOrder;
+                            existingIngredient.IsMainIngredient = ingredientDto.IsMainIngredient;
+                        }
+                    }
                 }
+            }
+            else
+            {
+                // If no ingredients in DTO, remove all existing ingredients
+                var existingIngredients = _context.ProductActiveIngredients
+                    .Where(pai => pai.ProductId == id)
+                    .ToList();
+                _context.ProductActiveIngredients.RemoveRange(existingIngredients);
             }
 
             return await _context.SaveChangesAsync();

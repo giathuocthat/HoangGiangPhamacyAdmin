@@ -42,7 +42,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         /// <param name="pageNumber"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
-        Task<(IList<Product> products, int TotalCount)> GetPagedProductsAsync(int pageNumber, int pageSize);
+        Task<(IList<Product> products, int TotalCount)> GetPagedProductsAsync(string? category, string? price, int? type, string? sort, int page = 1, int pageSize = 20);
 
         /// <summary>
         /// 
