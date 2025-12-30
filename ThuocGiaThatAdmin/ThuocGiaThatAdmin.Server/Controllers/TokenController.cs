@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -24,7 +25,7 @@ namespace HoangGiangPhamacyAuthentication.Controllers
             _tokenService = tokenService;
             _userManager = userManager;
             _userService = userService;
-        }   
+        }
 
         // POST: api/token
         [HttpPost]
@@ -41,7 +42,7 @@ namespace HoangGiangPhamacyAuthentication.Controllers
             {
                 user = emailUser;
             }
-            if(phoneUser != null)
+            if (phoneUser != null)
             {
                 user = phoneUser;
             }
@@ -61,6 +62,18 @@ namespace HoangGiangPhamacyAuthentication.Controllers
                 TokenType = "Bearer",
                 UserId = userId
             };
+
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,                // Bảo mật: không cho JavaScript truy cập
+                Secure = true,                  // Chỉ gửi qua HTTPS (set false nếu dev với HTTP)
+                SameSite = SameSiteMode.None,   // Cho phép cross-site requests
+               // Path = "/",                     // Cookie áp dụng cho toàn bộ site
+                MaxAge = TimeSpan.FromDays(7)   // Thời gian sống 7 ngày
+            };
+
+            Response.Cookies.Append("accessToken", response.Token, cookieOptions);
+            Response.Cookies.Append("refreshToken", response.RefreshToken, cookieOptions);
 
             return Ok(response);
         }

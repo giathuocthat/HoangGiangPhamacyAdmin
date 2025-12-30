@@ -113,6 +113,26 @@ builder.Services.AddAuthentication(options =>
             IssuerSigningKey = signingKey
         };
         options.MapInboundClaims = false;
+
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                // Th? l?y token t? Cookie có tên là "accessToken"
+                // (Tên này ph?i kh?p v?i tên b?n ?ã ??t khi Response.Cookies.Append)
+                var accessToken = context.Request.Cookies["accessToken"];
+
+                // N?u tìm th?y cookie, gán nó vào context ?? Framework x? lý ti?p
+                if (!string.IsNullOrEmpty(accessToken))
+                {
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
+            }
+        };
+
     });
 
 builder.Services.AddResponseCompression(options =>
@@ -278,10 +298,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigins",
         policy =>
         {
-            policy.AllowAnyOrigin() // Allows requests from any origin
+            policy.WithOrigins(allowedOrigins) 
                   .AllowAnyMethod() // Allows any HTTP method (GET, POST, PUT, DELETE, etc.)
-                  .AllowAnyHeader();
-            // .AllowCredentials(); // Allows any header in the request
+                  .AllowAnyHeader()
+                  .AllowCredentials(); // Allows any header in the request
         });
 });
 
