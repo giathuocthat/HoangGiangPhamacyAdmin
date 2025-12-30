@@ -42,6 +42,12 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
         /// Lấy danh sách users theo regionId
         /// </summary>
         Task<IEnumerable<SalesUserDto>> GetUsersByRegionAsync(int regionId);
+
+        /// <summary>
+        /// Lấy danh sách users theo departmentId
+        /// </summary>
+        Task<IEnumerable<SalesUserDto>> GetUsersByDepartmentAsync(int departmentId);
+
         IAsyncEnumerable<ApplicationRoleClaim> GetPermissions(string userId);
     }
 

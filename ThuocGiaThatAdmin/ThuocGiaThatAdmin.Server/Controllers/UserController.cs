@@ -274,6 +274,16 @@ namespace HoangGiangPhamacyAuthentication.Controllers
             return Ok(users);
         }
 
+        /// <summary>
+        /// GET: api/user/by-department/{departmentId}
+        /// Lấy danh sách users theo departmentId
+        /// </summary>
+        [HttpGet("by-department/{departmentId}")]
+        public async Task<IActionResult> GetUsersByDepartment(int departmentId)
+        {
+            var users = await _userService.GetUsersByDepartmentAsync(departmentId);
+            return Ok(users);
+        }
 
         [HttpGet("{userId}/permissions")]
         public async Task<IActionResult> GetUsersByRegion(string userId)

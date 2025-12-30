@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ThuocGiaThat.Infrastucture;
 
@@ -11,9 +12,11 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    partial class TrueMecContextModelSnapshot : ModelSnapshot
+    [Migration("20251229094323_AddColumnProductType")]
+    partial class AddColumnProductType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2201,49 +2204,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("ProductVariantId");
 
                     b.ToTable("OrderItemSnapshots");
-                });
-
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.OrderStatusHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ChangedByUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("ChangedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("NewStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OldStatus")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChangedByUserId");
-
-                    b.HasIndex("OrderId");
-
-                    b.ToTable("OrderStatusHistory");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.OrderVoucher", b =>
@@ -4706,25 +4666,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("OrderItem");
                 });
 
-            modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.OrderStatusHistory", b =>
-                {
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ApplicationUser", "ChangedByUser")
-                        .WithMany()
-                        .HasForeignKey("ChangedByUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Order", "Order")
-                        .WithMany("StatusHistory")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ChangedByUser");
-
-                    b.Navigation("Order");
-                });
-
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.OrderVoucher", b =>
                 {
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.Order", "Order")
@@ -5299,8 +5240,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Navigation("OrderItems");
 
                     b.Navigation("PaymentTransactions");
-
-                    b.Navigation("StatusHistory");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.OrderItem", b =>

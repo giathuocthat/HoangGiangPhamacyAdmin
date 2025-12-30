@@ -51,6 +51,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// <param name="dto">Admin order creation data</param>
         /// <returns>Created order</returns>
         [HttpPost("admin/create-order")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> AdminCreateOrder([FromBody] AdminCreateOrderDto dto)
         {
             return await ExecuteActionAsync(async () =>
@@ -66,6 +67,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// <param name="id">Order ID</param>
         /// <returns>Order details</returns>
         [HttpGet("{id}")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetOrderById(int id)
         {
             return await ExecuteActionAsync(async () =>
@@ -120,8 +122,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// <summary>
         /// Get orders for the logged-in customer
         /// </summary>
-        ////[Authorize(Roles = "Customer")]
         [HttpGet("customer/list")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetCustomerOrder(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10,
@@ -167,6 +169,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// <param name="dto">Update status DTO</param>
         /// <returns>Updated order</returns>
         [HttpPut("{id}/status")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] UpdateOrderStatusDto dto)
         {
             return await ExecuteActionAsync(async () =>
@@ -189,6 +192,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
 
         //[Authorize(Roles = "Customer")]
         [HttpGet("defaultAddress")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetDefaultAddress()
         {
             var customerId = User.GetCustomerId(); //int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
@@ -198,6 +202,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
 
         //[Authorize(Roles = "Customer")]
         [HttpPost("checkout")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> Checkout([FromBody] CheckoutOrderDto order)
         {
             return await ExecuteActionAsync(async () =>
@@ -212,6 +217,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         }
 
         [HttpGet("summary/{id}")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> Get(int id)
         {
             return await ExecuteActionAsync(async () =>
@@ -228,6 +234,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// <param name="dto">Update delivery status DTO</param>
         /// <returns>Updated order</returns>
         [HttpPut("{id}/delivery-status")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> UpdateDeliveryStatus(int id, [FromBody] UpdateOrderDeliveryStatusDto dto)
         {
             return await ExecuteActionAsync(async () =>
@@ -239,6 +246,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
 
         //[Authorize(Roles = "Customer")]
         [HttpGet("listorders")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetListOrders()
         {
             var customerId = int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
@@ -248,6 +256,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
 
         //[Authorize(Roles = "Customer")]
         [HttpGet("detail/{id}")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetOrderDetail(int id)
         {
             var customerId = int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
@@ -305,6 +314,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
 
         [Authorize(Roles = "Customer")]
         [HttpGet("invoice")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetInvoiceAsync()
         {
             return Ok();
@@ -319,6 +329,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         }
 
         [HttpGet("estimated-delivery")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetEstimatedDelivery([FromQuery] int provinceId, [FromQuery] int wardId)
         {
             return await ExecuteActionAsync(async () =>

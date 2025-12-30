@@ -1,21 +1,26 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ThuocGiaThat.Infrastucture;
 using ThuocGiaThat.Infrastucture.Repositories;
+using ThuocGiaThatAdmin.Contract.DTOs;
+using ThuocGiaThatAdmin.Contracts.Responses;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Service.Interfaces;
-using ThuocGiaThatAdmin.Contracts.Responses;
 
 namespace ThuocGiaThatAdmin.Service
 {
     public class CategoryService : ICategoryService
     {
         private readonly ICategoryRepository _repo;
+        private readonly TrueMecContext _context;
 
-        public CategoryService(ICategoryRepository repo)
+        public CategoryService(ICategoryRepository repo, TrueMecContext context)
         {
             _repo = repo ?? throw new ArgumentNullException(nameof(repo));
+            _context = context;
         }
 
         public async Task<(IEnumerable<Category> Items, int TotalCount)> GetCategoriesAsync(int pageNumber = 1, int pageSize = 10)
@@ -48,10 +53,61 @@ namespace ThuocGiaThatAdmin.Service
             return await _repo.SearchByNameAsync(searchTerm);
         }
 
-        public async Task<IEnumerable<Category>> GetRootCategoriesAsync()
+        public async Task<IEnumerable<CategoryRootCountProductsDto>> GetCategoryRootCountProductsAsync()
         {
-            var all = await _repo.GetAllAsync();
-            return all.Where(c => c.ParentId == null && c.IsActive).OrderBy(c => c.DisplayOrder);
+            var result = await _context.Categories.Where(c => c.ParentId == null && c.IsActive).OrderBy(c => c.DisplayOrder)
+                .Select(x => new CategoryRootCountProductsDto
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Slug = x.Slug,
+                }).ToListAsync();
+
+            var ids = string.Join(",", result.Select(x => x.Id));
+
+            var rootIds = result.Select(x => x.Id);
+
+            var sql = $@"
+WITH Roots AS (
+    SELECT Id AS RootId, Id
+    FROM Categories
+    WHERE Id IN ({ids})
+),
+Cte AS (
+    SELECT RootId, Id
+    FROM Roots
+    
+    UNION ALL
+    
+    SELECT cte.RootId, c.Id
+    FROM Categories c
+    INNER JOIN Cte cte ON c.ParentId = cte.Id
+)
+SELECT 
+    Cte.RootId AS Id,
+    COUNT(p.Id) AS TotalProducts,
+    '' AS Name,
+    '' AS Slug
+FROM Cte
+LEFT JOIN Products p ON p.CategoryId = Cte.Id
+GROUP BY Cte.RootId;
+";
+
+            var rootData = await _context
+                .Set<CategoryRootCountProductsDto>()
+                .FromSqlRaw(sql, string.Join(",", rootIds))
+                .ToListAsync();
+
+            foreach(var cat in result)
+            {
+                var item = rootData.FirstOrDefault(x => x.Id == cat.Id);
+                if (item != null)
+                {
+                    cat.TotalProducts = item.TotalProducts;
+                }
+            }
+
+            return result;
         }
 
         public async Task<IEnumerable<Category>> GetAllChildrenAsync()
@@ -179,6 +235,19 @@ namespace ThuocGiaThatAdmin.Service
                 category.UpdatedDate,
                 children
             );
+        }
+
+        public async Task<IList<CategoryDto>> GetRootCategoriesAsync()
+        {
+            return await _context.Categories.Where(x => x.ParentId == null && x.IsActive)
+                .Select(x => new CategoryDto
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Slug = x.Slug,
+                    ParentId = x.ParentId,
+                    DisplayOrder = x.DisplayOrder
+                }).ToListAsync();
         }
     }
 }
