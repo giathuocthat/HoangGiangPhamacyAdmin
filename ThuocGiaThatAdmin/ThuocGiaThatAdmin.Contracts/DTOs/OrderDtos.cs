@@ -186,6 +186,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
     public class UpdateOrderStatusDto
     {
         public string NewStatus { get; set; } = string.Empty;
+        public string? Notes { get; set; }
     }
 
     /// <summary>

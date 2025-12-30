@@ -72,7 +72,7 @@ namespace HoangGiangPhamacyAuthentication.Controllers
                 MaxAge = TimeSpan.FromDays(7)   // Thời gian sống 7 ngày
             };
 
-            Response.Cookies.Append("accessToken", response.Token, cookieOptions);
+            Response.Cookies.Append("adminAccessToken", response.Token, cookieOptions);
             Response.Cookies.Append("refreshToken", response.RefreshToken, cookieOptions);
 
             return Ok(response);

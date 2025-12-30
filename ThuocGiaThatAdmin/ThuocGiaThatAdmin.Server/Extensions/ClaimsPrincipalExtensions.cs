@@ -14,5 +14,15 @@ namespace ThuocGiaThatAdmin.Server.Extensions
 
             return int.Parse(id);
         }
+
+        public static Guid GetUserId(this ClaimsPrincipal user)
+        {
+            var id = user.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+            if (string.IsNullOrEmpty(id))
+                throw new UnauthorizedAccessException("UserId not found in token");
+
+            return Guid.Parse(id);
+        }
     }
 }

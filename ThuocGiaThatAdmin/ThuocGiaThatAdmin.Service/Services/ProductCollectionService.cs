@@ -8,6 +8,7 @@ using ThuocGiaThat.Infrastucture.Repositories;
 using ThuocGiaThatAdmin.Contract.Enums;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
+using ThuocGiaThatAdmin.Common;
 
 namespace ThuocGiaThatAdmin.Service.Services
 {
@@ -124,13 +125,13 @@ namespace ThuocGiaThatAdmin.Service.Services
             var collection = new ProductCollection
             {
                 Name = dto.Name,
-                Slug = GenerateSlug(dto.Name),
+                Slug = string.IsNullOrWhiteSpace(dto.Slug) ? GenerateSlug(dto.Name) : dto.Slug,
                 Description = dto.Description,
-                Type = (int)CollectionType.Manual,
+                Type = (int)dto.Type,
                 DisplayOrder = dto.DisplayOrder,
                 StartDate = dto.StartDate,
                 EndDate = dto.EndDate,
-                IsActive = true,
+                IsActive = dto.IsActive,
                 CreatedDate = DateTime.Now
             };
 
@@ -140,7 +141,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 {
                     collection.Items.Add(new ProductCollectionItem
                     {
-                        ProductVariantId = item.ProductId,
+                        ProductVariantId = item.ProductVariantId,
                         DisplayOrder = item.DisplayOrder,
                         AddedDate = DateTime.Now
                     });
@@ -162,9 +163,9 @@ namespace ThuocGiaThatAdmin.Service.Services
             }
 
             collection.Name = dto.Name;
-            collection.Slug = GenerateSlug(dto.Name);
+            collection.Slug = string.IsNullOrWhiteSpace(dto.Slug) ? GenerateSlug(dto.Name) : dto.Slug;
             collection.Description = dto.Description;
-            collection.Type = (int)CollectionType.Manual;
+            collection.Type = (int)dto.Type;
             collection.DisplayOrder = dto.DisplayOrder;
             collection.StartDate = dto.StartDate;
             collection.EndDate = dto.EndDate;
@@ -349,6 +350,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 Slug = collection.Slug,
                 Description = collection.Description,
                 Type = (ProductCollectionTypeEnum)collection.Type,
+                TypeName = ((ProductCollectionTypeEnum)collection.Type).GetDescription(),
                 IsActive = collection.IsActive,
                 DisplayOrder = collection.DisplayOrder,
                 StartDate = collection.StartDate,

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
@@ -18,6 +19,7 @@ using ThuocGiaThatAdmin.Contract.Models;
 using ThuocGiaThatAdmin.Contracts.Models;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Queries;
+using ThuocGiaThatAdmin.Server.Configurations;
 using ThuocGiaThatAdmin.Server.Extensions;
 using ThuocGiaThatAdmin.Service;
 using ThuocGiaThatAdmin.Service.Interfaces;
@@ -69,8 +71,43 @@ builder.Services.AddSwaggerGen(options =>
 
 // configure RedisCache
 string redisConnectionString = builder.Configuration["Redis:Connection"];
+
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
-    ConnectionMultiplexer.Connect(redisConnectionString));
+{
+    //var redisConnectionString = builder.Configuration.GetSection("Redis").Get<RedisConfigurationOption>();
+    var configOptions = ConfigurationOptions.Parse(redisConnectionString);
+    configOptions.ConnectTimeout = 10000;
+    configOptions.SyncTimeout = 50000;
+    configOptions.AsyncTimeout = 50000;
+    configOptions.AllowAdmin = true;
+    configOptions.AbortOnConnectFail = false;
+    configOptions.ConnectRetry = 3;
+    configOptions.KeepAlive = 60;
+    configOptions.ReconnectRetryPolicy = new ExponentialRetry(5000);
+
+    var multiplexer = ConnectionMultiplexer.Connect(configOptions);
+
+    // Log connection events
+    multiplexer.ConnectionFailed += (sender, args) =>
+    {
+        Console.WriteLine($"Redis Connection Failed: {args.Exception?.Message}");
+    };
+
+    multiplexer.ConnectionRestored += (sender, args) =>
+    {
+        Console.WriteLine("Redis Connection Restored");
+    };
+
+    multiplexer.InternalError += (sender, args) =>
+    {
+        Console.WriteLine($"Redis Internal Error: {args.Exception?.Message}");
+    };
+
+    return multiplexer;
+
+});
+
+
 builder.Services.AddScoped<ICacheService, RedisCache>();
 
 // Configure DbContext
@@ -119,11 +156,7 @@ builder.Services.AddAuthentication(options =>
         {
             OnMessageReceived = context =>
             {
-                // Th? l?y token t? Cookie có tên là "accessToken"
-                // (Tên này ph?i kh?p v?i tên b?n ?ã ??t khi Response.Cookies.Append)
-                var accessToken = context.Request.Cookies["accessToken"];
-
-                // N?u tìm th?y cookie, gán nó vào context ?? Framework x? lý ti?p
+                var accessToken = context.Request.Cookies["adminAccessToken"];
                 if (!string.IsNullOrEmpty(accessToken))
                 {
                     context.Token = accessToken;
@@ -144,6 +177,8 @@ builder.Services.AddResponseCompression(options =>
 // Configure FileUploadSettings
 builder.Services.Configure<FileUploadSettings>(
     builder.Configuration.GetSection("FileUploadSettings"));
+
+builder.Services.Configure<RedisConfigurationOption>(builder.Configuration.GetSection("Redis"));
 
 // ============================================================
 // Register Repositories
@@ -341,7 +376,7 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<ThuocGiaThat.Infrastucture.TrueMecContext>();
     db.Database.Migrate();
     // seed admin user and roles (reads AdminUser:* from configuration)
-    ChildrenRoleMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
+    RoleMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     UserMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();
     // seed role claims (permissions) for admin role
     AdminPermissionMigration.InitializeAsync(scope.ServiceProvider, builder.Configuration).GetAwaiter().GetResult();

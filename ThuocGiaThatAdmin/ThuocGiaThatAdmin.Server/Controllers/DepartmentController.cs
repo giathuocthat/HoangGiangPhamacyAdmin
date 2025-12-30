@@ -158,5 +158,79 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 return Success(new { message });
             });
         }
+
+        // ========== Department Role Management Endpoints ==========
+
+        /// <summary>
+        /// GET: api/department/{id}/roles
+        /// Lấy danh sách roles của department
+        /// </summary>
+        [HttpGet("{id}/roles")]
+        public async Task<IActionResult> GetDepartmentRoles(int id)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var roles = await _departmentService.GetDepartmentRolesAsync(id);
+                return Success(roles);
+            });
+        }
+
+        /// <summary>
+        /// POST: api/department/{id}/roles
+        /// Assign role cho department
+        /// </summary>
+        [HttpPost("{id}/roles")]
+        public async Task<IActionResult> AssignRoleToDepartment(int id, [FromBody] AssignRoleToDepartmentDto dto)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var (success, message) = await _departmentService.AssignRoleToDepartmentAsync(id, dto);
+
+                if (!success)
+                {
+                    if (message == "Department not found")
+                    {
+                        return NotFoundResponse(message);
+                    }
+                    return BadRequestResponse(message);
+                }
+
+                return Success(new { message });
+            });
+        }
+
+        /// <summary>
+        /// DELETE: api/department/{id}/roles/{roleId}
+        /// Remove role khỏi department
+        /// </summary>
+        [HttpDelete("{id}/roles/{roleId}")]
+        public async Task<IActionResult> RemoveRoleFromDepartment(int id, string roleId)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var (success, message) = await _departmentService.RemoveRoleFromDepartmentAsync(id, roleId);
+
+                if (!success)
+                {
+                    return NotFoundResponse(message);
+                }
+
+                return Success(new { message });
+            });
+        }
+
+        /// <summary>
+        /// GET: api/department/{id}/available-roles
+        /// Lấy danh sách roles chưa được assign cho department
+        /// </summary>
+        [HttpGet("{id}/available-roles")]
+        public async Task<IActionResult> GetAvailableRoles(int id)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var roles = await _departmentService.GetAvailableRolesForDepartmentAsync(id);
+                return Success(roles);
+            });
+        }
     }
 }

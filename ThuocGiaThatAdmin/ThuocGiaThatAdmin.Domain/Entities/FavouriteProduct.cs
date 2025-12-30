@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using ThuocGiaThatAdmin.Domain.Entities;
+using ThuocGiaThatAdmin.Domain.Enums;
 
 namespace ThuocGiaThatAdmin.Domain.Entities
 {
@@ -14,5 +15,7 @@ namespace ThuocGiaThatAdmin.Domain.Entities
 
         [ForeignKey("ProductVariantId")]
         public virtual ProductVariant ProductVariant { get; set; }
+
+        public FavouriteProductType Type { get; set; }
     }
 }
