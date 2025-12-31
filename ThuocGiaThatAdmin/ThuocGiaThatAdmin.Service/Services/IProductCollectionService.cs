@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using ThuocGiaThatAdmin.Contract.Enums;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
+using ThuocGiaThatAdmin.Domain.Enums;
 
 namespace ThuocGiaThatAdmin.Service.Services
 {
@@ -28,5 +29,7 @@ namespace ThuocGiaThatAdmin.Service.Services
         Task SetMaxOrderConfigAsync(int productId, SetMaxOrderDto dto);
 
         Task<List<CollectionProductResponseDto>> GetCollectionProductsByTypeAsync(ProductCollectionTypeEnum type, int pageSize);
+
+        Task<List<CollectionProductResponseDto>> GetFavoriteProductsByTypeAsync(FavouriteProductType type, int pageSize, int customerId);
     }
 }

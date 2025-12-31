@@ -66,8 +66,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 var response = new
                 {
                     accessToken = customer.Token,
+                    refreshToken = customer.RefreshToken,
                     tokenType = "Bearer",
-                    expiresAt = customer.ExpiresAt,
                     customer = new
                     {
                         id = customer!.Id,
@@ -116,6 +116,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 var response = new
                 {
                     accessToken = accessToken,
+                    refreshToken = refreshToken,
                     customer = new
                     {
                         id = customer!.Id,
@@ -140,8 +141,19 @@ namespace ThuocGiaThatAdmin.Server.Controllers
 
             var accessToken = _customerAuthService.Refresh(refreshToken);
 
-            return Ok(new { accessToken });
+            return Ok(accessToken);
         }
+
+        [HttpPost("refreshTokenApp")]
+        public IActionResult RefreshTokenApp(string refreshToken)
+        {
+            if (string.IsNullOrEmpty(refreshToken)) return BadRequest(new ApiErrorResponse { Detail = "RefreshToken không tồn tại" });
+
+            var accessToken = _customerAuthService.Refresh(refreshToken);
+
+            return Ok(accessToken);
+        }
+
 
         /// <summary>
         /// POST: api/customer/auth/logout

@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using ThuocGiaThatAdmin.Contract.Requests;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Domain.Enums;
+using ThuocGiaThatAdmin.Server.Extensions;
 using ThuocGiaThatAdmin.Server.Models;
 using ThuocGiaThatAdmin.Service.Interfaces;
 using ThuocGiaThatAdmin.Service.Services;
@@ -323,47 +325,9 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             try
             {
-                var (products, totalCount) = await _productService.GetPagedProductsAsync(category, price, type, sort, page, pageSize);
-                var response = new
-                {
-                    Data = products.Select(product => new
-                    {
-                        product.Id,
-                        product.CategoryId,
-                        product.BrandId,
-                        product.Name,
-                        product.ShortDescription,
-                        product.FullDescription,
-                        product.Slug,
-                        product.ThumbnailUrl,
-                        product.Ingredients,
-                        product.UsageInstructions,
-                        product.Contraindications,
-                        product.StorageInstructions,
-                        product.RegistrationNumber,
-                        product.IsPrescriptionDrug,
-                        product.IsActive,
-                        product.IsFeatured,
-                        product.CreatedDate,
-                        product.UpdatedDate,
-                        product.DosageInstructions,
-                        product.DrugEfficacy,
-                        BrandName = product.Brand?.Name,
-                        CategoryName = product.Category?.Name,
-                        price = product.ProductVariants.FirstOrDefault()?.Price,
-                        originalPrice = product.ProductVariants.FirstOrDefault()?.OriginalPrice,
-                        productVariantId = product.ProductVariants.FirstOrDefault()?.Id,
-                        product.Specification
-                    }),
-                    Pagination = new
-                    {
-                        PageNumber = page,
-                        PageSize = pageSize,
-                        TotalCount = totalCount,
-                        TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
-                    }
-                };
-                return Ok(response);
+                var objResult = await _productService.GetPagedProductsAsync(category, price, type, sort, page, pageSize);
+
+                return Ok(objResult);
             }
             catch (ArgumentException ex)
             {
@@ -588,6 +552,14 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 if (product == null)
                     return NotFound(new { message = $"Product with slug {slug} not found" });
 
+                var isFavorite = false;
+                var customerId = User.GetNullableCustomerId();
+                if (customerId.HasValue)
+                {
+                    isFavorite = await _productService.IsFavoriteProduct(customerId.Value, product.ProductVariants.First().Id);
+                    await _productService.AddViewedProductVariantAsync(customerId.Value, product.ProductVariants.First().Id);
+                }
+
                 var sumMaxSalesQuantity = product.ProductVariants.Sum(x => x.MaxSalesQuantity);
                 var sumAvailableStock = product.ProductVariants.Sum(x => x.Inventories.Sum(x => x.QuantityAvailable) + x.OverSaleNumber.GetValueOrDefault());
                 var maxOrderQuantity = sumMaxSalesQuantity >= sumAvailableStock ? sumMaxSalesQuantity : sumAvailableStock;
@@ -705,7 +677,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                             v.RatePriceUnit,
                             QuantityAvailable = v.Inventories.Sum(x => x.QuantityAvailable)
                         }),
-                    MaxOrderQuantity = maxOrderQuantity,                    
+                    MaxOrderQuantity = maxOrderQuantity,
+                    IsFavorite = isFavorite
                 };
 
                 return Ok(response);
@@ -719,6 +692,14 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 Logger.LogError(ex, "Error getting product by slug");
                 return StatusCode(500, new { message = "An error occurred while retrieving the product", error = ex.Message });
             }
+        }
+
+        [HttpPost("toggleFavorite/{id}")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> ToggleFavoriteAsync(int id)
+        {
+            var result = await _productService.ToggleFavoriteProductAsync(User.GetCustomerId(), id);
+            return Ok(result);
         }
     }
 }
