@@ -90,6 +90,8 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<Combo> Combos { get; set; }
         public DbSet<ComboItem> ComboItems { get; set; }
         public DbSet<BannerAnalytics> BannerAnalytics { get; set; }
+        public DbSet<CTA> CTAs { get; set; }
+
 
         // Purchase Order System
         public DbSet<Supplier> Suppliers { get; set; }
@@ -192,7 +194,7 @@ namespace ThuocGiaThat.Infrastucture
 
                 entity.HasOne(e => e.Product).WithMany(e => e.ProductVariants).HasForeignKey(e => e.ProductId)
                     .OnDelete(DeleteBehavior.Cascade);
-                entity.HasIndex(e => e.SKU).IsUnique();                
+                entity.HasIndex(e => e.SKU).IsUnique();
             });
 
             // ============ VariantOptionValue Configuration ============
@@ -1252,6 +1254,40 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasIndex(e => e.BannerId);
                 entity.HasIndex(e => e.CustomerId);
                 entity.HasIndex(e => e.EventType);
+            });
+
+            // ============ CTA Configuration ============
+            modelBuilder.Entity<CTA>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Code).HasMaxLength(50);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Title).HasMaxLength(500);
+                entity.Property(e => e.Description).HasMaxLength(1000);
+                entity.Property(e => e.ButtonText).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.TargetUrl).HasMaxLength(1000);
+                entity.Property(e => e.Icon).HasMaxLength(200);
+                entity.Property(e => e.ImageUrl).HasMaxLength(500);
+                entity.Property(e => e.MobileImageUrl).HasMaxLength(500);
+                entity.Property(e => e.BackgroundColor).HasMaxLength(50);
+                entity.Property(e => e.TextColor).HasMaxLength(50);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+
+                // Relationship with Campaign (optional)
+                entity.HasOne(e => e.Campaign)
+                    .WithMany()
+                    .HasForeignKey(e => e.CampaignId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                // Indexes
+                entity.HasIndex(e => e.Code);
+                entity.HasIndex(e => e.Type);
+                entity.HasIndex(e => e.Position);
+                entity.HasIndex(e => e.IsActive);
+                entity.HasIndex(e => e.DisplayOrder);
+                entity.HasIndex(e => new { e.ValidFrom, e.ValidTo });
+                entity.HasIndex(e => e.CampaignId);
             });
 
             // ============ Purchase Order System Configuration ============
