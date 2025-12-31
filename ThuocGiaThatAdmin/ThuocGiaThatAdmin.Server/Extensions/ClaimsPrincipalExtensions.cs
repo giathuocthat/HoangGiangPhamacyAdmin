@@ -17,7 +17,7 @@ namespace ThuocGiaThatAdmin.Server.Extensions
 
         public static Guid GetUserId(this ClaimsPrincipal user)
         {
-            var id = user.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            var id = user.FindFirstValue("Id");
 
             if (string.IsNullOrEmpty(id))
                 throw new UnauthorizedAccessException("UserId not found in token");
