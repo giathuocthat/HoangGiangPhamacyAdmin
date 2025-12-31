@@ -16,5 +16,6 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public int DisplayOrder { get; set; }
         public string? Slug { get; set; }
         public bool? IsFavorite { get; set; }
+        public string BrandName { get; set; }
     }
 }

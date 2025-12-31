@@ -449,6 +449,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                     MaxQuantityPerOrder = i.ProductVariant.MaxSalesQuantity,
                     ShortDescription = i.ProductVariant.Product.ShortDescription,
                     DisplayOrder = i.DisplayOrder,
+                    BrandName = i.ProductVariant.Product.Brand == null ? "" : i.ProductVariant.Product.Brand.Name
                 })
                 .ToListAsync();
 

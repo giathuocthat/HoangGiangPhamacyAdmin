@@ -22,6 +22,8 @@ namespace ThuocGiaThatAdmin.Contract.Enums
         [Description("Bán chạy (BestSeller)")]
         BestSeller = 5,
         [Description("Gợi ý (Recommendation)")]
-        Recommendation = 6
+        Recommendation = 6,
+        [Description("Sản phẩm mới")]
+        News = 7
     }
 }
