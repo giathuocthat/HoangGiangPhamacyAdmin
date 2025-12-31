@@ -2,10 +2,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using StackExchange.Redis;
 using System.Text;
 using System.Threading.RateLimiting;
 using ThuocGiaThat.Infrastucture.Data;
@@ -19,7 +17,6 @@ using ThuocGiaThatAdmin.Contract.Models;
 using ThuocGiaThatAdmin.Contracts.Models;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Queries;
-using ThuocGiaThatAdmin.Server.Configurations;
 using ThuocGiaThatAdmin.Server.Extensions;
 using ThuocGiaThatAdmin.Service;
 using ThuocGiaThatAdmin.Service.Interfaces;
@@ -69,46 +66,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// configure RedisCache
-string redisConnectionString = builder.Configuration["Redis:Connection"];
-
-builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
-{
-    //var redisConnectionString = builder.Configuration.GetSection("Redis").Get<RedisConfigurationOption>();
-    var configOptions = ConfigurationOptions.Parse(redisConnectionString);
-    configOptions.ConnectTimeout = 10000;
-    configOptions.SyncTimeout = 50000;
-    configOptions.AsyncTimeout = 50000;
-    configOptions.AllowAdmin = true;
-    configOptions.AbortOnConnectFail = false;
-    configOptions.ConnectRetry = 3;
-    configOptions.KeepAlive = 60;
-    configOptions.ReconnectRetryPolicy = new ExponentialRetry(5000);
-
-    var multiplexer = ConnectionMultiplexer.Connect(configOptions);
-
-    // Log connection events
-    multiplexer.ConnectionFailed += (sender, args) =>
-    {
-        Console.WriteLine($"Redis Connection Failed: {args.Exception?.Message}");
-    };
-
-    multiplexer.ConnectionRestored += (sender, args) =>
-    {
-        Console.WriteLine("Redis Connection Restored");
-    };
-
-    multiplexer.InternalError += (sender, args) =>
-    {
-        Console.WriteLine($"Redis Internal Error: {args.Exception?.Message}");
-    };
-
-    return multiplexer;
-
-});
-
-
-builder.Services.AddScoped<ICacheService, RedisCache>();
+builder.Services.AddMemoryCache();
 
 // Configure DbContext
 // Update the connection string as needed
@@ -178,7 +136,6 @@ builder.Services.AddResponseCompression(options =>
 builder.Services.Configure<FileUploadSettings>(
     builder.Configuration.GetSection("FileUploadSettings"));
 
-builder.Services.Configure<RedisConfigurationOption>(builder.Configuration.GetSection("Redis"));
 
 // ============================================================
 // Register Repositories
@@ -325,6 +282,9 @@ builder.Services.AddScoped<IOrderFulfillmentRepository, OrderFulfillmentReposito
 // Warehouse Picking Service
 builder.Services.AddScoped<IWarehousePickingService, WarehousePickingService>();
 builder.Services.AddScoped<IWarehousePickingRepository, WarehousePickingRepository>();
+builder.Services.AddScoped<ICacheService, InMemoryCache>();
+
+
 
 // Add CORS to allow frontend to call this API
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? throw new Exception("Cors:AllowedOrigins is missing"); ;
