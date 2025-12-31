@@ -95,7 +95,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
         /// <summary>
         /// Get brands with pagination
         /// </summary>
-        public async Task<(IList<Product> products, int TotalCount)> GetPagedProductsAsync(string? category, string? price, int? type, string? sort, int page = 1, int pageSize = 20)
+        public async Task<dynamic> GetPagedProductsAsync(string? category, string? price, int? type, string? sort, int page = 1, int pageSize = 20)
         {
             var query = _context.Set<Product>()
                 .Include(x => x.Brand)
@@ -104,7 +104,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
                 .AsQueryable()
                 .AsNoTracking();
 
-            if(!string.IsNullOrEmpty(category))
+            if (!string.IsNullOrEmpty(category))
             {
                 var categoryId = await _context.Set<Category>().Where(x => x.Slug == category).Select(x => x.Id).FirstOrDefaultAsync();
                 if (categoryId != 0)
@@ -115,7 +115,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
 
             if (!string.IsNullOrEmpty(price))
             {
-                switch(price)
+                switch (price)
                 {
                     case "lt_100k":
                         query = query.Where(x => x.ProductVariants.Any(y => y.Price <= 100000));
@@ -127,7 +127,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
                         query = query.Where(x => x.ProductVariants.Any(y => y.Price > 200000 && y.Price <= 300000));
                         break;
                     case "gt_300k":
-                        query.Where(x => x.ProductVariants.Any(y => y.Price > 300000));
+                        query = query.Where(x => x.ProductVariants.Any(y => y.Price > 300000));
                         break;
                 }
             }
@@ -164,13 +164,55 @@ namespace ThuocGiaThat.Infrastucture.Repositories
 
             var totalCount = await query.CountAsync();
 
-            var products = await query
-                .Include(p => p.ProductVariants.Take(1))                
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            //var products = await query
+            //    .Include(p => p.ProductVariants.Take(1))                
+            //    .Skip((page - 1) * pageSize)
+            //    .Take(pageSize)
+            //    .ToListAsync();
 
-            return (products, totalCount);
+            var data = await query
+                .Include(p => p.ProductVariants.Take(1))
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize).Select(product => new
+                {
+                    product.Id,
+                    product.CategoryId,
+                    product.BrandId,
+                    product.Name,
+                    product.ShortDescription,
+                    product.FullDescription,
+                    product.Slug,
+                    product.ThumbnailUrl,
+                    product.Ingredients,
+                    product.UsageInstructions,
+                    product.Contraindications,
+                    product.StorageInstructions,
+                    product.RegistrationNumber,
+                    product.IsPrescriptionDrug,
+                    product.IsActive,
+                    product.IsFeatured,
+                    product.CreatedDate,
+                    product.UpdatedDate,
+                    product.DosageInstructions,
+                    product.DrugEfficacy,
+                    BrandName = product.Brand == null ? "" : product.Brand.Name,
+                    CategoryName = product.Category == null ? "" : product.Category.Name,
+                    price = product.ProductVariants.First().Price,
+                    originalPrice = product.ProductVariants.First().OriginalPrice,
+                    productVariantId = product.ProductVariants.First().Id,
+                    product.Specification,
+                    isFavorite = product.ProductVariants.First().FavouriteProducts.Any() || false
+                }).ToListAsync();
+
+            var pagination = new
+            {
+                PageNumber = page,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
+
+            return (new { data, pagination });
         }
 
         /// <summary>
@@ -196,6 +238,7 @@ namespace ThuocGiaThat.Infrastucture.Repositories
                             .ThenInclude(pov => pov.ProductOption)
                 .Include(p => p.ProductVariants)
                     .ThenInclude(v => v.Inventories)
+                .Include(p => p.ProductVariants)
                 .FirstOrDefaultAsync(p => p.Slug.Equals(slug));
         }
     }

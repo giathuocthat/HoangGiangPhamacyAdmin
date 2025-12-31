@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using ThuocGiaThat.Infrastucture;
@@ -80,7 +81,7 @@ namespace ThuocGiaThatAdmin.Service.Services
         /// <param name="pageNumber">Page number (1-based)</param>
         /// <param name="pageSize">Number of items per page</param>
         /// <returns>Tuple containing list of products and total count</returns>
-        public async Task<(IEnumerable<Product> products, int TotalCount)> GetPagedProductsAsync(string? category, string? price, int? type, string? sort, int page = 1, int pageSize = 20)
+        public async Task<dynamic> GetPagedProductsAsync(string? category, string? price, int? type, string? sort, int page = 1, int pageSize = 20)
         {
             if (page <= 0)
                 throw new ArgumentException("Page number must be greater than 0", nameof(page));
@@ -993,6 +994,56 @@ namespace ThuocGiaThatAdmin.Service.Services
             if(string.IsNullOrEmpty(slug)) throw  new ArgumentNullException("slug");
 
             return await _productRepository.GetProductWithCategoryAsync(slug);
+        }
+
+        public async Task<bool> ToggleFavoriteProductAsync(int customerId, int id)
+        {
+            bool result;
+            var item = await _context.FavouriteProducts.FirstOrDefaultAsync(x => x.ProductVariantId == id && x.CustomerId == customerId && x.Type == FavouriteProductType.Liked
+            );
+            if (item == null)
+            {
+                _context.FavouriteProducts.Add(new FavouriteProduct
+                {
+                    ProductVariantId = id,
+                    CustomerId = customerId,
+                    UpdatedDate = DateTime.UtcNow,
+                    Type = FavouriteProductType.Liked
+                });
+                result = true;
+            }
+            else
+            {
+                _context.FavouriteProducts.Remove(item);
+                result = false;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return result;
+        }
+
+        public async Task AddViewedProductVariantAsync(int customerId, int id)
+        {
+            var item = await _context.FavouriteProducts.FirstOrDefaultAsync(x => x.ProductVariantId == id && x.CustomerId == customerId && x.Type == FavouriteProductType.Viewed
+            );
+            if (item == null)
+            {
+                _context.FavouriteProducts.Add(new FavouriteProduct
+                {
+                    ProductVariantId = id,
+                    CustomerId = customerId,
+                    UpdatedDate = DateTime.UtcNow,
+                    Type = FavouriteProductType.Viewed
+                });
+
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<bool> IsFavoriteProduct(int customerId, int productVariantId)
+        {
+            return await _context.FavouriteProducts.AnyAsync(x => x.CustomerId == customerId && x.ProductVariantId == productVariantId && x.Type == FavouriteProductType.Liked);
         }
     }
 }

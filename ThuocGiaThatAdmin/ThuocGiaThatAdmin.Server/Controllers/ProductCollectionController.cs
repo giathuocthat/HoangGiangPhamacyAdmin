@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ThuocGiaThatAdmin.Contract.Enums;
 using ThuocGiaThatAdmin.Contracts.DTOs;
+using ThuocGiaThatAdmin.Domain.Enums;
+using ThuocGiaThatAdmin.Server.Extensions;
 using ThuocGiaThatAdmin.Service.Services;
 
 namespace ThuocGiaThatAdmin.Server.Controllers
@@ -178,6 +180,15 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         public async Task<IActionResult> GetProductsByCollectionType(ProductCollectionTypeEnum type, int pageSize = 20)
         {
             var result = await _service.GetCollectionProductsByTypeAsync(type, pageSize);
+
+            return Ok(result);
+        }
+
+        [HttpGet("favoriteProducts/{type}")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> GetFavoriteProductsTypeAsync(FavouriteProductType type, int pageSize = 20)
+        {
+            var result = await _service.GetFavoriteProductsByTypeAsync(type, pageSize, User.GetCustomerId());
 
             return Ok(result);
         }
