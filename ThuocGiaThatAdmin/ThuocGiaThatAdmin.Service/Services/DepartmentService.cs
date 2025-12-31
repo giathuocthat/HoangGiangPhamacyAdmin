@@ -244,5 +244,109 @@ namespace ThuocGiaThatAdmin.Service.Services
 
             return (true, "Department deleted successfully");
         }
+
+        // ========== Department Role Management Implementation ==========
+
+        public async Task<IEnumerable<DepartmentRoleDto>> GetDepartmentRolesAsync(int departmentId)
+        {
+            var departmentRoles = await _context.DepartmentRoles
+                .Include(dr => dr.Role)
+                .Where(dr => dr.DepartmentId == departmentId && dr.IsActive)
+                .OrderBy(dr => dr.Role.Name)
+                .ToListAsync();
+
+            return departmentRoles.Select(dr => new DepartmentRoleDto
+            {
+                Id = dr.Id,
+                DepartmentId = dr.DepartmentId,
+                RoleId = dr.RoleId,
+                RoleName = dr.Role.Name ?? string.Empty,
+                RoleDisplayName = dr.Role.DisplayName,
+                Description = dr.Description,
+                IsActive = dr.IsActive,
+                CreatedDate = dr.CreatedDate
+            });
+        }
+
+        public async Task<(bool Success, string Message)> AssignRoleToDepartmentAsync(int departmentId, AssignRoleToDepartmentDto dto)
+        {
+            // Validate department exists
+            var department = await _departmentRepository.GetByIdAsync(departmentId);
+            if (department == null)
+            {
+                return (false, "Department not found");
+            }
+
+            // Validate role exists
+            var roleExists = await _context.Roles.AnyAsync(r => r.Id == dto.RoleId && r.IsActive);
+            if (!roleExists)
+            {
+                return (false, "Role not found or inactive");
+            }
+
+            // Check if role already assigned (composite unique constraint will also catch this)
+            var alreadyAssigned = await _context.DepartmentRoles
+                .AnyAsync(dr => dr.DepartmentId == departmentId && dr.RoleId == dto.RoleId);
+
+            if (alreadyAssigned)
+            {
+                return (false, "Role already assigned to this department");
+            }
+
+            // Create department role
+            var departmentRole = new DepartmentRole
+            {
+                DepartmentId = departmentId,
+                RoleId = dto.RoleId,
+                Description = dto.Description,
+                IsActive = true,
+                CreatedDate = DateTime.UtcNow
+            };
+
+            await _context.DepartmentRoles.AddAsync(departmentRole);
+            await _context.SaveChangesAsync();
+
+            return (true, "Role assigned to department successfully");
+        }
+
+        public async Task<(bool Success, string Message)> RemoveRoleFromDepartmentAsync(int departmentId, string roleId)
+        {
+            var departmentRole = await _context.DepartmentRoles
+                .FirstOrDefaultAsync(dr => dr.DepartmentId == departmentId && dr.RoleId == roleId);
+
+            if (departmentRole == null)
+            {
+                return (false, "Department role assignment not found");
+            }
+
+            _context.DepartmentRoles.Remove(departmentRole);
+            await _context.SaveChangesAsync();
+
+            return (true, "Role removed from department successfully");
+        }
+
+        public async Task<IEnumerable<RoleDto>> GetAvailableRolesForDepartmentAsync(int departmentId)
+        {
+            // Get all role IDs already assigned to this department
+            var assignedRoleIds = await _context.DepartmentRoles
+                .Where(dr => dr.DepartmentId == departmentId)
+                .Select(dr => dr.RoleId)
+                .ToListAsync();
+
+            // Get all active roles that are NOT assigned to this department
+            var availableRoles = await _context.Roles
+                .Where(r => r.IsActive && !assignedRoleIds.Contains(r.Id))
+                .OrderBy(r => r.Name)
+                .ToListAsync();
+
+            return availableRoles.Select(r => new RoleDto
+            {
+                Id = r.Id,
+                Name = r.Name ?? string.Empty,
+                DisplayName = r.DisplayName,
+                Description = r.Description,
+                IsActive = r.IsActive
+            });
+        }
     }
 }

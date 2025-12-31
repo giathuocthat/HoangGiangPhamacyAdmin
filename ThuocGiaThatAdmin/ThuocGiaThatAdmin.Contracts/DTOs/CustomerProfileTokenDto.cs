@@ -9,6 +9,6 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
     public class CustomerProfileTokenDto : CustomerProfileDto
     {
         public string Token { get; set; }
-        public string ExpiresAt { get; set; }
+        public string RefreshToken { get; set; }
     }
 }

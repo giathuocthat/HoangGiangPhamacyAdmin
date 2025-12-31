@@ -23,7 +23,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var roles = _roleManager.Roles.Where(x => x.Name != AdminPermission.Role);
+            var roles = _roleManager.Roles.Where(x => x.Name != AdminPermission.Role).OrderByDescending( x=> x.Name).ToList();
             return Ok(roles);
         }
 
@@ -39,6 +39,9 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             var user = await _userManager.FindByIdAsync(userId);
             var roles = await _userManager.GetRolesAsync(user);
+
+            roles = roles.OrderByDescending(x => x).ToList();
+
             return Ok(roles);
         }
     }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ThuocGiaThat.Infrastucture;
 
@@ -11,9 +12,11 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    partial class TrueMecContextModelSnapshot : ModelSnapshot
+    [Migration("20251230064622_AddDepartmentRole")]
+    partial class AddDepartmentRole
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -213,9 +216,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Code")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -291,9 +291,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
-
-                    b.Property<string>("AvatarUrl")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -1512,9 +1509,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<int>("ProductVariantId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
@@ -1524,7 +1518,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.HasIndex("CustomerId", "ProductVariantId", "Type")
+                    b.HasIndex("CustomerId", "ProductVariantId")
                         .IsUnique();
 
                     b.ToTable("FavouriteProducts");
@@ -4578,7 +4572,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsRequired();
 
                     b.HasOne("ThuocGiaThatAdmin.Domain.Entities.ProductVariant", "ProductVariant")
-                        .WithMany("FavouriteProducts")
+                        .WithMany()
                         .HasForeignKey("ProductVariantId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -5422,8 +5416,6 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductVariant", b =>
                 {
-                    b.Navigation("FavouriteProducts");
-
                     b.Navigation("Inventories");
 
                     b.Navigation("InventoryTransactions");

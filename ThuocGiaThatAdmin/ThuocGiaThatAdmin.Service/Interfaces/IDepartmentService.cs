@@ -38,5 +38,27 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
         /// Xóa department (soft delete)
         /// </summary>
         Task<(bool Success, string Message)> DeleteDepartmentAsync(int id);
+
+        // ========== Department Role Management ==========
+
+        /// <summary>
+        /// Lấy danh sách roles của department
+        /// </summary>
+        Task<IEnumerable<DepartmentRoleDto>> GetDepartmentRolesAsync(int departmentId);
+
+        /// <summary>
+        /// Assign role cho department
+        /// </summary>
+        Task<(bool Success, string Message)> AssignRoleToDepartmentAsync(int departmentId, AssignRoleToDepartmentDto dto);
+
+        /// <summary>
+        /// Remove role khỏi department
+        /// </summary>
+        Task<(bool Success, string Message)> RemoveRoleFromDepartmentAsync(int departmentId, string roleId);
+
+        /// <summary>
+        /// Lấy danh sách roles chưa được assign cho department
+        /// </summary>
+        Task<IEnumerable<RoleDto>> GetAvailableRolesForDepartmentAsync(int departmentId);
     }
 }

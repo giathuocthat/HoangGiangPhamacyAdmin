@@ -103,6 +103,7 @@ namespace ThuocGiaThat.Infrastucture
         // Sales Region System
         public DbSet<SalesRegion> SalesRegions { get; set; }
         public DbSet<Department> Departments { get; set; }
+        public DbSet<DepartmentRole> DepartmentRoles { get; set; }
         public DbSet<CustomerInvoiceInfo> CustomerInvoiceInfos { get; set; }
         public DbSet<FavouriteProduct> FavouriteProducts { get; set; }
         public DbSet<ProductReview> ProductReviews { get; set; }
@@ -191,7 +192,7 @@ namespace ThuocGiaThat.Infrastucture
 
                 entity.HasOne(e => e.Product).WithMany(e => e.ProductVariants).HasForeignKey(e => e.ProductId)
                     .OnDelete(DeleteBehavior.Cascade);
-                entity.HasIndex(e => e.SKU).IsUnique();
+                entity.HasIndex(e => e.SKU).IsUnique();                
             });
 
             // ============ VariantOptionValue Configuration ============
@@ -606,6 +607,35 @@ namespace ThuocGiaThat.Infrastucture
                     .OnDelete(DeleteBehavior.SetNull);
 
                 entity.HasIndex(e => e.ManagerId);
+            });
+
+            // ============ DepartmentRole Configuration ============
+            modelBuilder.Entity<DepartmentRole>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Description).HasMaxLength(500);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UpdatedDate);
+
+                // Composite unique constraint: One role can only be assigned once per department
+                entity.HasIndex(e => new { e.DepartmentId, e.RoleId }).IsUnique();
+
+                // Relationship with Department
+                entity.HasOne(e => e.Department)
+                    .WithMany(d => d.DepartmentRoles)
+                    .HasForeignKey(e => e.DepartmentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Relationship with ApplicationRole
+                entity.HasOne(e => e.Role)
+                    .WithMany(r => r.DepartmentRoles)
+                    .HasForeignKey(e => e.RoleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Indexes for queries
+                entity.HasIndex(e => e.DepartmentId);
+                entity.HasIndex(e => e.RoleId);
+                entity.HasIndex(e => e.IsActive);
             });
 
             // ============ Address Configuration ============
@@ -1458,11 +1488,11 @@ namespace ThuocGiaThat.Infrastucture
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(e => e.ProductVariant)
-                    .WithMany()
+                    .WithMany(e => e.FavouriteProducts)
                     .HasForeignKey(e => e.ProductVariantId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasIndex(e => new { e.CustomerId, e.ProductVariantId }).IsUnique();
+                entity.HasIndex(e => new { e.CustomerId, e.ProductVariantId, e.Type }).IsUnique();
                 entity.HasIndex(e => e.CustomerId);
                 entity.HasIndex(e => e.ProductVariantId);
             });

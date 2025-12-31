@@ -5,6 +5,16 @@ namespace ThuocGiaThatAdmin.Server.Extensions
 {
     public static class ClaimsPrincipalExtensions
     {
+        public static int? GetNullableCustomerId(this ClaimsPrincipal user)
+        {
+            var id = user.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+            if (string.IsNullOrEmpty(id))
+                return null;
+
+            return int.Parse(id);
+        }
+
         public static int GetCustomerId(this ClaimsPrincipal user)
         {
             var id = user.FindFirstValue(JwtRegisteredClaimNames.Sub);

@@ -75,6 +75,11 @@ namespace ThuocGiaThatAdmin.Service.Services
 
             var (token, expiresAt) = GenerateJwtTokenAndExpires(customer);
 
+            var jwtSettings = _configuration.GetSection("Jwt");
+            var expiryRefreshTokenMinutes = int.Parse(jwtSettings["ExpiresRefreshTokenMinutes"] ?? "1440");
+            var refreshTokenExpires = DateTime.Now.AddMinutes(expiryRefreshTokenMinutes);
+            var refreshToken = GenerateJwtToken(customer, refreshTokenExpires);
+
             var result = new CustomerProfileTokenDto
             {
                 FullName = customer.FullName,
@@ -82,10 +87,10 @@ namespace ThuocGiaThatAdmin.Service.Services
                 BusinessTypeName = businessType?.Name,
                 PhoneNumber = customer.PhoneNumber,
                 Email = customer.Email,
-                ExpiresAt = expiresAt,
                 Token = token,
                 Id = customer.Id,
-                IsVerified = customer.IsVerified
+                IsVerified = customer.IsVerified,
+                RefreshToken = refreshToken
             };
 
 

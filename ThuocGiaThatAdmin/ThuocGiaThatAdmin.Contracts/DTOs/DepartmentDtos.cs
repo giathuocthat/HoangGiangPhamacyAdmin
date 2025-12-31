@@ -69,4 +69,40 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
         public bool IsActive { get; set; }
         public string? ManagerId { get; set; }
     }
+
+    /// <summary>
+    /// DTO for Department Role information
+    /// </summary>
+    public class DepartmentRoleDto
+    {
+        public int Id { get; set; }
+        public int DepartmentId { get; set; }
+        public string RoleId { get; set; } = string.Empty;
+        public string RoleName { get; set; } = string.Empty;
+        public string? RoleDisplayName { get; set; }
+        public string? Description { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime CreatedDate { get; set; }
+    }
+
+    /// <summary>
+    /// DTO for assigning role to department
+    /// </summary>
+    public class AssignRoleToDepartmentDto
+    {
+        public string RoleId { get; set; } = string.Empty;
+        public string? Description { get; set; }
+    }
+
+    /// <summary>
+    /// DTO for Role basic information
+    /// </summary>
+    public class RoleDto
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string? DisplayName { get; set; }
+        public string? Description { get; set; }
+        public bool IsActive { get; set; }
+    }
 }
