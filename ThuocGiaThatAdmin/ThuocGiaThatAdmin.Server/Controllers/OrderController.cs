@@ -80,6 +80,19 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             }, "Get Order");
         }
 
+        [HttpGet("admin/{id}")]    
+        public async Task<IActionResult> GetOrderByIdAdmin(int id)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var order = await _orderService.GetOrderByIdAsync(id);
+                if (order == null)
+                    return NotFoundResponse($"Order with ID {id} not found");
+
+                return Success(order, "Order retrieved successfully");
+            }, "Get Order");
+        }
+
         /// <summary>
         /// Get orders with pagination and search
         /// </summary>
@@ -88,7 +101,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// <param name="searchText">Search by phone, email, or order number</param>
         /// <returns>Paginated list of orders</returns>
         [HttpGet("list")]
-        //[Authorize(Roles = "Admin,Customer")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetOrders(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10,
@@ -120,7 +133,6 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         }
 
         [HttpGet("admin/list")]
-        //[Authorize(Roles = "Admin,Customer")]
         public async Task<IActionResult> GetOrdersAdmin(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10,

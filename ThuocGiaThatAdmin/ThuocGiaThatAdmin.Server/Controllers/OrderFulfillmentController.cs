@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ThuocGiaThatAdmin.Contracts.DTOs;
+using ThuocGiaThatAdmin.Server.Extensions;
 using ThuocGiaThatAdmin.Service.Interfaces;
 
 namespace ThuocGiaThatAdmin.Server.Controllers
@@ -35,18 +36,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             return await ExecuteActionAsync(async () =>
             {
-                // Lấy UserId từ claims
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                userIdClaim = "cb5b42d4-cb1e-4499-a789-52be2c17300f"; // Temporary hardcode for testing
-                if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid userId))
-                {
-                    return UnauthorizedResponse("User ID not found in token");
-                }
-
-                Logger.LogInformation($"User {userId} initiating order fulfillment for warehouse {request.WarehouseId}");
-
-                var result = await _fulfillmentService.FulfillOrdersAsync(request, userId);
-
+                var result = await _fulfillmentService.FulfillOrdersAsync(request, User.GetUserId());
                 return Success(result, "Order fulfillment completed");
             }, "Fulfill Orders");
         }

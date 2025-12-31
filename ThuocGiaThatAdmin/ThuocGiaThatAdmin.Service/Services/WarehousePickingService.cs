@@ -9,6 +9,8 @@ using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
 using ThuocGiaThatAdmin.Service.Interfaces;
 
+using Microsoft.EntityFrameworkCore;
+
 namespace ThuocGiaThatAdmin.Service.Services
 {
     /// <summary>
@@ -39,6 +41,13 @@ namespace ThuocGiaThatAdmin.Service.Services
             try
             {
                 _logger.LogInformation($"Processing {request.Movements.Count} picking movements for warehouse {request.WarehouseId}");
+
+                // Validate Destination Location
+                var destinationExists = await _context.WarehouseLocations.AnyAsync(x => x.LocationCode == request.DestinationLocationCode);
+                if (!destinationExists)
+                {
+                    throw new ArgumentException($"Mã vị trí đích {request.DestinationLocationCode} không tồn tại trong hệ thống.");
+                }
 
                 // Xử lý từng movement
                 foreach (var movementRequest in request.Movements)
@@ -187,7 +196,6 @@ namespace ThuocGiaThatAdmin.Service.Services
 
             destinationStock.Quantity += movementRequest.Quantity;
             destinationStock.UpdatedDate = DateTime.Now;
-            await _pickingRepository.UpdateBatchLocationStockAsync(destinationStock);
 
             _logger.LogInformation($"Moved {movementRequest.Quantity} of batch {movementRequest.BatchNumber} from {movementRequest.FromLocationCode} to {destinationLocationCode}");
 
