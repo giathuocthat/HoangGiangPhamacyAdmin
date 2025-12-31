@@ -145,8 +145,14 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         }
 
         [HttpPost("refreshTokenApp")]
-        public IActionResult RefreshTokenApp(string refreshToken)
+        public IActionResult RefreshTokenApp()
         {
+            var authHeader = HttpContext.Request.Headers["Authorization"].ToString();
+            if (string.IsNullOrEmpty(authHeader))
+                return Unauthorized("Missing Authorization header");
+
+            var refreshToken = authHeader.Replace("Bearer ", "").Trim();
+
             if (string.IsNullOrEmpty(refreshToken)) return BadRequest(new ApiErrorResponse { Detail = "RefreshToken không tồn tại" });
 
             var accessToken = _customerAuthService.Refresh(refreshToken);
