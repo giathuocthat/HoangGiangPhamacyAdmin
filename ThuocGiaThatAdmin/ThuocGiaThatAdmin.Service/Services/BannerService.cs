@@ -29,7 +29,7 @@ namespace ThuocGiaThatAdmin.Service.Services
 
         public async Task<IEnumerable<BannerResponseDto>> GetAllAsync()
         {
-            var banners = await _bannerRepository.GetAllAsync();
+            var banners = await _bannerRepository.GetAllAsync(x => x.BannerSections);
             return banners.Select(MapToDto);
         }
 
