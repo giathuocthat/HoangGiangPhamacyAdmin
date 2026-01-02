@@ -286,9 +286,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             {
                 if (command == null)
                     return BadRequest(new { message = "Command cannot be null" });
-
-                if (id != command.Id)
-                    return BadRequest(new { message = "Id mismatch" });
+                command.Id = id;
 
                 var result = await _commandDispatcher.DispatchAsync(command);
                 return Ok(result);
