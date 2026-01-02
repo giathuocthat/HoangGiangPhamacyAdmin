@@ -24,6 +24,8 @@ namespace ThuocGiaThatAdmin.Contract.Enums
         [Description("Gợi ý (Recommendation)")]
         Recommendation = 6,
         [Description("Sản phẩm mới")]
-        News = 7
+        News = 7,
+        [Description("Đang khuyến mãi")]
+        Sales = 8,
     }
 }

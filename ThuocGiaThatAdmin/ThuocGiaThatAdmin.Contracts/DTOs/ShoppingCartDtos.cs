@@ -22,6 +22,8 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         /// Session ID cho khách chưa đăng nhập
         /// </summary>
         public string? SessionId { get; set; }
+
+        public bool? IsUpdateQuantity { get; set; }
     }
     
     /// <summary>

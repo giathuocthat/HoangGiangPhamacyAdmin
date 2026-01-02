@@ -435,7 +435,8 @@ namespace ThuocGiaThatAdmin.Service.Services
         {
             var dtos = await _context.ProductCollections.Where(x => x.Type == (int)type && (!x.StartDate.HasValue || x.StartDate.Value <= DateTime.Now) && (!x.EndDate.HasValue || x.EndDate.Value >= DateTime.Now))
                 .SelectMany(x => x.Items)
-                .OrderBy(i => i.DisplayOrder)
+                .OrderByDescending(i => i.DisplayOrder)
+                .Take(pageSize)
                 .Select(i => new CollectionProductResponseDto
                 {
                     Id = i.ProductVariant.Product.Id,
@@ -452,6 +453,15 @@ namespace ThuocGiaThatAdmin.Service.Services
                     BrandName = i.ProductVariant.Product.Brand == null ? "" : i.ProductVariant.Product.Brand.Name
                 })
                 .ToListAsync();
+            var productVariantIds = dtos.Select(x => x.ProductVariantId).ToList();
+
+            var cartItems = await _context.ShoppingCartItems.Where(x => productVariantIds.Contains(x.ProductVariantId)).Select(x => new { x.ProductVariantId, x.Quantity }).ToListAsync();
+            foreach(var dto in dtos)
+            {
+                var cartItem = cartItems.FirstOrDefault(x => x.ProductVariantId == dto.ProductVariantId);
+                if (cartItem == null) continue;
+                dto.QuantityInCart = cartItem.Quantity;
+            }
 
             return dtos;
         }

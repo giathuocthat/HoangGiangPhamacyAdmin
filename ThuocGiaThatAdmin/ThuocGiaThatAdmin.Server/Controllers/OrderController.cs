@@ -293,7 +293,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetListOrders()
         {
-            var customerId = int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
+            var customerId = User.GetCustomerId();
             var result = await _orderService.GetListOrders(customerId);
             return Ok(result);
         }
@@ -381,6 +381,15 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 var result = await _orderService.GetEstimatedDeliveryTime(provinceId, wardId);
                 return Success(result, "Get Estimated Delivery Time successfully");
             }, "Get Estimated Delivery Time");
+        }
+
+        [HttpGet("summaryOrderInfoes")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> GetSummaryOrderInfoes()
+        {
+            var objResult = await _orderService.GetSummaryOrderInfoes(User.GetCustomerId());
+
+            return Ok(objResult);
         }
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using ThuocGiaThat.Infrastucture;
@@ -519,9 +520,10 @@ namespace ThuocGiaThatAdmin.Service.Services
 
         public async Task<dynamic> CreateOrderAsync(CheckoutOrderDto orderDto)
         {
+            var createdDate = DateTime.UtcNow;
             var order = new Order
             {
-                OrderNumber = NumberGenerator.GenerateOrderNumber(),
+                OrderNumber = NumberGenerator.BuildOrderNumber(orderDto.ProvinceId.GetValueOrDefault(), orderDto.CustomerId.GetValueOrDefault(), createdDate),
                 CustomerId = orderDto.CustomerId,
                 Note = orderDto.Note,
                 OrderStatus = OrderStatus.Pending.ToStatusString(),
@@ -545,6 +547,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 ShippingPhone = orderDto.ShippingPhone,
                 ExportInvoice = orderDto.ExportInvoice,
                 CustomerInvoiceInfoId = orderDto.InvoiceId,
+                CreatedDate = createdDate
             };
 
             // Create snapshots for all order items (using navigation property, not ID)
@@ -668,7 +671,11 @@ namespace ThuocGiaThatAdmin.Service.Services
                     OrderStatusDescription = Enum.Parse<OrderStatus>(x.OrderStatus).GetDescription(),
                     NumberOfProducts = x.OrderItems.Count,
                     TotalOfItems = x.OrderItems.Sum(i => i.Quantity),
-                    CreatedDate = x.CreatedDate
+                    CreatedDate = x.CreatedDate,
+                    IsRequestInvoice = x.ExportInvoice,
+                    TotalAmount = x.TotalAmount,
+                    EstimatedDeliveryDate = x.EstimatedDeliveryDate,
+                    DeliveryDate = x.DeliveredDate
                 }).ToListAsync();
         }
 
@@ -757,6 +764,21 @@ namespace ThuocGiaThatAdmin.Service.Services
             {
                 NumberOfDays = days,
                 EstimatedDate = DateTime.Now.AddDays(days)
+            };
+        }
+
+        public async Task<dynamic> GetSummaryOrderInfoes(int customerId)
+        {
+            var query = _context.Orders.Where(x => x.CustomerId == customerId && x.OrderStatus != OrderStatus.Cancelled.ToString());
+            var totalAmount = await query.SumAsync(x => x.TotalAmount);
+            var totalOrders = await query.CountAsync();
+            var totalProducts = await query.SelectMany(x => x.OrderItems).Select(x => x.ProductVariantId).Distinct().CountAsync();
+
+            return new
+            {
+                TotalAmount = totalAmount,
+                TotalOrders = totalOrders,
+                TotalProducts = totalProducts
             };
         }
     }

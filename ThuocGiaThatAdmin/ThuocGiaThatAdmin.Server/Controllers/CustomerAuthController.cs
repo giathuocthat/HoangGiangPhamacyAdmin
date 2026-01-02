@@ -213,7 +213,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     HasBusinessInfo = customer.BusinessTypeId.HasValue,
                     HasPaymentAccounts = customer.PaymentAccounts.Any(),
                     CreatedDate = customer.CreatedDate,
-                    IsVerified = customer.IsVerified
+                    IsVerified = customer.IsVerified,
+                    RewardPoints = customer.RewardPoints
                 };
 
                 return Success(profile);
@@ -230,7 +231,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             return await ExecuteActionAsync(async () =>
             {
-                var customerId = int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
+                var customerId = User.GetCustomerId();
                 var success = await _customerAuthService.UpdateProfileAsync(customerId, dto);
 
                 if (!success)
@@ -315,7 +316,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             return await ExecuteActionAsync(async () =>
             {
-                var customerId = int.Parse(User.FindFirst("customer_id")?.Value ?? "0");
+                var customerId = User.GetCustomerId();
                 var result = await _customerAuthService.ChangePasswordAsync(customerId, dto);
 
                 return result.success ? Success("") : BadRequest(result.message);
@@ -332,6 +333,6 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             var result = await _customerAuthService.CheckExisting(request);
             return Ok(result);
 
-        }
+        }        
     }
 }

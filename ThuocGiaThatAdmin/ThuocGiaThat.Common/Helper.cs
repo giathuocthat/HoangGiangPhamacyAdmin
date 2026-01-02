@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.WebSockets;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,6 +36,13 @@ namespace ThuocGiaThatAdmin.Common
             }
 
             return sb.ToString();
-        }  
+        }
+
+        public static string BuildOrderNumber(int province, int customerId, DateTime createdDate)
+        {
+            var nowVN = DateTime.UtcNow.AddHours(7);
+            string result = $"O-{province:00}-{customerId:000000}-{nowVN:yyMMddHHmmss}";
+            return result;
+        }
     }
 }

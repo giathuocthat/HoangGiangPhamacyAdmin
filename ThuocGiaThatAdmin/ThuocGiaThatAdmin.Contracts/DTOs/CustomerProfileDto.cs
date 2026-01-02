@@ -20,5 +20,7 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
         public DateTime CreatedDate { get; set; }
 
         public bool IsVerified { get; set; }
+
+        public int? RewardPoints { get; set; }
     }
 }

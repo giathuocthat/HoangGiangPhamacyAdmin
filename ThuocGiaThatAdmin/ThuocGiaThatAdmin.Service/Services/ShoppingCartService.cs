@@ -93,7 +93,7 @@ namespace ThuocGiaThatAdmin.Service.Services
             if (existingItem != null)
             {
                 // Update quantity
-                existingItem.Quantity += dto.Quantity;
+                existingItem.Quantity = dto.IsUpdateQuantity == true ? dto.Quantity : existingItem.Quantity + dto.Quantity;
                 existingItem.TotalLineAmount = existingItem.Quantity * existingItem.UnitPrice;
                 existingItem.UpdatedDate = DateTime.UtcNow;
                 _cartItemRepository.Update(existingItem);

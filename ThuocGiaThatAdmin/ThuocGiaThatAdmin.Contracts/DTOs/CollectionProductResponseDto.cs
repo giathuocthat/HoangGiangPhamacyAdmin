@@ -17,5 +17,13 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public string? Slug { get; set; }
         public bool? IsFavorite { get; set; }
         public string BrandName { get; set; }
+        public decimal? SuggestedRetailPrice
+        {
+            get
+            {
+                return Price.HasValue ? Price.Value + 100000 : null;
+            }
+        }
+        public int QuantityInCart { get; set; }
     }
 }
