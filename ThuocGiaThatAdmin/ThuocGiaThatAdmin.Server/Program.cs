@@ -284,6 +284,9 @@ builder.Services.AddScoped<IWarehousePickingService, WarehousePickingService>();
 builder.Services.AddScoped<IWarehousePickingRepository, WarehousePickingRepository>();
 builder.Services.AddScoped<ICacheService, InMemoryCache>();
 
+// CTA Service
+builder.Services.AddScoped<ICTAService, CTAService>();
+
 
 
 // Add CORS to allow frontend to call this API
