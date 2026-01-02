@@ -16,5 +16,7 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
         public string Slug { get; set; } = string.Empty;
 
         public int DisplayOrder { get; set; } = 0;
+
+        public string? ImageUrl { get; set; }
     }
 }

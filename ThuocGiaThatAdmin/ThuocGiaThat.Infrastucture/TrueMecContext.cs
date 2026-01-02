@@ -122,9 +122,14 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.Description).HasMaxLength(1000);
                 entity.Property(e => e.Slug).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.ImageUrl).HasMaxLength(500);
+
 
                 entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
                 entity.Property(e => e.UpdatedDate);
+
+                entity.Property(e => e.UpdatedDate);
+
 
                 entity.HasOne(e => e.ParentCategory)
                     .WithMany(e => e.ChildCategories)
