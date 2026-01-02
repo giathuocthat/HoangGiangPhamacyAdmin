@@ -52,6 +52,7 @@ namespace ThuocGiaThatAdmin.Commands.Categories.Handlers
             category.ParentId = command.ParentId;
             category.DisplayOrder = command.DisplayOrder;
             category.IsActive = command.IsActive;
+            category.ImageUrl = command.ImageUrl;
             category.UpdatedDate = DateTime.UtcNow;
 
             _categoryRepository.Update(category);

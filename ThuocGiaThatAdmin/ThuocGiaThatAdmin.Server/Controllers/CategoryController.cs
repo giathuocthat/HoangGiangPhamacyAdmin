@@ -51,6 +51,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                         c.ParentId,
                         c.DisplayOrder,
                         c.IsActive,
+                        c.ImageUrl,
                         c.CreatedDate,
                         c.UpdatedDate
                     }),
@@ -102,7 +103,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             try
             {
-                var items = await _service.GetRootCategoriesAsync();                
+                var items = await _service.GetRootCategoriesAsync();
                 return Ok(items);
             }
             catch (Exception ex)
@@ -147,7 +148,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     c.Slug,
                     c.Description,
                     c.DisplayOrder,
-                    c.IsActive
+                    c.IsActive,
+                    c.ImageUrl
                 });
                 return Ok(response);
             }
@@ -195,7 +197,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             {
                 var query = new GetCategoryHierarchyQuery();
                 var items = await _queryDispatcher.DispatchAsync(query);
-               // var items = await _service.GetCategoryHierarchyAsync();
+                // var items = await _service.GetCategoryHierarchyAsync();
                 return Ok(new { Data = items });
             }
             catch (Exception ex)
@@ -243,7 +245,8 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                     c.Description,
                     c.ParentId,
                     c.DisplayOrder,
-                    c.IsActive
+                    c.IsActive,
+                    c.ImageUrl
                 });
                 return Ok(response);
             }
