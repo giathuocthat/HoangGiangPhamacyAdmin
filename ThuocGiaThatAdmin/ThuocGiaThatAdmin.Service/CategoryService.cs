@@ -195,6 +195,7 @@ GROUP BY Cte.RootId;
             existing.Description = entity.Description;
             existing.ParentId = entity.ParentId;
             existing.Slug = entity.Slug;
+            existing.ImageUrl = entity.ImageUrl;
             existing.DisplayOrder = entity.DisplayOrder;
             existing.IsActive = entity.IsActive;
             existing.UpdatedDate = DateTime.UtcNow;

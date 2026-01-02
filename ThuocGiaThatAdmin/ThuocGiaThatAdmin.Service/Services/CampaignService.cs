@@ -31,7 +31,7 @@ namespace ThuocGiaThatAdmin.Service.Services
 
         public async Task<CampaignResponseDto?> GetByIdAsync(int id)
         {
-            var campaign = await _campaignRepository.GetByIdAsync(id);
+            var campaign = await _campaignRepository.GetWithBannersAsync(id);
             return campaign == null ? null : MapToDto(campaign);
         }
 

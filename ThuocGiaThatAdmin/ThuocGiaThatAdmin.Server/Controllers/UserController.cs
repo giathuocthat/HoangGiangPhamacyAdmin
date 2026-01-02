@@ -45,7 +45,7 @@ namespace HoangGiangPhamacyAuthentication.Controllers
                 PhoneNumber = dto.Phone,
                 IsActive = true,
                 DepartmentId = dto.DepartmentId,
-                AvatarUrl = dto.ImageUrl
+                AvatarUrl = dto.AvatarUrl
             };
 
             var result = await _userService.CreateAsync(user, dto.Password);
@@ -90,7 +90,7 @@ namespace HoangGiangPhamacyAuthentication.Controllers
             existing.PhoneNumber = dto.Phone;
             existing.Email = dto.Email ?? existing.Email;
             existing.DepartmentId = dto.DepartmentId ?? existing.DepartmentId;
-            existing.AvatarUrl = dto.ImageUrl;
+            existing.AvatarUrl = dto.AvatarUrl ?? existing.AvatarUrl;
 
             var result = await _userService.UpdateAsync(existing);
             if (!result.Succeeded)
