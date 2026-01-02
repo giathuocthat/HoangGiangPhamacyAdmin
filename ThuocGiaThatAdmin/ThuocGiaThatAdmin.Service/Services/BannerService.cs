@@ -120,6 +120,7 @@ namespace ThuocGiaThatAdmin.Service.Services
                 throw new InvalidOperationException("Valid from date must be before valid to date");
 
             // Update properties
+            banner.CampaignId = dto.CampaignId;
             banner.Title = dto.Title;
             banner.Subtitle = dto.Subtitle;
             banner.Description = dto.Description;

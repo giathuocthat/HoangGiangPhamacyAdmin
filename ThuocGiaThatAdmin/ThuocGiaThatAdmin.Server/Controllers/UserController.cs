@@ -31,6 +31,11 @@ namespace HoangGiangPhamacyAuthentication.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
+            if (dto.DepartmentId == null)
+            {
+                throw new Exception("DepartmentId is required.");
+            }
+
             var user = new ApplicationUser
             {
                 UserName = dto.Username,
@@ -38,7 +43,9 @@ namespace HoangGiangPhamacyAuthentication.Controllers
                 FullName = dto.FullName,
                 CreatedDate = DateTime.Now,
                 PhoneNumber = dto.Phone,
-                IsActive = true
+                IsActive = true,
+                DepartmentId = dto.DepartmentId,
+                AvatarUrl = dto.ImageUrl
             };
 
             var result = await _userService.CreateAsync(user, dto.Password);
@@ -48,16 +55,19 @@ namespace HoangGiangPhamacyAuthentication.Controllers
                 return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
             }
 
-            var roldeDetail = await _roleManager.FindByIdAsync(dto.Role.ToString());
-
-            if (roldeDetail != null)
+            // Assign role if provided
+            if (!string.IsNullOrWhiteSpace(dto.Role))
             {
-                var roleName = roldeDetail.Name;
-                var isInRole = await _userManager.IsInRoleAsync(user, roleName);
+                var roleDetail = await _roleManager.FindByNameAsync(dto.Role);
 
-                if (!isInRole)
+                if (roleDetail != null)
                 {
-                    await _userManager.AddToRoleAsync(user, roleName);
+                    var isInRole = await _userManager.IsInRoleAsync(user, roleDetail.Name);
+
+                    if (!isInRole)
+                    {
+                        await _userManager.AddToRoleAsync(user, roleDetail.Name);
+                    }
                 }
             }
 
@@ -77,7 +87,10 @@ namespace HoangGiangPhamacyAuthentication.Controllers
 
             // Map updatable fields
             existing.FullName = dto.FullName ?? existing.FullName;
-            existing.PhoneNumber = dto.PhoneNumber;
+            existing.PhoneNumber = dto.Phone;
+            existing.Email = dto.Email ?? existing.Email;
+            existing.DepartmentId = dto.DepartmentId ?? existing.DepartmentId;
+            existing.AvatarUrl = dto.ImageUrl;
 
             var result = await _userService.UpdateAsync(existing);
             if (!result.Succeeded)
@@ -85,7 +98,27 @@ namespace HoangGiangPhamacyAuthentication.Controllers
                 return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
             }
 
-            return Ok(new { id = existing.Id, username = existing.UserName, email = existing.Email, fullName = existing.FullName });
+            // Update role if provided
+            if (!string.IsNullOrWhiteSpace(dto.Role))
+            {
+                var roleDetail = await _roleManager.FindByNameAsync(dto.Role);
+
+                if (roleDetail != null)
+                {
+                    // Remove all existing roles
+                    var currentRoles = await _userManager.GetRolesAsync(existing);
+                    if (currentRoles.Any())
+                    {
+                        await _userManager.RemoveFromRolesAsync(existing, currentRoles);
+                    }
+                    
+                    // Add new role
+                    await _userManager.AddToRoleAsync(existing, roleDetail.Name);
+                }
+            }
+
+            return Ok(new { fullName = existing.FullName, phone = existing.PhoneNumber, departmentId = existing.DepartmentId, 
+                            imageUrl = existing.AvatarUrl,email = existing.Email});
         }
 
         // GET: api/user/{id}
@@ -95,7 +128,7 @@ namespace HoangGiangPhamacyAuthentication.Controllers
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest(new { error = "id_required" });
 
-            var user = await _userService.GetByIdAsync(id);
+            var user = await _userService.GetByIdWithDepartmentAsync(id);
             if (user == null)
                 return NotFound(new { error = "user_not_found" });
 
@@ -107,10 +140,14 @@ namespace HoangGiangPhamacyAuthentication.Controllers
                 Username = user.UserName,
                 Email = user.Email,
                 FullName = user.FullName,
+                DepartmentId = user.DepartmentId,
+                DepartmentName = user.Department?.Name,
+                Role = roles != null && roles.Any() ? string.Join(",", roles) : string.Empty,
                 Roles = roles?.ToArray() ?? Array.Empty<string>(),
                 PhoneNumber = user.PhoneNumber,
                 CreatedDate = user.CreatedDate,
-                IsActive = user.IsActive
+                IsActive = user.IsActive,
+                ImageUrl = user.AvatarUrl
             };
 
             return Ok(dto);

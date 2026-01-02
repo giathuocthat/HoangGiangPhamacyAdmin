@@ -48,6 +48,14 @@ namespace ThuocGiaThatAdmin.Service
             return await _userManager.FindByNameAsync(username);
         }
 
+        public async Task<ApplicationUser?> GetByIdWithDepartmentAsync(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id)) return null;
+            return await _userRepository.AsAsQueryable()
+                .Include(u => u.Department)
+                .FirstOrDefaultAsync(u => u.Id == id);
+        }
+
         public async Task<IEnumerable<ApplicationUser>> GetAllAsync()
         {
             return await _userManager.Users.AsNoTracking().ToListAsync();
