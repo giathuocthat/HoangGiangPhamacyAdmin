@@ -511,7 +511,8 @@ namespace ThuocGiaThatAdmin.Service.Services
                     VariantSKU = oi.ProductVariant?.SKU ?? "Unknown",
                     Quantity = oi.Quantity,
                     UnitPrice = oi.UnitPrice,
-                    TotalLineAmount = oi.TotalLineAmount
+                    TotalLineAmount = oi.TotalLineAmount,
+                    QuantityFulfilled = oi.QuantityFulfilled
                 }).ToList()
             };
         }

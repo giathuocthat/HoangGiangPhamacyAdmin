@@ -62,12 +62,22 @@ namespace ThuocGiaThat.Infrastucture.Repositories
                 return existingStock;
             }
 
+            // Tìm warehouse location id
+            var warehouseLocation = await _context.WarehouseLocations
+                .FirstOrDefaultAsync(l => l.LocationCode == destinationLocationCode);
+
+            if (warehouseLocation == null)
+            {
+                throw new InvalidOperationException($"Location code {destinationLocationCode} does not exist.");
+            }
+
             // Tạo mới nếu chưa tồn tại
             var newStock = new BatchLocationStock
             {
                 InventoryBatchId = inventoryBatchId,
                 ProductVariantId = productVariantId,
                 WarehouseId = warehouseId,
+                WarehouseLocationId = warehouseLocation.Id,
                 LocationCode = destinationLocationCode,
                 Quantity = 0,
                 QuantityReserved = 0,

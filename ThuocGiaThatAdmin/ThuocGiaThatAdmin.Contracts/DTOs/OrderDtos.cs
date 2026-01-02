@@ -161,6 +161,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal TotalLineAmount { get; set; }
+        public int QuantityFulfilled { get; set; }
     }
 
     /// <summary>

@@ -80,6 +80,19 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             }, "Get Order");
         }
 
+        [HttpGet("admin/{id}")]    
+        public async Task<IActionResult> GetOrderByIdAdmin(int id)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                var order = await _orderService.GetOrderByIdAsync(id);
+                if (order == null)
+                    return NotFoundResponse($"Order with ID {id} not found");
+
+                return Success(order, "Order retrieved successfully");
+            }, "Get Order");
+        }
+
         /// <summary>
         /// Get orders with pagination and search
         /// </summary>
@@ -102,6 +115,37 @@ namespace ThuocGiaThatAdmin.Server.Controllers
                 }
 
                 var (orders, totalCount) = await _orderService.GetOrdersAsync(pageNumber, pageSize, searchText, User.GetCustomerId());
+
+                var response = new
+                {
+                    Data = orders,
+                    Pagination = new
+                    {
+                        PageNumber = pageNumber,
+                        PageSize = pageSize,
+                        TotalCount = totalCount,
+                        TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+                    }
+                };
+
+                return Success(response, "Orders retrieved successfully");
+            }, "Get Orders List");
+        }
+
+        [HttpGet("admin/list")]
+        public async Task<IActionResult> GetOrdersAdmin(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? searchText = null)
+        {
+            return await ExecuteActionAsync(async () =>
+            {
+                if (pageSize > 100)
+                {
+                    return BadRequestResponse("Page size cannot exceed 100");
+                }
+
+                var (orders, totalCount) = await _orderService.GetOrdersAsync(pageNumber, pageSize, searchText);
 
                 var response = new
                 {

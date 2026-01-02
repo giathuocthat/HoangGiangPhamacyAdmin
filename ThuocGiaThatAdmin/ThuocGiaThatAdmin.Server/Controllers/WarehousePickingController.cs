@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ThuocGiaThatAdmin.Contracts.DTOs;
+using ThuocGiaThatAdmin.Server.Extensions;
 using ThuocGiaThatAdmin.Service.Interfaces;
 
 namespace ThuocGiaThatAdmin.Server.Controllers
@@ -34,17 +35,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         {
             return await ExecuteActionAsync(async () =>
             {
-                // Lấy UserId từ claims
-                //var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-                //if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid userId))
-                //{
-                //    return UnauthorizedResponse("User ID not found in token");
-                //}
-
-                //Logger.LogInformation($"User {userId} initiating picking process for warehouse {request.WarehouseId}");
-
-                var result = await _pickingService.ProcessPickingAsync(request, Guid.Parse("d82e0c7d-0d76-48d7-a466-901dfe81ecac"));
+                var result = await _pickingService.ProcessPickingAsync(request, User.GetUserId());
 
                 return Success(result, "Picking process completed");
             }, "Process Picking");
