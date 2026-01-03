@@ -31,14 +31,14 @@ namespace HoangGiangPhamacyAuthentication.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            if (dto.DepartmentId == null)
-            {
-                throw new Exception("DepartmentId is required.");
-            }
+            //if (dto.DepartmentId == null)
+            //{
+            //    throw new Exception("DepartmentId is required.");
+            //}
 
             var user = new ApplicationUser
             {
-                UserName = dto.Username,
+                UserName = dto.Email,
                 Email = dto.Email,
                 FullName = dto.FullName,
                 CreatedDate = DateTime.Now,
@@ -58,7 +58,7 @@ namespace HoangGiangPhamacyAuthentication.Controllers
             // Assign role if provided
             if (!string.IsNullOrWhiteSpace(dto.Role))
             {
-                var roleDetail = await _roleManager.FindByNameAsync(dto.Role);
+                var roleDetail = await _roleManager.FindByIdAsync(dto.Role);
 
                 if (roleDetail != null)
                 {

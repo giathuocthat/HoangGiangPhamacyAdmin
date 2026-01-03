@@ -4,9 +4,6 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
 {
     public class UserCreateDto
     {
-        [Required]
-        [StringLength(100)]
-        public string Username { get; set; } = null!;
 
         [Required]
         [EmailAddress]

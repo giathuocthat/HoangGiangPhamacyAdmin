@@ -140,6 +140,7 @@ namespace ThuocGiaThatAdmin.Service
             var users = _userManager.Users.Where(x => x.UserName != "ADMIN" && x.UserName != "admin")
                 .Skip((pageIndex - 1) * pageSize)
                 .Take(pageSize)
+                .OrderByDescending( x=> x.CreatedDate)
                 .ToList();
 
             var result = users.Select(x => new UserResponse
