@@ -117,7 +117,7 @@ namespace ThuocGiaThat.Infrastucture
             // ============ Category Configuration ============
             modelBuilder.Entity<Category>(entity =>
             {
-                entity.Property(p => p.Id).UseIdentityColumn(seed: 1, increment: 1);
+                entity.Property(p => p.Id);
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.Description).HasMaxLength(1000);
@@ -125,7 +125,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.ImageUrl).HasMaxLength(500);
 
 
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.Property(e => e.UpdatedDate);
@@ -147,7 +147,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.Slug).IsRequired().HasMaxLength(255);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
                 entity.HasIndex(e => e.Slug).IsUnique();
             });
@@ -158,7 +158,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.Slug).IsRequired().HasMaxLength(255);
-                entity.Property(e => e.CreatedDate).HasColumnName("CreatedDate").HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasColumnName("CreatedDate").HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate).HasColumnName("UpdatedDate");
 
                 entity.HasOne(e => e.Category).WithMany(e => e.Products).HasForeignKey(e => e.CategoryId)
@@ -194,7 +194,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.SKU).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.OriginalPrice).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasOne(e => e.Product).WithMany(e => e.ProductVariants).HasForeignKey(e => e.ProductId)
@@ -217,7 +217,7 @@ namespace ThuocGiaThat.Infrastucture
             modelBuilder.Entity<Inventory>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasOne(e => e.ProductVariant)
@@ -243,7 +243,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.Code).IsRequired().HasMaxLength(50);
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.Address).HasMaxLength(500);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasIndex(e => e.Code).IsUnique();
@@ -256,7 +256,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.BatchNumber).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.CostPrice).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasOne(e => e.Inventory)
@@ -278,7 +278,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.PurchaseOrderNumber).HasMaxLength(100);
                 entity.Property(e => e.Supplier).HasMaxLength(255);
                 entity.Property(e => e.QRCodePath).HasMaxLength(500);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasOne(e => e.ProductVariant)
@@ -299,7 +299,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.TotalValue).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.ReferenceNumber).HasMaxLength(100);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasOne(e => e.ProductVariant)
@@ -329,7 +329,7 @@ namespace ThuocGiaThat.Infrastucture
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Message).IsRequired().HasMaxLength(500);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasOne(e => e.ProductVariant)
@@ -358,7 +358,7 @@ namespace ThuocGiaThat.Infrastucture
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.HasOne(e => e.ProductVariant).WithMany(e => e.PriceHistories)
                     .HasForeignKey(e => e.ProductVariantId).OnDelete(DeleteBehavior.Cascade);
             });
@@ -374,7 +374,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.BinName).HasMaxLength(50);
                 entity.Property(e => e.Description).HasMaxLength(500);
                 entity.Property(e => e.Notes).HasMaxLength(500);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasOne(e => e.Warehouse)
@@ -394,7 +394,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.LocationCode).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Notes).HasMaxLength(500);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 // Relationship with InventoryBatch
@@ -440,7 +440,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.ToLocationCode).HasMaxLength(100);
                 entity.Property(e => e.BatchNumber).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Reason).HasMaxLength(500);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasOne(e => e.ProductVariant)
@@ -457,7 +457,7 @@ namespace ThuocGiaThat.Infrastucture
                 // This ensures batch location consistency
                 entity.HasIndex(e => new { e.BatchNumber, e.WarehouseId, e.ToLocationCode })
                     .IsUnique()
-                    .HasFilter("[ToLocationCode] IS NOT NULL"); // Only apply when ToLocationCode is not null
+                    .HasFilter("\"ToLocationCode\" IS NOT NULL"); // Only apply when ToLocationCode is not null
 
                 // Indexes for queries
                 entity.HasIndex(e => e.ProductVariantId);
@@ -473,7 +473,7 @@ namespace ThuocGiaThat.Infrastucture
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Email).HasMaxLength(255);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
                 entity.Property(e => e.PhoneNumber).IsRequired(true);
 
@@ -539,7 +539,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.BankBranch).HasMaxLength(200);
                 entity.Property(e => e.SwiftCode).HasMaxLength(20);
                 entity.Property(e => e.Notes).HasMaxLength(500);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 // Indexes for faster queries
@@ -554,7 +554,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Code).IsRequired().HasMaxLength(20);
                 entity.Property(e => e.Description).HasMaxLength(500);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 // Unique constraint on Code
@@ -570,7 +570,7 @@ namespace ThuocGiaThat.Infrastucture
                         Code = "MB",
                         Description = "Khu vực miền Bắc Việt Nam",
                         IsActive = true,
-                        CreatedDate = new DateTime(2025, 12, 1)
+                        CreatedDate = new DateTime(2025, 12, 1, 0, 0, 0, DateTimeKind.Utc)
                     },
                     new SalesRegion
                     {
@@ -579,7 +579,7 @@ namespace ThuocGiaThat.Infrastucture
                         Code = "MT",
                         Description = "Khu vực miền Trung Việt Nam",
                         IsActive = true,
-                        CreatedDate = new DateTime(2025, 12, 1)
+                        CreatedDate = new DateTime(2025, 12, 1, 0, 0, 0, DateTimeKind.Utc)
                     },
                     new SalesRegion
                     {
@@ -588,7 +588,7 @@ namespace ThuocGiaThat.Infrastucture
                         Code = "MN",
                         Description = "Khu vực miền Nam Việt Nam",
                         IsActive = true,
-                        CreatedDate = new DateTime(2025, 12, 1)
+                        CreatedDate = new DateTime(2025, 12, 1, 0, 0, 0, DateTimeKind.Utc)
                     }
                 );
             });
@@ -600,7 +600,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Code).IsRequired().HasMaxLength(20);
                 entity.Property(e => e.Description).HasMaxLength(500);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 // Unique constraint on Code
@@ -621,7 +621,7 @@ namespace ThuocGiaThat.Infrastucture
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Description).HasMaxLength(500);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 // Composite unique constraint: One role can only be assigned once per department
@@ -649,7 +649,7 @@ namespace ThuocGiaThat.Infrastucture
             modelBuilder.Entity<Address>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
                 entity.HasOne(e => e.Customer).WithMany(e => e.Addresses).HasForeignKey(e => e.CustomerId)
                     .OnDelete(DeleteBehavior.Cascade);
@@ -661,7 +661,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.OrderNumber).IsRequired().HasMaxLength(50);
                 entity.Property(e => e.TotalAmount).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
                 entity.Property(e => e.CustomerInvoiceInfoId).IsRequired(false);
 
@@ -724,7 +724,7 @@ namespace ThuocGiaThat.Infrastucture
             modelBuilder.Entity<OrderItemFulfillment>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
                 entity.Property(e => e.Notes).HasMaxLength(500);
 
@@ -791,7 +791,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.TotalAmount).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.Note).HasMaxLength(500);
                 entity.Property(e => e.SessionId).HasMaxLength(100);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasOne(e => e.Customer)
@@ -816,7 +816,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.VariantSKU).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.ImageUrl).HasMaxLength(500);
                 entity.Property(e => e.VariantAttributes).HasMaxLength(500);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasOne(e => e.ShoppingCart)
@@ -859,7 +859,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.Slug).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.Description).HasMaxLength(1000);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasIndex(e => e.Slug).IsUnique();
@@ -888,7 +888,7 @@ namespace ThuocGiaThat.Infrastucture
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Reason).HasMaxLength(500);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasIndex(e => e.ProductId).IsUnique();
@@ -987,7 +987,7 @@ namespace ThuocGiaThat.Infrastucture
 
                 entity.Property(e => e.CreatedBy).HasMaxLength(100);
                 entity.Property(e => e.UpdatedBy).HasMaxLength(100);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 // Indexes
@@ -1000,7 +1000,7 @@ namespace ThuocGiaThat.Infrastucture
             modelBuilder.Entity<VoucherCategory>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
 
                 entity.HasOne(e => e.Voucher)
                     .WithMany(v => v.VoucherCategories)
@@ -1022,7 +1022,7 @@ namespace ThuocGiaThat.Infrastucture
             modelBuilder.Entity<VoucherProductVariant>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
 
                 entity.HasOne(e => e.Voucher)
                     .WithMany(v => v.VoucherProductVariants)
@@ -1048,7 +1048,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.DiscountAmount).HasColumnType("decimal(18,2)").IsRequired();
                 entity.Property(e => e.OrderTotalBeforeDiscount).HasColumnType("decimal(18,2)").IsRequired();
                 entity.Property(e => e.OrderTotalAfterDiscount).HasColumnType("decimal(18,2)").IsRequired();
-                entity.Property(e => e.UsedAt).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.UsedAt).HasDefaultValueSql("NOW()");
 
                 entity.HasOne(e => e.Voucher)
                     .WithMany(v => v.UsageHistory)
@@ -1079,7 +1079,7 @@ namespace ThuocGiaThat.Infrastucture
 
                 entity.Property(e => e.AppliedOrder).IsRequired();
                 entity.Property(e => e.DiscountAmount).HasColumnType("decimal(18,2)").IsRequired();
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
 
                 entity.HasOne(e => e.Order)
                     .WithMany()
@@ -1276,7 +1276,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.MobileImageUrl).HasMaxLength(500);
                 entity.Property(e => e.BackgroundColor).HasMaxLength(50);
                 entity.Property(e => e.TextColor).HasMaxLength(50);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 // Relationship with Campaign (optional)
@@ -1311,7 +1311,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.ImageUrl).HasMaxLength(500);
                 entity.Property(e => e.CreditLimit).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.Notes).HasMaxLength(1000);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasOne(e => e.Ward)
@@ -1346,7 +1346,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.Mobile).HasMaxLength(20);
                 entity.Property(e => e.ContactType).HasConversion<int>();
                 entity.Property(e => e.Notes).HasMaxLength(1000);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasOne(e => e.Supplier)
@@ -1372,7 +1372,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.TotalAmount).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.Notes).HasMaxLength(1000);
                 entity.Property(e => e.Terms).HasMaxLength(2000);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasOne(e => e.Supplier)
@@ -1409,7 +1409,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.SKU).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.VariantOptions).HasMaxLength(1000);
                 entity.Property(e => e.Notes).HasMaxLength(1000);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasOne(e => e.PurchaseOrder)
@@ -1436,7 +1436,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.ChangeDetails).HasMaxLength(2000);
                 entity.Property(e => e.Reason).HasMaxLength(500);
                 entity.Property(e => e.Notes).HasMaxLength(1000);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasOne(e => e.PurchaseOrder)
@@ -1460,7 +1460,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.VehicleNumber).HasMaxLength(50);
                 entity.Property(e => e.Notes).HasMaxLength(1000);
                 entity.Property(e => e.RejectionReason).HasMaxLength(500);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasOne(e => e.PurchaseOrder)
@@ -1490,7 +1490,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.ShelfNumber).HasMaxLength(50);
                 entity.Property(e => e.Notes).HasMaxLength(1000);
                 entity.Property(e => e.InspectionNotes).HasMaxLength(1000);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasOne(e => e.GoodsReceipt)
@@ -1520,7 +1520,7 @@ namespace ThuocGiaThat.Infrastucture
             modelBuilder.Entity<FavouriteProduct>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasOne(e => e.Customer)
@@ -1544,7 +1544,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.ReviewText).IsRequired().HasMaxLength(2000);
                 entity.Property(e => e.IsApproved).HasDefaultValue(false);
-                entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("NOW()");
                 entity.Property(e => e.UpdatedDate);
 
                 entity.HasOne(e => e.Customer)

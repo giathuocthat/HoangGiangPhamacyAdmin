@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using ThuocGiaThat.Infrastucture;
 using ThuocGiaThatAdmin.Common;
 using ThuocGiaThatAdmin.Contract.DTOs;
@@ -854,14 +853,14 @@ namespace ThuocGiaThatAdmin.Service.Services
                     };
                 }
 
-                if(!containerLocation.BinName.IsNullOrEmpty() || !containerLocation.ShelfName.IsNullOrEmpty())
-                {
-                    return new ProcessShipmentResponseDto
-                    {
-                        Success = false,
-                        Message = $"Container location {request.ContainerLocationCode} is not for delivery"
-                    };
-                }
+                //if(!containerLocation.BinName.IsNullOrEmpty() || !containerLocation.ShelfName.IsNullOrEmpty())
+                //{
+                //    return new ProcessShipmentResponseDto
+                //    {
+                //        Success = false,
+                //        Message = $"Container location {request.ContainerLocationCode} is not for delivery"
+                //    };
+                //}
 
                 int totalItemsShipped = 0;
                 decimal totalQuantityShipped = 0;

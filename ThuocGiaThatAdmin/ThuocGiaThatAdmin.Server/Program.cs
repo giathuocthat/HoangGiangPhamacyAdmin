@@ -73,7 +73,7 @@ builder.Services.AddMemoryCache();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<ThuocGiaThat.Infrastucture.TrueMecContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseNpgsql(connectionString));
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
     .AddEntityFrameworkStores<ThuocGiaThat.Infrastucture.TrueMecContext>()
