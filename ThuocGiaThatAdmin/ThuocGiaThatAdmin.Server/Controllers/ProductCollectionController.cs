@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using ThuocGiaThatAdmin.Common;
 using ThuocGiaThatAdmin.Contract.Enums;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Enums;
@@ -21,6 +24,24 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             : base(logger)
         {
             _service = service;
+        }
+
+        /// <summary>
+        /// Get all collection types from enum
+        /// </summary>
+        [HttpGet("collection-types")]
+        public IActionResult GetCollectionTypes()
+        {
+            var collectionTypes = Enum.GetValues(typeof(ProductCollectionTypeEnum))
+                .Cast<ProductCollectionTypeEnum>()
+                .Select(e => new
+                {
+                    value = (int)e,
+                    label = e.GetDescription()
+                })
+                .ToList();
+
+            return Ok(collectionTypes);
         }
 
         /// <summary>

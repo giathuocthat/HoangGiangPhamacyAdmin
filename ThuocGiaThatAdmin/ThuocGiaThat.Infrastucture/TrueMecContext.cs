@@ -60,6 +60,7 @@ namespace ThuocGiaThat.Infrastucture
         public DbSet<CustomerPaymentAccount> CustomerPaymentAccounts { get; set; }
         public DbSet<CustomerDocument> CustomerDocuments { get; set; }
         public DbSet<CustomerVerification> CustomerVerifications { get; set; }
+        public DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
 
         // Shopping Cart
         public DbSet<ShoppingCart> ShoppingCarts { get; set; }
@@ -122,9 +123,14 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.Description).HasMaxLength(1000);
                 entity.Property(e => e.Slug).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.ImageUrl).HasMaxLength(500);
+
 
                 entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
                 entity.Property(e => e.UpdatedDate);
+
+                entity.Property(e => e.UpdatedDate);
+
 
                 entity.HasOne(e => e.ParentCategory)
                     .WithMany(e => e.ChildCategories)
@@ -704,7 +710,7 @@ namespace ThuocGiaThat.Infrastucture
                 entity.Property(e => e.VariantImageUrl).HasMaxLength(500);
                 entity.Property(e => e.CategoryName).HasMaxLength(255);
                 entity.Property(e => e.BrandName).HasMaxLength(255);
-                entity.Property(e => e.RegistrationNumber).HasMaxLength(100);
+                //entity.Property(e => e.RegistrationNumber).HasMaxLength(100);
 
                 entity.HasOne(e => e.OrderItem)
                     .WithOne()
@@ -1559,6 +1565,8 @@ namespace ThuocGiaThat.Infrastucture
             });
 
             modelBuilder.Entity<CategoryRootCountProductsDto>().HasNoKey();
+
+            modelBuilder.Entity<OrderStatusHistory>().ToTable("OrderStatusHistory");
         }
     }
 }

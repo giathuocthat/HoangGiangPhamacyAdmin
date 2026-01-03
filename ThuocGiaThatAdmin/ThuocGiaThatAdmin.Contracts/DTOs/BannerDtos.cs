@@ -68,6 +68,7 @@ namespace ThuocGiaThatAdmin.Contracts.DTOs
     /// </summary>
     public class UpdateBannerDto
     {
+        public int CampaignId { get; set; }
         public string Title { get; set; } = string.Empty;
         public string? Subtitle { get; set; }
         public string? Description { get; set; }

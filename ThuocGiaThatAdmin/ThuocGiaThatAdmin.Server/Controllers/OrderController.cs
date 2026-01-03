@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using System.Threading.Tasks;
+using ThuocGiaThatAdmin.Common;
 using ThuocGiaThatAdmin.Contract.DTOs;
 using ThuocGiaThatAdmin.Contracts.DTOs;
 using ThuocGiaThatAdmin.Domain.Entities;
+using ThuocGiaThatAdmin.Domain.Enums;
 using ThuocGiaThatAdmin.Server.Extensions;
 using ThuocGiaThatAdmin.Service.Interfaces;
 using ThuocGiaThatAdmin.Service.Services;
@@ -213,7 +215,7 @@ namespace ThuocGiaThatAdmin.Server.Controllers
         /// <param name="dto">Update status DTO</param>
         /// <returns>Updated order</returns>
         [HttpPut("{id}/status")]
-        [Authorize(Roles = "Customer")]
+        //[Authorize(Roles = "Customer")]
         public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] UpdateOrderStatusDto dto)
         {
             return await ExecuteActionAsync(async () =>
@@ -390,6 +392,29 @@ namespace ThuocGiaThatAdmin.Server.Controllers
             var objResult = await _orderService.GetSummaryOrderInfoes(User.GetCustomerId());
 
             return Ok(objResult);
+        }
+
+        [HttpGet("listOrderStatus")]
+        public async Task<IActionResult> GetListOrderStatus()
+        {
+            var result = Enum.GetValues(typeof(OrderStatus))
+            .Cast<OrderStatus>()
+            .Select(x => new
+            {
+                value = (int)x,
+                label = x.ToString(),
+                description = x.GetDescription()
+            });
+
+            return Ok(result);
+        }
+
+        [HttpGet("orderTimeline/{orderId}")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> GetOrderStatusHistories(int orderId)
+        {
+            var result = await _orderService.GetOrderTimelineAsync(orderId);
+            return Ok(result);
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using ThuocGiaThat.Infrastucture;
 using ThuocGiaThatAdmin.Common;
 using ThuocGiaThatAdmin.Contract.DTOs;
@@ -521,6 +522,7 @@ namespace ThuocGiaThatAdmin.Service.Services
         public async Task<dynamic> CreateOrderAsync(CheckoutOrderDto orderDto)
         {
             var createdDate = DateTime.UtcNow;
+            var estimate = await GetEstimatedDeliveryTime(orderDto.ProvinceId.GetValueOrDefault(), orderDto.WardId.GetValueOrDefault());
             var order = new Order
             {
                 OrderNumber = NumberGenerator.BuildOrderNumber(orderDto.ProvinceId.GetValueOrDefault(), orderDto.CustomerId.GetValueOrDefault(), createdDate),
@@ -547,7 +549,8 @@ namespace ThuocGiaThatAdmin.Service.Services
                 ShippingPhone = orderDto.ShippingPhone,
                 ExportInvoice = orderDto.ExportInvoice,
                 CustomerInvoiceInfoId = orderDto.InvoiceId,
-                CreatedDate = createdDate
+                CreatedDate = createdDate,
+                EstimatedDeliveryDate = estimate.EstimatedDate
             };
 
             // Create snapshots for all order items (using navigation property, not ID)
@@ -763,10 +766,193 @@ namespace ThuocGiaThatAdmin.Service.Services
             return new
             {
                 NumberOfDays = days,
-                EstimatedDate = DateTime.Now.AddDays(days)
+                EstimatedDate = DateTime.UtcNow.AddDays(days)
             };
         }
 
+        /// <summary>
+        /// Lấy thông tin chi tiết đơn hàng để chuẩn bị xuất kho giao hàng
+        /// </summary>
+        public async Task<ShipmentOrderDetailsDto?> GetOrderDetailsForShipmentAsync(string orderNumber)
+        {
+            var order = await _context.Orders
+                .Include(o => o.Customer)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.ProductVariant)
+                        .ThenInclude(pv => pv.Product)
+                .FirstOrDefaultAsync(o => o.OrderNumber == orderNumber);
+
+            if (order == null)
+                return null;
+
+            return new ShipmentOrderDetailsDto
+            {
+                OrderId = order.Id,
+                OrderNumber = order.OrderNumber,
+                OrderStatus = order.OrderStatus.ToString(),
+                CustomerName = order.Customer?.FullName ?? order.ShippingName,
+                CustomerPhone = order.Customer?.PhoneNumber ?? order.ShippingPhone,
+                ShippingAddress = order.ShippingAddress,
+                TotalAmount = order.TotalAmount,
+                Items = order.OrderItems.Select(oi => new ShipmentOrderItemDto
+                {
+                    OrderItemId = oi.Id,
+                    ProductVariantId = oi.ProductVariantId,
+                    ProductName = oi.ProductVariant?.Product?.Name ?? "Unknown",
+                    SKU = oi.ProductVariant?.SKU ?? "N/A",
+                    Quantity = oi.Quantity,
+                    QuantityFulfilled = oi.QuantityFulfilled,
+                    UnitPrice = oi.UnitPrice,
+                    TotalLineAmount = oi.TotalLineAmount
+                }).ToList()
+            };
+        }
+
+        /// <summary>
+        /// Xử lý xuất kho giao hàng (Outbound Delivery)
+        /// - Trừ inventory quantity
+        /// - Trừ reserved quantity
+        /// - Chuyển order status sang InTransit
+        /// - Clear warehouse location (container)
+        /// </summary>
+        public async Task<ProcessShipmentResponseDto> ProcessShipmentAsync(
+            ProcessShipmentRequestDto request,
+            Guid userId)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // 1. Tìm đơn hàng
+                var order = await _context.Orders
+                    .Include(o => o.OrderItems)
+                        .ThenInclude(oi => oi.Fulfillments)
+                            .ThenInclude(oif => oif.InventoryBatch)
+                    .FirstOrDefaultAsync(o => o.OrderNumber == request.OrderNumber);
+
+                if (order == null)
+                {
+                    return new ProcessShipmentResponseDto
+                    {
+                        Success = false,
+                        Message = $"Order {request.OrderNumber} not found"
+                    };
+                }
+
+                // 2. Kiểm tra trạng thái đơn hàng
+                if (order.OrderStatus != OrderStatus.Processing.ToString() && order.OrderStatus != OrderStatus.ReadyToShip.ToString() && !order.IsFulfilled.GetValueOrDefault())
+                {
+                    return new ProcessShipmentResponseDto
+                    {
+                        Success = false,
+                        Message = $"Order status must be Processing or ReadyToShip, current status: {order.OrderStatus}"
+                    };
+                }
+
+                // 3. Tìm warehouse location (container)
+                var containerLocation = await _context.WarehouseLocations
+                    .FirstOrDefaultAsync(wl =>
+                        wl.LocationCode == request.ContainerLocationCode &&
+                        wl.WarehouseId == request.WarehouseId);
+
+                if (containerLocation == null)
+                {
+                    return new ProcessShipmentResponseDto
+                    {
+                        Success = false,
+                        Message = $"Container location {request.ContainerLocationCode} not found"
+                    };
+                }
+
+                if(!containerLocation.BinName.IsNullOrEmpty() || !containerLocation.ShelfName.IsNullOrEmpty())
+                {
+                    return new ProcessShipmentResponseDto
+                    {
+                        Success = false,
+                        Message = $"Container location {request.ContainerLocationCode} is not for delivery"
+                    };
+                }
+
+                int totalItemsShipped = 0;
+                decimal totalQuantityShipped = 0;
+
+                // 4. Xử lý từng order item
+                foreach (var orderItem in order.OrderItems)
+                {
+                    // cập nhật lại số tồn kho của product variant trong inventories
+                    var inventory = _context.Inventories.First(i => i.ProductVariantId == orderItem.ProductVariantId && i.WarehouseId == request.WarehouseId);
+                    inventory.QuantityReserved -= orderItem.QuantityFulfilled;
+                    inventory.QuantityOnHand -= orderItem.QuantityFulfilled;
+
+                    // Duyệt qua từng fulfillment để trừ inventorybatch
+                    foreach (var fulfillment in orderItem.Fulfillments)
+                    {
+                        var inventoryBatch = fulfillment.InventoryBatch;
+                        if (inventoryBatch == null)
+                            continue;
+
+                        // Trừ QuantityReserved
+                        inventoryBatch.QuantitySold -= fulfillment.QuantityFulfilled;
+
+                        // Trừ QuantityAvailable (actual inventory)
+                        inventoryBatch.Quantity -= fulfillment.QuantityFulfilled;
+
+                        // nếu số lượng âm sẽ báo lỗi
+                        if (inventoryBatch.Quantity < 0 || inventoryBatch.QuantitySold < 0)
+
+                        totalQuantityShipped += fulfillment.QuantityFulfilled;
+                    }
+                    totalItemsShipped++;
+                }
+
+                // 5. Clear container location - Reset về empty/available
+                var inventoriesInContainer = await _context.BatchLocationStocks
+                    .Where(ib => ib.WarehouseLocationId == containerLocation.Id)
+                    .ToListAsync();
+
+                _context.BatchLocationStocks.RemoveRange(inventoriesInContainer);
+
+                // 6. Chuyển order status sang InTransit
+                order.OrderStatus = OrderStatus.InTransit.ToString();
+                order.UpdatedDate = DateTime.Now;
+
+                // 7. Tạo order history log
+                var orderHistory = new OrderStatusHistory
+                {
+                    OrderId = order.Id,
+                    OldStatus = order.OrderStatus,
+                    NewStatus = OrderStatus.InTransit.ToString(),
+                    ChangedByUserId = userId.ToString(),
+                    UpdatedDate = DateTime.Now,
+                    Notes = $"Shipment processed from container {request.ContainerLocationCode}. {request.Notes ?? ""}"
+                };
+                _context.Set<OrderStatusHistory>().Add(orderHistory);
+
+                // 8. Save changes
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return new ProcessShipmentResponseDto
+                {
+                    Success = true,
+                    Message = "Shipment processed successfully",
+                    OrderId = order.Id,
+                    OrderNumber = order.OrderNumber,
+                    OrderStatus = order.OrderStatus.ToString(),
+                    TotalItemsShipped = totalItemsShipped,
+                    TotalQuantityShipped = totalQuantityShipped
+                };
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return new ProcessShipmentResponseDto
+                {
+                    Success = false,
+                    Message = $"Error processing shipment: {ex.Message}"
+                };
+            }
+        }
+    
         public async Task<dynamic> GetSummaryOrderInfoes(int customerId)
         {
             var query = _context.Orders.Where(x => x.CustomerId == customerId && x.OrderStatus != OrderStatus.Cancelled.ToString());
@@ -780,6 +966,18 @@ namespace ThuocGiaThatAdmin.Service.Services
                 TotalOrders = totalOrders,
                 TotalProducts = totalProducts
             };
+        }
+
+        public async Task<dynamic> GetOrderTimelineAsync(int orderId)
+        {
+            return await _context.OrderStatusHistories.Where(x => x.OrderId == orderId)
+                .Select(x => new
+                {
+                    OrderId = x.OrderId,
+                    NewStatus = x.NewStatus,
+                    OldStatus = x.OldStatus,
+                    ChangedDate = x.ChangedDate
+                }).ToListAsync();
         }
     }
 }

@@ -4,9 +4,6 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
 {
     public class UserCreateDto
     {
-        [Required]
-        [StringLength(100)]
-        public string Username { get; set; } = null!;
 
         [Required]
         [EmailAddress]
@@ -21,5 +18,9 @@ namespace ThuocGiaThatAdmin.Contract.DTOs
 
         public string? Phone { get; set; }
         public string? Role { get; set; }
+
+        public int? DepartmentId { get; set; }
+
+        public string? AvatarUrl { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ThuocGiaThat.Infrastucture;
 
@@ -11,9 +12,11 @@ using ThuocGiaThat.Infrastucture;
 namespace ThuocGiaThat.Infrastucture.Migrations
 {
     [DbContext(typeof(TrueMecContext))]
-    partial class TrueMecContextModelSnapshot : ModelSnapshot
+    [Migration("20260102031912_updatecategorytable")]
+    partial class updatecategorytable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -119,7 +122,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.Property<int>("TotalProducts")
                         .HasColumnType("int");
 
-                    b.ToTable("CategoryRootCountProductsDto", (string)null);
+                    b.ToTable("CategoryRootCountProductsDto");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ActiveIngredient", b =>
@@ -151,7 +154,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ActiveIngredients", (string)null);
+                    b.ToTable("ActiveIngredients");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Address", b =>
@@ -205,7 +208,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("WardId");
 
-                    b.ToTable("Addresses", (string)null);
+                    b.ToTable("Addresses");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ApplicationRole", b =>
@@ -410,7 +413,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Banks", (string)null);
+                    b.ToTable("Banks");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Banner", b =>
@@ -500,7 +503,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("ValidFrom", "ValidTo");
 
-                    b.ToTable("Banners", (string)null);
+                    b.ToTable("Banners");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.BannerAnalytics", b =>
@@ -546,7 +549,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("EventType");
 
-                    b.ToTable("BannerAnalytics", (string)null);
+                    b.ToTable("BannerAnalytics");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.BannerSection", b =>
@@ -595,7 +598,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("DisplayOrder");
 
-                    b.ToTable("BannerSections", (string)null);
+                    b.ToTable("BannerSections");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.BatchLocationStock", b =>
@@ -661,7 +664,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("InventoryBatchId", "WarehouseLocationId")
                         .IsUnique();
 
-                    b.ToTable("BatchLocationStocks", (string)null);
+                    b.ToTable("BatchLocationStocks");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Brand", b =>
@@ -707,7 +710,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("Slug")
                         .IsUnique();
 
-                    b.ToTable("Brands", (string)null);
+                    b.ToTable("Brands");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.BusinessType", b =>
@@ -729,7 +732,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("BusinessTypes", (string)null);
+                    b.ToTable("BusinessTypes");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.CTA", b =>
@@ -846,7 +849,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("ValidFrom", "ValidTo");
 
-                    b.ToTable("CTAs", (string)null);
+                    b.ToTable("CTAs");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Campaign", b =>
@@ -897,7 +900,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("StartDate", "EndDate");
 
-                    b.ToTable("Campaigns", (string)null);
+                    b.ToTable("Campaigns");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Category", b =>
@@ -954,7 +957,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("Slug")
                         .IsUnique();
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Combo", b =>
@@ -1026,7 +1029,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("ValidFrom", "ValidTo");
 
-                    b.ToTable("Combos", (string)null);
+                    b.ToTable("Combos");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ComboItem", b =>
@@ -1073,7 +1076,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("ComboItems", (string)null);
+                    b.ToTable("ComboItems");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Country", b =>
@@ -1260,7 +1263,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("TaxCode");
 
-                    b.ToTable("Customers", (string)null);
+                    b.ToTable("Customers");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.CustomerDocument", b =>
@@ -1334,7 +1337,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("IsRequired", "IsVerified");
 
-                    b.ToTable("CustomerDocuments", (string)null);
+                    b.ToTable("CustomerDocuments");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.CustomerInvoiceInfo", b =>
@@ -1456,7 +1459,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("CustomerId", "IsDefault");
 
-                    b.ToTable("CustomerPaymentAccounts", (string)null);
+                    b.ToTable("CustomerPaymentAccounts");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.CustomerVerification", b =>
@@ -1519,7 +1522,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("CustomerId", "ProcessedDate");
 
-                    b.ToTable("CustomerVerifications", (string)null);
+                    b.ToTable("CustomerVerifications");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Department", b =>
@@ -1567,7 +1570,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("ManagerId");
 
-                    b.ToTable("Departments", (string)null);
+                    b.ToTable("Departments");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.DepartmentRole", b =>
@@ -1611,7 +1614,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("DepartmentId", "RoleId")
                         .IsUnique();
 
-                    b.ToTable("DepartmentRoles", (string)null);
+                    b.ToTable("DepartmentRoles");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.FavouriteProduct", b =>
@@ -1648,7 +1651,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("CustomerId", "ProductVariantId", "Type")
                         .IsUnique();
 
-                    b.ToTable("FavouriteProducts", (string)null);
+                    b.ToTable("FavouriteProducts");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.GoodsReceipt", b =>
@@ -1729,7 +1732,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("WarehouseId");
 
-                    b.ToTable("GoodsReceipts", (string)null);
+                    b.ToTable("GoodsReceipts");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.GoodsReceiptItem", b =>
@@ -1805,7 +1808,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("PurchaseOrderItemId");
 
-                    b.ToTable("GoodsReceiptItems", (string)null);
+                    b.ToTable("GoodsReceiptItems");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Inventory", b =>
@@ -1860,7 +1863,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("ProductVariantId", "WarehouseId")
                         .IsUnique();
 
-                    b.ToTable("Inventories", (string)null);
+                    b.ToTable("Inventories");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.InventoryBatch", b =>
@@ -1924,7 +1927,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("Status");
 
-                    b.ToTable("InventoryBatches", (string)null);
+                    b.ToTable("InventoryBatches");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.InventoryTransaction", b =>
@@ -2000,7 +2003,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("WarehouseId");
 
-                    b.ToTable("InventoryTransactions", (string)null);
+                    b.ToTable("InventoryTransactions");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.LocationStockMovement", b =>
@@ -2074,7 +2077,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsUnique()
                         .HasFilter("[ToLocationCode] IS NOT NULL");
 
-                    b.ToTable("LocationStockMovements", (string)null);
+                    b.ToTable("LocationStockMovements");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Order", b =>
@@ -2196,7 +2199,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("WardId");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.OrderItem", b =>
@@ -2234,7 +2237,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("OrderItems", (string)null);
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.OrderItemFulfillment", b =>
@@ -2280,7 +2283,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("OrderItemId");
 
-                    b.ToTable("OrderItemFulfillments", (string)null);
+                    b.ToTable("OrderItemFulfillments");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.OrderItemSnapshot", b =>
@@ -2342,7 +2345,8 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("RegistrationNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("SKU")
                         .IsRequired()
@@ -2376,7 +2380,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("OrderItemSnapshots", (string)null);
+                    b.ToTable("OrderItemSnapshots");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.OrderStatusHistory", b =>
@@ -2419,7 +2423,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderStatusHistory", (string)null);
+                    b.ToTable("OrderStatusHistory");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.OrderVoucher", b =>
@@ -2456,7 +2460,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("OrderId", "VoucherId")
                         .IsUnique();
 
-                    b.ToTable("OrderVouchers", (string)null);
+                    b.ToTable("OrderVouchers");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.OtpCode", b =>
@@ -2498,7 +2502,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("Phone", "Code", "IsUsed", "Type");
 
-                    b.ToTable("OtpCodes", (string)null);
+                    b.ToTable("OtpCodes");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.PaymentTransaction", b =>
@@ -2576,7 +2580,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                         .IsUnique()
                         .HasFilter("[TransactionCode] IS NOT NULL");
 
-                    b.ToTable("PaymentTransactions", (string)null);
+                    b.ToTable("PaymentTransactions");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.PriceHistory", b =>
@@ -2611,7 +2615,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("PriceHistories", (string)null);
+                    b.ToTable("PriceHistories");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Product", b =>
@@ -2711,7 +2715,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("Slug")
                         .IsUnique();
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductActiveIngredient", b =>
@@ -2743,7 +2747,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductActiveIngredients", (string)null);
+                    b.ToTable("ProductActiveIngredients");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductBatch", b =>
@@ -2811,7 +2815,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("ProductBatches", (string)null);
+                    b.ToTable("ProductBatches");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductCollection", b =>
@@ -2868,7 +2872,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("Type");
 
-                    b.ToTable("ProductCollections", (string)null);
+                    b.ToTable("ProductCollections");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductCollectionItem", b =>
@@ -2897,7 +2901,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("ProductCollectionItems", (string)null);
+                    b.ToTable("ProductCollectionItems");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductImage", b =>
@@ -2931,7 +2935,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductImages", (string)null);
+                    b.ToTable("ProductImages");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductMaxOrderConfig", b =>
@@ -2976,7 +2980,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("ProductId")
                         .IsUnique();
 
-                    b.ToTable("ProductMaxOrderConfigs", (string)null);
+                    b.ToTable("ProductMaxOrderConfigs");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductOption", b =>
@@ -3002,7 +3006,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductOptions", (string)null);
+                    b.ToTable("ProductOptions");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductOptionValue", b =>
@@ -3028,7 +3032,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("ProductOptionId");
 
-                    b.ToTable("ProductOptionValues", (string)null);
+                    b.ToTable("ProductOptionValues");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductReview", b =>
@@ -3073,7 +3077,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductReviews", (string)null);
+                    b.ToTable("ProductReviews");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ProductStatusMap", b =>
@@ -3161,7 +3165,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("SKU")
                         .IsUnique();
 
-                    b.ToTable("ProductVariants", (string)null);
+                    b.ToTable("ProductVariants");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Province", b =>
@@ -3300,7 +3304,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("WarehouseId");
 
-                    b.ToTable("PurchaseOrders", (string)null);
+                    b.ToTable("PurchaseOrders");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.PurchaseOrderHistory", b =>
@@ -3362,7 +3366,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("PurchaseOrderId");
 
-                    b.ToTable("PurchaseOrderHistories", (string)null);
+                    b.ToTable("PurchaseOrderHistories");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.PurchaseOrderItem", b =>
@@ -3429,7 +3433,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("PurchaseOrderId");
 
-                    b.ToTable("PurchaseOrderItems", (string)null);
+                    b.ToTable("PurchaseOrderItems");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.SalesRegion", b =>
@@ -3477,7 +3481,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("SalesManagerId");
 
-                    b.ToTable("SalesRegions", (string)null);
+                    b.ToTable("SalesRegions");
 
                     b.HasData(
                         new
@@ -3553,7 +3557,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("SessionId");
 
-                    b.ToTable("ShoppingCarts", (string)null);
+                    b.ToTable("ShoppingCarts");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.ShoppingCartItem", b =>
@@ -3628,7 +3632,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("ShoppingCartId");
 
-                    b.ToTable("ShoppingCartItems", (string)null);
+                    b.ToTable("ShoppingCartItems");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.StockAlert", b =>
@@ -3704,7 +3708,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("WarehouseId");
 
-                    b.ToTable("StockAlerts", (string)null);
+                    b.ToTable("StockAlerts");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Supplier", b =>
@@ -3797,7 +3801,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("WardId");
 
-                    b.ToTable("Suppliers", (string)null);
+                    b.ToTable("Suppliers");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.SupplierContact", b =>
@@ -3865,7 +3869,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("SupplierId", "IsPrimary");
 
-                    b.ToTable("SupplierContacts", (string)null);
+                    b.ToTable("SupplierContacts");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.UploadedFile", b =>
@@ -3937,7 +3941,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UploadedFiles", (string)null);
+                    b.ToTable("UploadedFiles");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.VariantOptionValue", b =>
@@ -3961,7 +3965,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("ProductVariantId", "ProductOptionValueId")
                         .IsUnique();
 
-                    b.ToTable("VariantOptionValues", (string)null);
+                    b.ToTable("VariantOptionValues");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Voucher", b =>
@@ -4067,7 +4071,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("IsActive", "StartDate", "EndDate");
 
-                    b.ToTable("Vouchers", (string)null);
+                    b.ToTable("Vouchers");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.VoucherCategory", b =>
@@ -4098,7 +4102,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("VoucherId", "CategoryId")
                         .IsUnique();
 
-                    b.ToTable("VoucherCategories", (string)null);
+                    b.ToTable("VoucherCategories");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.VoucherProductVariant", b =>
@@ -4132,7 +4136,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
                     b.HasIndex("VoucherId", "ProductVariantId")
                         .IsUnique();
 
-                    b.ToTable("VoucherProductVariants", (string)null);
+                    b.ToTable("VoucherProductVariants");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.VoucherUsageHistory", b =>
@@ -4177,7 +4181,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("VoucherId");
 
-                    b.ToTable("VoucherUsageHistories", (string)null);
+                    b.ToTable("VoucherUsageHistories");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.Ward", b =>
@@ -4283,7 +4287,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("IsActive");
 
-                    b.ToTable("Warehouses", (string)null);
+                    b.ToTable("Warehouses");
                 });
 
             modelBuilder.Entity("ThuocGiaThatAdmin.Domain.Entities.WarehouseLocation", b =>
@@ -4349,7 +4353,7 @@ namespace ThuocGiaThat.Infrastucture.Migrations
 
                     b.HasIndex("WarehouseId");
 
-                    b.ToTable("WarehouseLocations", (string)null);
+                    b.ToTable("WarehouseLocations");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>

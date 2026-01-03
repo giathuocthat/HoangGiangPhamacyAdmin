@@ -15,6 +15,7 @@ namespace ThuocGiaThatAdmin.Service.Interfaces
         Task<IdentityResult> CreateAsync(ApplicationUser user, string password);
         Task<IdentityResult> UpdateAsync(ApplicationUser user);
         Task<ApplicationUser?> GetByIdAsync(string id);
+        Task<ApplicationUser?> GetByIdWithDepartmentAsync(string id);
         Task<IList<string>> GetRolesAsync(ApplicationUser user);
         Task<IEnumerable<UserResponse>> GetAllAsync(int pageIndex, int pageSize);
         Task<IEnumerable<UserResponse>> GetDeactivatedUsersAsync(FilterRequest request);

@@ -48,6 +48,14 @@ namespace ThuocGiaThatAdmin.Service
             return await _userManager.FindByNameAsync(username);
         }
 
+        public async Task<ApplicationUser?> GetByIdWithDepartmentAsync(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id)) return null;
+            return await _userRepository.AsAsQueryable()
+                .Include(u => u.Department)
+                .FirstOrDefaultAsync(u => u.Id == id);
+        }
+
         public async Task<IEnumerable<ApplicationUser>> GetAllAsync()
         {
             return await _userManager.Users.AsNoTracking().ToListAsync();
@@ -132,6 +140,7 @@ namespace ThuocGiaThatAdmin.Service
             var users = _userManager.Users.Where(x => x.UserName != "ADMIN" && x.UserName != "admin")
                 .Skip((pageIndex - 1) * pageSize)
                 .Take(pageSize)
+                .OrderByDescending( x=> x.CreatedDate)
                 .ToList();
 
             var result = users.Select(x => new UserResponse
